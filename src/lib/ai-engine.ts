@@ -480,7 +480,8 @@ function buildMistralRequest(baseUrl: string | undefined, settings: AppSettings,
 }
 
 function buildNvidiaRequest(baseUrl: string | undefined, settings: AppSettings, apiKey: string, messages: Array<{ role: string; content: string }>): Request {
-  const url = baseUrl || 'https://integrate.api.nvidia.com/v1/chat/completions';
+  // Use Cloudflare Worker proxy to avoid CORS issues
+  const url = baseUrl || 'https://roleplay.jameskaren.workers.dev/';
 
   const body: Record<string, unknown> = {
     model: settings.activeModel,
@@ -489,14 +490,13 @@ function buildNvidiaRequest(baseUrl: string | undefined, settings: AppSettings, 
     max_tokens: settings.maxTokens ?? 1024,
     top_p: settings.topP ?? 0.9,
     stream: settings.streamingEnabled,
+    apiKey, // Pass API key in body for proxy
   };
 
   return new Request(url, {
     method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json', 
-      'Authorization': `Bearer ${apiKey}`, 
-      'Accept': settings.streamingEnabled ? 'text/event-stream' : 'application/json',
+    headers: {
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
   });

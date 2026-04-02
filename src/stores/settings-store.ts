@@ -172,9 +172,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
           body = { model, messages: [{ role: 'user', content: 'Hi' }], max_tokens: 10 };
           break;
         case 'nvidia':
-          url = 'https://integrate.api.nvidia.com/v1/chat/completions';
-          headers['Authorization'] = `Bearer ${key}`;
-          body = { model, messages: [{ role: 'user', content: 'Hi' }], max_tokens: 10 };
+          // Use Cloudflare Worker proxy to avoid CORS
+          url = 'https://roleplay.jameskaren.workers.dev/';
+          body = { model, messages: [{ role: 'user', content: 'Hi' }], max_tokens: 10, apiKey: key };
           break;
         default:
           return { success: false, message: `Provider ${settings.activeProvider} not supported.` };
