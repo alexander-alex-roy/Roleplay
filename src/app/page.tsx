@@ -1414,29 +1414,54 @@ function ChatInput() {
                           
                           const imageModel = settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
                           
+                          const modelDefaults: Record<string, { steps: number; cfg_scale: number }> = {
+                            'stabilityai/stable-diffusion-3-medium': { steps: 50, cfg_scale: 5 },
+                            'stabilityai/stable-diffusion-xl': { steps: 25, cfg_scale: 5 },
+                            'black-forest-labs/flux.1-dev': { steps: 50, cfg_scale: 5 },
+                            'black-forest-labs/flux.1-schnell': { steps: 4, cfg_scale: 0 },
+                            'black-forest-labs/flux.2-klein-4b': { steps: 4, cfg_scale: 1 },
+                          };
+                          const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
+                          
                           const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                               prompt: `cinematic scene featuring ${store.activeCharacter.name}, ${visualDetails}, dramatic moment, photorealistic, highly detailed, atmospheric lighting, depth of field, 16:9 aspect ratio, scene context: ${contextPrompt.slice(-300)}`,
                               model: imageModel,
-                              cfg_scale: 7,
+                              cfg_scale: defaults.cfg_scale,
                               aspect_ratio: "16:9",
                               seed: Math.floor(Math.random() * 1000000),
-                              steps: 60,
-                              negative_prompt: "cartoon, anime, illustration, drawing, painting, 3d render, deformed, distorted, low quality, blurry, text, watermark, signature",
+                              steps: defaults.steps,
+                              negative_prompt: imageModel.includes('flux') ? undefined : "cartoon, anime, illustration, drawing, painting, 3d render, deformed, distorted, low quality, blurry, text, watermark, signature",
                               apiKey: nvidiaConfig.apiKey,
                             }),
                           });
                           
                           if (response.ok) {
                             const data = await response.json();
+                            let base64Data = null;
                             if (data.image) {
-                              const base64Data = data.image.startsWith('data:') 
-                                ? data.image 
+                              base64Data = data.image.startsWith('data:')
+                                ? data.image
                                 : `data:image/jpeg;base64,${data.image}`;
-                              await store.addImageMessage(base64Data, imageModel);
+                            } else if (data.artifacts && data.artifacts[0]?.base64) {
+                              base64Data = data.artifacts[0].base64.startsWith('data:')
+                                ? data.artifacts[0].base64
+                                : `data:image/jpeg;base64,${data.artifacts[0].base64}`;
+                            } else if (data.images && data.images[0]) {
+                              base64Data = data.images[0].startsWith('data:')
+                                ? data.images[0]
+                                : `data:image/jpeg;base64,${data.images[0]}`;
                             }
+                            if (base64Data) {
+                              await store.addImageMessage(base64Data, imageModel);
+                            } else {
+                              console.error('No image data in response. Keys:', Object.keys(data));
+                            }
+                          } else {
+                            const errBody = await response.text();
+                            console.error('Scene image generation failed:', response.status, errBody);
                           }
                         } catch (e) {
                           console.error('Image generation failed:', e);
@@ -2652,40 +2677,57 @@ function CharacterEditorInner() {
                           
                           const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
                           
+                          const modelDefaults: Record<string, { steps: number; cfg_scale: number }> = {
+                            'stabilityai/stable-diffusion-3-medium': { steps: 50, cfg_scale: 5 },
+                            'stabilityai/stable-diffusion-xl': { steps: 25, cfg_scale: 5 },
+                            'black-forest-labs/flux.1-dev': { steps: 50, cfg_scale: 5 },
+                            'black-forest-labs/flux.1-schnell': { steps: 4, cfg_scale: 0 },
+                            'black-forest-labs/flux.2-klein-4b': { steps: 4, cfg_scale: 1 },
+                          };
+                          const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
+                          
+                          const avatarPrompt = `photorealistic portrait of ${form.name}, ${characterDetails || 'character'}, detailed face, natural lighting, high quality, 8k, realistic, professional photography${form.personality ? `, ${form.personality}` : ''}`;
+                          const finalPrompt = imageModel === 'black-forest-labs/flux.2-klein-4b' ? avatarPrompt.slice(0, 790) : avatarPrompt;
+                          
                           const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
                             method: 'POST',
                             headers: {
                               'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                              prompt: ` photorealistic portrait of ${form.name}, ${characterDetails || 'character'}, detailed face, natural lighting, high quality, 8k, realistic, professional photography${form.personality ? `, ${form.personality}` : ''}`,
+                              prompt: finalPrompt,
                               model: imageModel,
-                              cfg_scale: 7,
+                              cfg_scale: defaults.cfg_scale,
                               aspect_ratio: "1:1",
                               seed: Math.floor(Math.random() * 1000000),
-                              steps: 60,
-                              negative_prompt: "cartoon, anime, illustration, drawing, painting, 3d render, deformed, distorted, disfigured, mutation, mutated, ugly, bad anatomy, bad proportions, blurry, low quality, watermark, text",
+                              steps: defaults.steps,
+                              negative_prompt: imageModel.includes('flux') ? undefined : "cartoon, anime, illustration, drawing, painting, 3d render, deformed, distorted, disfigured, mutation, mutated, ugly, bad anatomy, bad proportions, blurry, low quality, watermark, text",
                               apiKey: nvidiaConfig.apiKey,
                             }),
                           });
-                          if (response.status !== 200) {
+                          if (!response.ok) {
                             const errBody = await response.text();
-                            throw new Error(`invocation failed with status ${response.status} ${errBody}`);
+                            throw new Error(`Image generation failed (${response.status}): ${errBody.slice(0, 200)}`);
                           }
                           const response_body = await response.json();
-                          console.log('Image generation response:', response_body);
-                          console.log('Image length:', response_body.image?.length);
-                          console.log('Response keys:', Object.keys(response_body));
+                          let base64Data = null;
                           if (response_body.image) {
-                            const base64Data = response_body.image.startsWith('data:') 
-                              ? response_body.image 
+                            base64Data = response_body.image.startsWith('data:')
+                              ? response_body.image
                               : `data:image/jpeg;base64,${response_body.image}`;
-                            updateForm('avatar', base64Data);
+                          } else if (response_body.artifacts && response_body.artifacts[0]?.base64) {
+                            base64Data = response_body.artifacts[0].base64.startsWith('data:')
+                              ? response_body.artifacts[0].base64
+                              : `data:image/jpeg;base64,${response_body.artifacts[0].base64}`;
                           } else if (response_body.images && response_body.images[0]) {
-                            const base64Data = response_body.images[0].startsWith('data:') 
-                              ? response_body.images[0] 
+                            base64Data = response_body.images[0].startsWith('data:')
+                              ? response_body.images[0]
                               : `data:image/jpeg;base64,${response_body.images[0]}`;
+                          }
+                          if (base64Data) {
                             updateForm('avatar', base64Data);
+                          } else {
+                            throw new Error('No image data in response. Keys: ' + Object.keys(response_body).join(', '));
                           }
                         } catch (e) {
                           console.error('Avatar generation failed:', e);

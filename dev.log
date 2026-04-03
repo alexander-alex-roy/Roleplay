@@ -2,129 +2,17 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.100.49:3000
 - Environments: .env
-✓ Ready in 286ms
+✓ Ready in 245ms
 
- GET / 200 in 390ms (next.js: 200ms, application-code: 190ms)
-✓ Compiled in 469ms
-✓ Compiled in 99ms
-✓ Compiled in 112ms
-✓ Compiled in 125ms
-[browser] ./src/app/page.tsx:648:20
-Expected '</', got 'jsx text'
-  646 |           ))}
-  647 |         </div>
-> 648 |       </ScrollArea>
-      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 649 |     </div>
-      | ^^^^
-  650 |   );
-  651 | }
-  652 |
-
-Parsing ecmascript source code failed
-
-Import traces:
-  Client Component Browser:
-    ./src/app/page.tsx [Client Component Browser]
-    ./src/app/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/page.tsx [Client Component SSR]
-    ./src/app/page.tsx [Server Component] 
-[browser] ./src/app/page.tsx:648:20
-Expected '</', got 'jsx text'
-  646 |           ))}
-  647 |         </div>
-> 648 |       </ScrollArea>
-      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 649 |     </div>
-      | ^^^^
-  650 |   );
-  651 | }
-  652 |
-
-Parsing ecmascript source code failed
-
-Import traces:
-  Client Component Browser:
-    ./src/app/page.tsx [Client Component Browser]
-    ./src/app/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/page.tsx [Client Component SSR]
-    ./src/app/page.tsx [Server Component] 
- GET / 200 in 75ms (next.js: 16ms, application-code: 59ms)
-✓ Compiled in 91ms
-✓ Compiled in 89ms
-✓ Compiled in 88ms
-[browser] ./src/app/page.tsx:648:13
-Expected '</', got 'jsx text'
-  646 |           ))}
-  647 |         </div>
-> 648 |       </div>
-      |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 649 |     </div>
-      | ^^^^
-  650 |   );
-  651 | }
-  652 |
-
-Parsing ecmascript source code failed
-
-Import traces:
-  Client Component Browser:
-    ./src/app/page.tsx [Client Component Browser]
-    ./src/app/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/page.tsx [Client Component SSR]
-    ./src/app/page.tsx [Server Component] 
- GET / 200 in 37ms (next.js: 11ms, application-code: 27ms)
-✓ Compiled in 121ms
-[browser] ./src/app/page.tsx:648:20
-Expected '</', got 'jsx text'
-  646 |           ))}
-  647 |         </div>
-> 648 |       </ScrollArea>
-      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 649 |     </div>
-      | ^^^^
-  650 |   );
-  651 | }
-  652 |
-
-Parsing ecmascript source code failed
-
-Import traces:
-  Client Component Browser:
-    ./src/app/page.tsx [Client Component Browser]
-    ./src/app/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/page.tsx [Client Component SSR]
-    ./src/app/page.tsx [Server Component] 
- GET / 200 in 40ms (next.js: 7ms, application-code: 33ms)
-✓ Compiled in 98ms
-[browser] ./src/app/page.tsx:850:20
-Expected '</', got 'jsx text'
-  848 |           ))}
-  849 |         </div>
-> 850 |       </ScrollArea>
-      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 851 |     </div>
-      | ^^^^
-  852 |   );
-  853 | }
-  854 |
-
-Parsing ecmascript source code failed
-
-Import traces:
-  Client Component Browser:
-    ./src/app/page.tsx [Client Component Browser]
-    ./src/app/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/page.tsx [Client Component SSR]
-    ./src/app/page.tsx [Server Component] 
- GET / 200 in 29ms (next.js: 4ms, application-code: 25ms)
+ GET / 200 in 354ms (next.js: 126ms, application-code: 228ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 42ms (next.js: 8ms, application-code: 34ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 44ms (next.js: 4ms, application-code: 40ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 35ms (next.js: 1814µs, application-code: 33ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
