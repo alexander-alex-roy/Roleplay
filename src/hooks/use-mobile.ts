@@ -31,7 +31,8 @@ export function useMobileOptimizations() {
   React.useEffect(() => {
     // Disable double-tap zoom on iOS
     const handleGesture = (e: Event) => {
-      if ((e as TouchEvent).scale !== undefined && (e as TouchEvent).scale !== 1) {
+      const touchEvent = e as unknown as { scale?: number };
+      if (touchEvent.scale !== undefined && touchEvent.scale !== 1) {
         e.preventDefault()
       }
     }

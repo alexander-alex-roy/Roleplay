@@ -2,17 +2,7 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.100.49:3000
 - Environments: .env
-✓ Ready in 245ms
+✓ Ready in 408ms
 
- GET / 200 in 354ms (next.js: 126ms, application-code: 228ms)
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
- GET / 200 in 42ms (next.js: 8ms, application-code: 34ms)
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
- GET / 200 in 44ms (next.js: 4ms, application-code: 40ms)
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
- GET / 200 in 35ms (next.js: 1814µs, application-code: 33ms)
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 392ms (next.js: 174ms, application-code: 217ms)
+✓ Compiled in 139ms

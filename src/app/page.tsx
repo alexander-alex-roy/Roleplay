@@ -14,7 +14,7 @@ import {
   Eye, EyeOff, Zap, BookOpen, Menu
 } from 'lucide-react';
 import { useIsMobile, useMobileOptimizations } from '@/hooks/use-mobile';
-import { useContextMenuStore, ContextMenu } from '@/hooks/use-context-menu';
+import { useContextMenuStore, ContextMenu, type ContextMenuItem } from '@/hooks/use-context-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -540,7 +540,7 @@ function EmptyChatView({ isMobile, onOpenMobileNav, lightboxImage, setLightboxIm
           {store.activeCharacter.description && (
             <p className="text-muted-foreground text-sm line-clamp-3">{store.activeCharacter.description}</p>
           )}
-          <Button size="lg" className="gap-2 min-h-[44px]" onClick={() => store.newChat(store.activeCharacter)}>
+          <Button size="lg" className="gap-2 min-h-[44px]" onClick={() => store.activeCharacter && store.newChat(store.activeCharacter)}>
             <MessageSquare className="w-5 h-5" /> Start Chat
           </Button>
           {store.chats.length > 0 && (
@@ -1060,23 +1060,17 @@ function MessageBubble({ message }: { message: MessageData }) {
       items.push({
         label: 'Regenerate',
         icon: <RefreshCw className="w-4 h-4" />,
-        disabled: store.messages.length < 2,
         onClick: () => store.regenerateMessage(),
-      });
+      } as any);
     }
 
     items.push(
-      { label: '', onClick: () => {}, separator: true as const },
-      {
-        label: 'Delete',
-        icon: <Trash2 className="w-4 h-4" />,
-        destructive: true,
-        onClick: () => {
+      { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, destructive: true, onClick: () => {
           if (confirm('Delete this message?')) {
             store.deleteMessage(message.id);
           }
         },
-      }
+      } as any
     );
 
     contextMenu.show(e, items);
@@ -1183,58 +1177,56 @@ function CopyIcon({ className }: { className?: string }) {
 function formatMessageContent(content: string): React.ReactNode {
   if (!content) return null;
 
-  const tokens: Array<{ type: 'bold' | 'italic' | 'doubleQuote' | 'singleQuote' | 'text'; content: string }> = [];
+  const tokens: Array<{ type: 'bold' | 'italic' | 'action' | 'dialogue' | 'text'; content: string }> = [];
   let remaining = content;
 
   while (remaining.length > 0) {
-    // Try to match **bold** first
-    const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
+    // Match *actions* - single asterisks around text (not **bold**)
+    const actionMatch = remaining.match(/^\*([^*]+)\*/);
+    if (actionMatch) {
+      tokens.push({ type: 'action', content: actionMatch[1] });
+      remaining = remaining.slice(actionMatch[0].length);
+      continue;
+    }
+
+    // Match **bold**
+    const boldMatch = remaining.match(/^\*\*([^*]+)\*\*/);
     if (boldMatch) {
       tokens.push({ type: 'bold', content: boldMatch[1] });
       remaining = remaining.slice(boldMatch[0].length);
       continue;
     }
 
-    // Try to match *italic* (non-greedy, so it stops at first closing *)
-    const italicMatch = remaining.match(/^\*(.+?)\*/);
-    if (italicMatch) {
-      tokens.push({ type: 'italic', content: italicMatch[1] });
-      remaining = remaining.slice(italicMatch[0].length);
+    // Match "dialogue" - double quotes
+    const dialogueMatch = remaining.match(/^"([^"]+)"/);
+    if (dialogueMatch) {
+      tokens.push({ type: 'dialogue', content: dialogueMatch[1] });
+      remaining = remaining.slice(dialogueMatch[0].length);
       continue;
     }
 
-    // Try to match "double quotes" - only if they wrap content (not apostrophes in words)
-    const doubleQuoteMatch = remaining.match(/^"(.*?)"/);
-    if (doubleQuoteMatch) {
-      tokens.push({ type: 'doubleQuote', content: doubleQuoteMatch[1] });
-      remaining = remaining.slice(doubleQuoteMatch[0].length);
-      continue;
-    }
-
-    // Try to match 'single quotes' - only if they're wrapping words (followed by space or end)
-    // This avoids matching contractions like "it's" or "how's"
-    const singleQuoteMatch = remaining.match(/^'(\S+)'(\s|$)/);
+    // Match 'dialogue' - single quotes (both styles)
+    const singleQuoteMatch = remaining.match(/^'([^']+)'/);
     if (singleQuoteMatch) {
-      tokens.push({ type: 'singleQuote', content: singleQuoteMatch[1] });
+      tokens.push({ type: 'dialogue', content: singleQuoteMatch[1] });
       remaining = remaining.slice(singleQuoteMatch[0].length);
       continue;
     }
 
-    // Find the next special character
-    const nextSpecial = remaining.search(/[*"]/);
+    // Find next special character
+    const nextAsterisk = remaining.indexOf('*');
+    const nextDoubleQuote = remaining.indexOf('"');
     const nextSingleQuote = remaining.indexOf("'");
-    
+
+    let nextSpecial = nextAsterisk;
+    if (nextDoubleQuote !== -1 && (nextSpecial === -1 || nextDoubleQuote < nextSpecial)) {
+      nextSpecial = nextDoubleQuote;
+    }
     if (nextSingleQuote !== -1 && (nextSpecial === -1 || nextSingleQuote < nextSpecial)) {
-      // Single quote found before asterisk/double quote - slice up to it
-      if (nextSingleQuote > 0) {
-        tokens.push({ type: 'text', content: remaining.slice(0, nextSingleQuote) });
-        remaining = remaining.slice(nextSingleQuote);
-      } else {
-        // Single quote at start, treat as text if not a match
-        tokens.push({ type: 'text', content: remaining[0] });
-        remaining = remaining.slice(1);
-      }
-    } else if (nextSpecial === -1) {
+      nextSpecial = nextSingleQuote;
+    }
+
+    if (nextSpecial === -1) {
       tokens.push({ type: 'text', content: remaining });
       remaining = '';
     } else if (nextSpecial === 0) {
@@ -1252,12 +1244,11 @@ function formatMessageContent(content: string): React.ReactNode {
     switch (token.type) {
       case 'bold':
         return <span key={index} className="font-bold">{token.content}</span>;
-      case 'italic':
-        return <span key={index} className="italic text-muted-foreground">{token.content}</span>;
-      case 'doubleQuote':
-        return <span key={index} className="text-primary">&ldquo;{token.content}&rdquo;</span>;
-      case 'singleQuote':
-        return <span key={index} className="text-primary">&lsquo;{token.content}&rsquo;</span>;
+      case 'action':
+        return <span key={index} className="italic text-muted-foreground">*{token.content}*</span>;
+      case 'dialogue':
+        return <span key={index} className="text-foreground font-medium">&ldquo;{token.content}&rdquo;</span>;
+      case 'text':
       default:
         return <span key={index}>{token.content}</span>;
     }
@@ -1400,17 +1391,13 @@ function ChatInput() {
                         
                         setGeneratingImage(true);
                         try {
-                          const recentMessages = store.messages.slice(-10);
-                          const contextPrompt = recentMessages.map(m => 
-                            m.role === 'user' ? `User: ${m.content}` : `${store.activeCharacter?.name || 'Character'}: ${m.content}`
-                          ).join('\n');
+                          const recentMessages = store.messages.slice(-6);
+                          const lastAction = recentMessages.find(m => m.role === 'user' || m.role === 'assistant');
+                          const sceneContext = lastAction ? lastAction.content.slice(0, 150) : '';
                           
-                          const visualDetails = [
-                            store.activeCharacter.description,
-                            store.activeCharacter.personality,
-                            store.activeCharacter.behavior,
-                            store.activeCharacter.creatorNotes,
-                          ].filter(Boolean).join('. ');
+                          const charName = store.activeCharacter.name;
+                          const charDesc = store.activeCharacter.description || '';
+                          const charPersonality = store.activeCharacter.personality || '';
                           
                           const imageModel = settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
                           
@@ -1423,11 +1410,18 @@ function ChatInput() {
                           };
                           const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
                           
+                          const basePrompt = `cinematic portrait of ${charName}, ${charDesc.slice(0, 150)}, ${charPersonality.slice(0, 80)}, natural lighting, atmospheric, depth of field, 16:9`;
+                          let finalPrompt = basePrompt;
+                          if (sceneContext) {
+                            finalPrompt += `, scene: ${sceneContext}`;
+                          }
+                          finalPrompt = finalPrompt.slice(0, 800);
+                          
                           const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                              prompt: `cinematic scene featuring ${store.activeCharacter.name}, ${visualDetails}, dramatic moment, photorealistic, highly detailed, atmospheric lighting, depth of field, 16:9 aspect ratio, scene context: ${contextPrompt.slice(-300)}`,
+                              prompt: finalPrompt,
                               model: imageModel,
                               cfg_scale: defaults.cfg_scale,
                               aspect_ratio: "16:9",
@@ -1521,7 +1515,7 @@ function SettingsDialog() {
   const settings = settingsStore.settings;
   const [activeTab, setActiveTab] = useState<'providers' | 'model' | 'persona' | 'memory' | 'context' | 'ui' | 'data'>('providers');
   const [showKeys, setShowKeys] = useState(false);
-  const [newProvider, setNewProvider] = useState<AIProvider | null>(null);
+  const [newProvider, setNewProvider] = useState<AIProvider | ''>('');
   const [newKey, setNewKey] = useState('');
   const [newBaseUrl, setNewBaseUrl] = useState('');
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -2471,6 +2465,7 @@ function CharacterEditorInner() {
           name: generated.name,
           description: generated.description,
           personality: generated.personality,
+          knowledge: generated.knowledge,
           scenario: generated.scenario,
           firstMessage: generated.firstMessage,
           speechPatterns: generated.speechPatterns,
@@ -2669,11 +2664,9 @@ function CharacterEditorInner() {
                         if (!nvidiaConfig?.apiKey) return;
                         setGenerating(true);
                         try {
-                          const characterDetails = [
-                            form.description || '',
-                            form.personality || '',
-                            form.scenario || '',
-                          ].filter(Boolean).join(', ');
+                          const charName = form.name || 'character';
+                          const charDesc = form.description || '';
+                          const charPersonality = form.personality || '';
                           
                           const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
                           
@@ -2686,8 +2679,8 @@ function CharacterEditorInner() {
                           };
                           const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
                           
-                          const avatarPrompt = `photorealistic portrait of ${form.name}, ${characterDetails || 'character'}, detailed face, natural lighting, high quality, 8k, realistic, professional photography${form.personality ? `, ${form.personality}` : ''}`;
-                          const finalPrompt = imageModel === 'black-forest-labs/flux.2-klein-4b' ? avatarPrompt.slice(0, 790) : avatarPrompt;
+                          const avatarPrompt = `portrait of ${charName}, ${charDesc.slice(0, 180)}, ${charPersonality.slice(0, 100)}, natural lighting, soft shadows, high detail, 8k, professional photo, headshot`;
+                          const finalPrompt = imageModel.includes('flux') ? avatarPrompt.slice(0, 790) : avatarPrompt;
                           
                           const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
                             method: 'POST',

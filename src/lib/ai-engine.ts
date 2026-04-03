@@ -151,15 +151,14 @@ export function buildSystemPrompt(
   }
 
   const userPersona = settings.userPersona;
-  // Only add user block when a meaningful name is set
-  if (userPersona?.name && userPersona.name.trim() !== '' && userPersona.name !== 'You') {
-    const userLines = [
-      '[Your Identity (The User)]',
-      userPersona.name ? `Name: ${userPersona.name}` : '',
-      userPersona.description ? `Description: ${userPersona.description}` : '',
-      userPersona.personality ? `Personality: ${userPersona.personality}` : '',
-      userPersona.speechPatterns ? `Speech Style: ${userPersona.speechPatterns}` : '',
-    ].filter(Boolean);
+  const userLines = [
+    '[Your Identity (The User)]',
+    userPersona.name && userPersona.name.trim() !== '' && userPersona.name !== 'You' ? `Name: ${userPersona.name}` : 'Name: You',
+    userPersona.description ? `Description: ${userPersona.description}` : '',
+    userPersona.personality ? `Personality: ${userPersona.personality}` : '',
+    userPersona.speechPatterns ? `Speech Style: ${userPersona.speechPatterns}` : '',
+  ].filter(Boolean);
+  if (userLines.length > 1) {
     parts.push(userLines.join('\n'));
   }
 
@@ -183,16 +182,18 @@ export function buildSystemPrompt(
 
   // FIX: Was a single-quoted string — ${character.name} was literal text, never replaced.
   // Now correctly uses a template literal.
-  const rpInstructions = `\n[Roleplay Guidelines - IMPORTANT]
-- Stay in character as ${character.name}. Never break character.
-- NEVER include any reasoning, thinking process, metadata, or analysis in your response.
-- NEVER write things like "Based on...", "Reasoning:", "Analysis:", "The response should..."
-- ONLY output the roleplay response itself - pure narrative without any meta-commentary.
-- The user plays themselves. React to them naturally in character.
-- Use vivid, descriptive language. Show emotions through actions, dialogue, and thoughts.
-- Drive the story forward. Mix dialogue, action, and narration naturally.
-- Keep responses concise but immersive (2-4 paragraphs unless scene needs more).
-- Do NOT explain your choices or include any system/instruction text in the response.`;
+  const rpInstructions = `\n[Roleplay Guidelines - CRITICAL]
+- Stay in character as ${character.name}. NEVER break character or speak as AI.
+- Be ${character.name} with their own personality, speech patterns, and behaviors.
+- ALWAYS remember and respect the user's name, description, and personality provided above.
+- NEVER repeat yourself, rephrase the same ideas, or echo what you or the user just said.
+- Keep responses NATURAL and CONCISE (1-3 paragraphs max).
+- NEVER include any reasoning, thinking process, analysis, or meta-commentary.
+- NEVER write things like "Based on...", "Reasoning:", "As an AI...", "I should..."
+- The user plays themselves. React naturally in character as ${character.name}.
+- Use vivid but efficient descriptions. Show emotions through actions, dialogue, and thoughts.
+- Drive the story forward with new developments, not repetitive dialogue.
+- Do NOT explain your choices or include any system/instruction text in your response.`;
   parts.push(rpInstructions);
 
   if (summary?.trim()) {

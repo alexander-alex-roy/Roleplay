@@ -308,11 +308,11 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   activeProvider: 'openai',
   activeModel: 'gpt-4o-mini',
 
-  temperature: 0.8,
-  maxTokens: 1024,
+  temperature: 0.7,
+  maxTokens: 512,
   topP: 0.9,
-  frequencyPenalty: 0,
-  presencePenalty: 0,
+  frequencyPenalty: 0.1,
+  presencePenalty: 0.1,
 
   memoryEnabled: true,
   autoExtractMemories: true,
@@ -320,8 +320,8 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   memoryImportanceThreshold: 3,
 
   contextWindow: 8192,
-  summarizeThreshold: 8,
-  keepRecentCount: 8,
+  summarizeThreshold: 6,
+  keepRecentCount: 6,
 
   theme: 'system',
   fontSize: 'medium',

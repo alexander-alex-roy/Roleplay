@@ -20,13 +20,13 @@ import {
 const MIN_MESSAGES_TO_SUMMARIZE = 6;
 
 /** Absolute cap on the number of messages ever considered in one pass. */
-const MAX_CONTEXT_MESSAGES = 50;
+const MAX_CONTEXT_MESSAGES = 30;
 
 /** How many recent messages are always kept verbatim. */
-const DEFAULT_KEEP_RECENT = 8;
+const DEFAULT_KEEP_RECENT = 6;
 
 /** Summary word-count ceiling sent to the summarizer. */
-const SUMMARY_MAX_WORDS = 200;
+const SUMMARY_MAX_WORDS = 150;
 
 /** Safety token margin reserved on top of the output-token budget. */
 const CONTEXT_SAFETY_MARGIN = 500;
