@@ -76,6 +76,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       }
       if (formatIssues.length > 0) {
         console.warn(`[settings] Key format warning for ${config.provider}: ${formatIssues.join('; ')}`);
+        // Provide user feedback for invalid key formats
+        throw new Error(`Invalid API key format for ${config.provider}: ${formatIssues.join('; ')}`);
       }
     }
 

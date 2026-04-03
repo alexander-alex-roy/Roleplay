@@ -2,6 +2,162 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.100.49:3000
 - Environments: .env
-✓ Ready in 596ms
+✓ Ready in 320ms
 
- GET / 200 in 621ms (next.js: 284ms, application-code: 337ms)
+○ Compiling / ...
+ GET / 200 in 5.8s (next.js: 5.7s, application-code: 156ms)
+ GET / 200 in 32ms (next.js: 8ms, application-code: 24ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+✓ Compiled in 117ms
+✓ Compiled in 48ms
+✓ Compiled in 125ms
+✓ Compiled in 67ms
+✓ Compiled in 63ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 83ms
+✓ Compiled in 135ms
+✓ Compiled in 63ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 170ms
+✓ Compiled in 87ms
+✓ Compiled in 64ms
+✓ Compiled in 63ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 68ms
+✓ Compiled in 112ms
+✓ Compiled in 71ms
+✓ Compiled in 57ms
+✓ Compiled in 112ms
+✓ Compiled in 112ms
+✓ Compiled in 43ms
+✓ Compiled in 79ms
+✓ Compiled in 100ms
+[browser] ./src/app/page.tsx:1826:24
+Expected '</', got 'jsx text'
+  1824 |               </div>
+  1825 |             )}
+> 1826 |           </ScrollArea>
+       |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1827 |         </div>
+       | ^^^^^^^^
+  1828 |       </DialogContent>
+  1829 |     </Dialog>
+  1830 |   );
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:1826:24
+Expected '</', got 'jsx text'
+  1824 |               </div>
+  1825 |             )}
+> 1826 |           </ScrollArea>
+       |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 1827 |         </div>
+       | ^^^^^^^^
+  1828 |       </DialogContent>
+  1829 |     </Dialog>
+  1830 |   );
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+✓ Compiled in 100ms
+ GET / 200 in 67ms (next.js: 15ms, application-code: 52ms)
+✓ Compiled in 141ms
+✓ Compiled in 57ms
+✓ Compiled in 61ms
+✓ Compiled in 66ms
+✓ Compiled in 68ms
+✓ Compiled in 61ms
+✓ Compiled in 62ms
+✓ Compiled in 57ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 54ms (next.js: 7ms, application-code: 47ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 135ms
+✓ Compiled in 63ms
+✓ Compiled in 64ms
+✓ Compiled in 108ms
+✓ Compiled in 61ms
+ GET / 200 in 51ms (next.js: 6ms, application-code: 45ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 62ms
+✓ Compiled in 59ms
+✓ Compiled in 125ms
+✓ Compiled in 139ms
+✓ Compiled in 62ms
+✓ Compiled in 62ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 51ms (next.js: 8ms, application-code: 43ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 38ms (next.js: 4ms, application-code: 34ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 93ms
+✓ Compiled in 59ms
+✓ Compiled in 118ms
+ GET / 200 in 48ms (next.js: 7ms, application-code: 41ms)
+ GET / 200 in 45ms (next.js: 4ms, application-code: 41ms)
+✓ Compiled in 103ms
+✓ Compiled in 56ms
+✓ Compiled in 115ms
+ GET / 200 in 42ms (next.js: 5ms, application-code: 37ms)
+✓ Compiled in 101ms
+ GET / 200 in 45ms (next.js: 3ms, application-code: 42ms)
+✓ Compiled in 117ms
+✓ Compiled in 93ms
+⨯ Error: The default export is not a React Component in "/page"
+    at ignore-listed frames
+⨯ Error: The default export is not a React Component in "/page"
+    at ignore-listed frames {
+  page: '/'
+}
+✓ Compiled in 80ms
+ GET / 500 in 863ms (next.js: 136ms, application-code: 728ms)
+ GET / 200 in 223ms (next.js: 84ms, application-code: 139ms)
+✓ Compiled in 112ms
+✓ Compiled in 126ms
+✓ Compiled in 61ms
+✓ Compiled in 151ms
+✓ Compiled in 46ms
+✓ Compiled in 43ms
+✓ Compiled in 50ms
+✓ Compiled in 36ms
+✓ Compiled in 54ms
+✓ Compiled in 37ms
+✓ Compiled in 40ms
+✓ Compiled in 38ms
+✓ Compiled in 54ms
+✓ Compiled in 50ms
+✓ Compiled in 38ms
+✓ Compiled in 38ms
+✓ Compiled in 31ms
+✓ Compiled in 28ms
+✓ Compiled in 105ms
+ GET / 200 in 56ms (next.js: 13ms, application-code: 43ms)
+ GET / 200 in 37ms (next.js: 3ms, application-code: 34ms)
+✓ Compiled in 95ms
+ GET / 200 in 40ms (next.js: 4ms, application-code: 37ms)
+✓ Compiled in 109ms
+ GET / 200 in 61ms (next.js: 21ms, application-code: 41ms)

@@ -13,7 +13,7 @@ import {
   AlertCircle, RefreshCw, Search, Sparkles, Shield,
   Eye, EyeOff, Zap, BookOpen, Menu
 } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile, useMobileOptimizations } from '@/hooks/use-mobile';
 import { useContextMenuStore, ContextMenu } from '@/hooks/use-context-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,6 +49,9 @@ export default function RoleplayChat() {
   const isMobile = useIsMobile();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const contextMenu = useContextMenuStore();
+
+  // Mobile optimizations
+  useMobileOptimizations();
 
   // Global listeners for context menu
   useEffect(() => {
@@ -87,7 +90,7 @@ export default function RoleplayChat() {
   }
 
   return (
-    <div className="h-dvh flex overflow-hidden bg-background">
+    <div className="h-dvh flex overflow-hidden bg-background touch-none">
       {/* Character Sidebar - hidden on mobile */}
       {!isMobile && <CharacterSidebar />}
 
@@ -100,7 +103,7 @@ export default function RoleplayChat() {
       )}
 
       {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {store.activeCharacter && store.activeChat ? (
           <ChatView isMobile={isMobile} onOpenMobileNav={() => setMobileNavOpen(true)} />
         ) : store.activeCharacter ? (
@@ -596,8 +599,8 @@ function CharacterSidebar() {
           </Button>
         </div>
       </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2 space-y-1">
+      <ScrollArea className="flex-1 overflow-y-auto touch-pan-y">
+        <div className="p-2 space-y-1 min-w-full">
           {filtered.length === 0 && (
             <p className="text-center text-muted-foreground text-xs py-8">No characters yet</p>
           )}
@@ -665,14 +668,14 @@ function CharacterItem({ character }: { character: Character }) {
         <Bot className="w-4 h-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium truncate">{character.name}</p>
-        <p className="text-xs text-muted-foreground truncate">{character.tags.slice(0, 2).join(', ')}</p>
+        <p className="text-sm font-medium truncate block">{character.name}</p>
+        <p className="text-xs text-muted-foreground truncate block">{character.tags.slice(0, 2).join(', ') || 'No tags'}</p>
       </div>
-      <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex gap-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6"
+          className="h-6 w-6 text-muted-foreground"
           onClick={(e) => {
             e.stopPropagation();
             store.setCharacterEditorOpen(true, character);
@@ -683,7 +686,7 @@ function CharacterItem({ character }: { character: Character }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6"
+          className="h-6 w-6 text-muted-foreground"
           onClick={(e) => {
             e.stopPropagation();
             store.saveCharacter({ ...character, isFavorite: !character.isFavorite });
@@ -694,7 +697,7 @@ function CharacterItem({ character }: { character: Character }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 hover:text-destructive"
+          className="h-6 w-6 text-muted-foreground hover:text-destructive"
           onClick={(e) => {
             e.stopPropagation();
             if (confirm(`Delete "${character.name}"? This cannot be undone.`)) {
@@ -740,8 +743,8 @@ function ChatHistorySidebar() {
           </TooltipProvider>
         </div>
       </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2 space-y-0.5">
+      <ScrollArea className="flex-1 overflow-y-auto touch-pan-y">
+        <div className="p-2 space-y-0.5 min-w-full">
           {store.chats.length === 0 && (
             <p className="text-center text-muted-foreground text-xs py-6">No chats yet</p>
           )}
@@ -769,7 +772,7 @@ function ChatHistorySidebar() {
             return (
               <div
                 key={chat.id}
-                className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-md cursor-pointer text-sm transition-colors ${
+                className={`group flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer text-sm transition-colors w-full ${
                   store.activeChat?.id === chat.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
                 }`}
                 onClick={() => store.selectChat(chat)}
@@ -783,20 +786,26 @@ function ChatHistorySidebar() {
                 }}
               >
                 <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="truncate flex-1">{chat.title}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirm('Delete this chat?')) {
-                      store.deleteChat(chat.id);
-                    }
-                  }}
-                >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
+                <div className="flex-1 min-w-0 overflow-hidden" style={{maxWidth: '130px'}}>
+                  <div className="truncate text-xs" style={{fontSize: '10px', lineHeight: '12px', maxWidth: '130px'}}>
+                    {chat.title}
+                  </div>
+                </div>
+                <div className="flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5 text-muted-foreground hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm('Delete this chat?')) {
+                        store.deleteChat(chat.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
               </div>
             );
           })}
@@ -974,11 +983,11 @@ function MessageBubble({ message }: { message: { id: string; role: string; conte
         <div
           className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
             isUser
-              ? 'bg-primary text-primary-foreground rounded-tr-sm'
-              : 'bg-muted rounded-tl-sm'
+              ? 'bg-blue-600 text-white rounded-tr-sm'
+              : 'bg-gray-100 dark:bg-gray-800 rounded-tl-sm'
           }`}
         >
-          {message.content}
+          {formatMessageContent(message.content)}
           {message.isStreaming && <span className="animate-pulse ml-0.5">▊</span>}
         </div>
         <div className={`flex items-center gap-1 mt-1 ${isUser ? 'justify-end mr-1' : 'ml-1'}`}>
@@ -1008,6 +1017,20 @@ function CopyIcon({ className }: { className?: string }) {
       <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
     </svg>
   );
+}
+
+// Format message content with styling for *text* and "text"
+function formatMessageContent(content: string): React.ReactNode {
+  const parts = content.split(/(\*[^\*]+\*|'[^']+'|"[^"]+")/);
+  return parts.map((part, index) => {
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <span key={index} className="text-gray-500 dark:text-gray-400">{part.slice(1, -1)}</span>;
+    } else if ((part.startsWith("'") && part.endsWith("'")) || (part.startsWith('"') && part.endsWith('"'))) {
+      return <span key={index} className="font-medium text-black dark:text-white">{part.slice(1, -1)}</span>;
+    } else {
+      return <span key={index}>{part}</span>;
+    }
+  });
 }
 
 // ============================================================
@@ -1218,7 +1241,7 @@ function SettingsDialog() {
 
   return (
     <Dialog open={store.settingsOpen} onOpenChange={store.setSettingsOpen}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle className="flex items-center gap-2">
             <Settings className="w-5 h-5" /> Settings
@@ -1242,8 +1265,9 @@ function SettingsDialog() {
           </div>
 
           {/* Tab content */}
-          <ScrollArea className="flex-1 p-4">
-            {activeTab === 'providers' && (
+          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-pan-y">
+            <div className="min-h-full">
+              {activeTab === 'providers' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1491,6 +1515,7 @@ function SettingsDialog() {
                       value={[settings.temperature]}
                       min={0} max={2} step={0.05}
                       onValueChange={([v]) => settingsStore.updateSetting('temperature', v)}
+                      className="touch-none"
                     />
                   </div>
 
@@ -1503,6 +1528,7 @@ function SettingsDialog() {
                       value={[settings.maxTokens]}
                       min={64} max={4096} step={64}
                       onValueChange={([v]) => settingsStore.updateSetting('maxTokens', v)}
+                      className="touch-none"
                     />
                   </div>
 
@@ -1514,6 +1540,7 @@ function SettingsDialog() {
                       value={[settings.topP]}
                       min={0} max={1} step={0.05}
                       onValueChange={([v]) => settingsStore.updateSetting('topP', v)}
+                      className="touch-none"
                     />
                   </div>
 
@@ -1526,6 +1553,7 @@ function SettingsDialog() {
                       value={[settings.frequencyPenalty]}
                       min={0} max={2} step={0.1}
                       onValueChange={([v]) => settingsStore.updateSetting('frequencyPenalty', v)}
+                      className="touch-none"
                     />
                   </div>
 
@@ -1538,6 +1566,7 @@ function SettingsDialog() {
                       value={[settings.presencePenalty]}
                       min={0} max={2} step={0.1}
                       onValueChange={([v]) => settingsStore.updateSetting('presencePenalty', v)}
+                      className="touch-none"
                     />
                   </div>
                 </div>
@@ -1692,6 +1721,7 @@ function SettingsDialog() {
                       value={[settings.summarizeThreshold]}
                       min={8} max={50} step={2}
                       onValueChange={([v]) => settingsStore.updateSetting('summarizeThreshold', v)}
+                      className="touch-none"
                     />
                   </div>
 
@@ -1703,6 +1733,7 @@ function SettingsDialog() {
                       value={[settings.keepRecentCount]}
                       min={2} max={20} step={1}
                       onValueChange={([v]) => settingsStore.updateSetting('keepRecentCount', v)}
+                      className="touch-none"
                     />
                   </div>
 
@@ -1819,6 +1850,7 @@ function SettingsDialog() {
                 </div>
               </div>
             )}
+            </div>
           </ScrollArea>
         </div>
       </DialogContent>
@@ -1986,7 +2018,7 @@ function CharacterEditorInner() {
           </div>
 
           {/* Form */}
-          <ScrollArea className="flex-1 p-4">
+          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-pan-y">
             {activeField === 'templates' && !isEditing && (
               <div className="space-y-4">
                 <div>
@@ -2404,7 +2436,7 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
           </SheetTitle>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100dvh-10rem)]">
+        <ScrollArea className="h-[calc(100dvh-10rem)] overflow-y-auto -webkit-overflow-scrolling-touch">
           {/* Characters Section */}
           <div className="border-b border-border">
             <div className="p-3 space-y-2">
@@ -2594,7 +2626,7 @@ function MemoryPanelSheet() {
           )}
 
           {/* Memory List */}
-          <ScrollArea className="flex-1 -mx-6 px-6">
+          <ScrollArea className="flex-1 -mx-6 px-6 overflow-y-auto touch-pan-y">
             <div className="space-y-2 pb-4">
               {store.memories.length === 0 ? (
                 <div className="text-center py-12">

@@ -56,6 +56,15 @@ const config: Config = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		touchAction: {
+  			manipulation: 'manipulation'
+  		},
+  		minHeight: {
+  			'touch': '44px'
+  		},
+  		minWidth: {
+  			'touch': '44px'
   		}
   	}
   },

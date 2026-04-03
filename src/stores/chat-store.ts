@@ -403,7 +403,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
             activeCharacter,
             settings,
             existingMemories
-          ).catch(() => {});
+          ).catch((error) => {
+            console.error('Memory extraction failed:', error);
+          });
         }
       },
       onError: (error: string) => {

@@ -748,6 +748,43 @@ export function estimateTokens(text: string): number {
   return Math.ceil(tokens);
 }
 
+// ---- Enhanced token estimation for non-English text ----
+export function estimateTokensEnhanced(text: string): number {
+  if (!text) return 0;
+  
+  // Handle CJK characters (Chinese, Japanese, Korean)
+  const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
+  const cjkMatches = text.match(cjkRegex);
+  const cjkCount = cjkMatches ? cjkMatches.length : 0;
+  
+  // Handle other Unicode characters (e.g., emojis, symbols)
+  const unicodeRegex = /[^\s\w\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
+  const unicodeMatches = text.match(unicodeRegex);
+  const unicodeCount = unicodeMatches ? unicodeMatches.length : 0;
+  
+  // Handle whitespace and punctuation
+  const whitespaceRegex = /\s+/g;
+  const whitespaceMatches = text.match(whitespaceRegex);
+  const whitespaceCount = whitespaceMatches ? whitespaceMatches.length : 0;
+  
+  // Estimate tokens based on character types
+  const totalChars = text.length;
+  const alphanumericChars = totalChars - cjkCount - unicodeCount - whitespaceCount;
+  
+  // Weights for different character types
+  const cjkWeight = 1.5;
+  const unicodeWeight = 1.2;
+  const alphanumericWeight = 0.25;
+  
+  // Calculate total tokens
+  let tokens = 0;
+  tokens += cjkCount * cjkWeight;
+  tokens += unicodeCount * unicodeWeight;
+  tokens += alphanumericChars * alphanumericWeight;
+  
+  return Math.ceil(tokens);
+}
+
 export function estimateMessageTokens(messages: Array<{ role: string; content: string }>): number {
   return messages.reduce((sum, m) => sum + estimateTokens(m.content) + 4, 0);
 }
@@ -804,7 +841,7 @@ export async function generateCharacter(
 ): Promise<GeneratedCharacter | null> {
   const providerConfig = settings.providers.find(p => p.provider === settings.activeProvider && p.enabled);
   if (!providerConfig) {
-    throw new Error('No API key configured. Please add an API key in Settings.');
+    throw new Error(`No API key configured for ${settings.activeProvider}. Please add an API key in Settings.`);
   }
 
   const { userPrompt, characterType } = options;
@@ -828,10 +865,10 @@ export async function generateCharacter(
     await streamChatResponse(settings, messages, undefined, {
       onToken: (token) => { fullText += token; },
       onDone: () => {},
-      onError: () => {},
+      onError: (error) => { throw new Error(`Character generation failed: ${error}`); },
     });
-  } catch {
-    throw new Error('Failed to generate character. Please try again.');
+  } catch (error) {
+    throw new Error(`Failed to generate character: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
   }
 
   // Parse the JSON response
@@ -847,7 +884,7 @@ export async function generateCharacter(
     // Find JSON array or object
     const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('Could not parse character data');
+      throw new Error('Could not parse character data: No valid JSON found in response');
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
@@ -869,6 +906,6 @@ export async function generateCharacter(
     return character;
   } catch (e) {
     console.error('Character parsing error:', e);
-    throw new Error('Failed to parse generated character. Please try again.');
+    throw new Error(`Failed to parse generated character: ${e instanceof Error ? e.message : 'Unknown error'}. Please try again.`);
   }
 }

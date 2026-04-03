@@ -5,7 +5,7 @@
 
 import type { ChatMessage, AppSettings, Character, ContextWindow, MemoryEntry } from './types';
 import { retrieveRelevantMemories, formatMemoriesForPrompt, generateSceneSummary } from './memory';
-import { buildSystemPrompt, estimateMessageTokens, estimateTokens, getModelInfo } from './ai-engine';
+import { buildSystemPrompt, estimateMessageTokens, estimateTokens, getModelInfo, estimateTokensEnhanced } from './ai-engine';
 import { streamChatResponse } from './ai-engine';
 
 // ---- Build the context window for sending to AI ----
@@ -35,7 +35,7 @@ export async function buildContextWindow(
   const systemPrompt = buildSystemPrompt(character, settings, memoryStrings, existingSummary);
 
   // Calculate available tokens for messages
-  const systemTokens = estimateTokens(systemPrompt) + 200; // 200 buffer for system prompt
+  const systemTokens = estimateTokensEnhanced(systemPrompt) + 200; // 200 buffer for system prompt
   const availableForMessages = modelInfo.contextTokens - systemTokens - modelInfo.outputTokens - 500; // safety margin
 
   // Select messages to include
@@ -62,9 +62,15 @@ export async function buildContextWindow(
     summary = newSummary;
   }
 
+  // Optimize the selected messages for token efficiency
+  selectedMessages = optimizeContextWindow(selectedMessages, availableForMessages);
+
   const totalTokens = systemTokens + estimateMessageTokens(
     selectedMessages.map(m => ({ role: m.role, content: m.content }))
   );
+
+  // Log token usage for debugging
+  console.debug(`[context] Total tokens: ${totalTokens}/${modelInfo.contextTokens}`);
 
   const contextWindow: ContextWindow = {
     messages: selectedMessages,
@@ -100,15 +106,27 @@ async function condenseMessages(
 
   let summary = existingSummary;
 
+  // Enforce maximum context length to prevent runaway growth
+  const maxContextMessages = 50; // Absolute maximum number of messages to consider
+  if (messages.length > maxContextMessages) {
+    const excess = messages.length - maxContextMessages;
+    // If we have way too many messages, be more aggressive with summarization
+    if (olderMessages.length > settings.summarizeThreshold * 2) {
+      summary = await summarizeConversation(olderMessages.slice(0, -settings.summarizeThreshold), character, settings, existingSummary);
+    }
+  }
+
   // If we have older messages that need summarizing
   if (olderMessages.length >= settings.summarizeThreshold) {
     // Generate new summary incorporating older messages
     summary = await summarizeConversation(olderMessages, character, settings, existingSummary);
   } else if (olderMessages.length > 0) {
     // Not enough older messages for full summarization, but include some
-    // Try to fit as many older messages as possible
+    // Try to fit as many older messages as possible, but enforce strict token limits
     const recentTokens = estimateMessageTokens(recentMessages.map(m => ({ role: m.role, content: m.content })));
-    const budgetForOlder = maxTokens - recentTokens;
+    // Reserve 20% of tokens for the AI response, use 80% for context
+    const contextBudget = Math.floor(maxTokens * 0.8);
+    const budgetForOlder = Math.max(0, contextBudget - recentTokens);
 
     let fitOlder: ChatMessage[] = [];
     let usedTokens = 0;
@@ -194,4 +212,36 @@ function getModelContextLimits(modelId: string): { contextTokens: number; output
   };
 
   return limits[modelId] || { contextTokens: 8192, outputTokens: 2048 };
+}
+
+// ---- Optimize context window for token efficiency ----
+export function optimizeContextWindow(
+  messages: ChatMessage[],
+  maxTokens: number
+): ChatMessage[] {
+  if (messages.length === 0) return [];
+
+  // Calculate token usage for each message
+  const messageTokens = messages.map(msg => estimateTokens(msg.content) + 4); // +4 for role overhead
+  const totalTokens = messageTokens.reduce((sum, tokens) => sum + tokens, 0);
+
+  // If total tokens are within the limit, return all messages
+  if (totalTokens <= maxTokens) return messages;
+
+  // Otherwise, prioritize recent messages and condense older ones
+  const recentMessages = messages.slice(-8); // Keep the last 8 messages verbatim
+  const olderMessages = messages.slice(0, -8);
+
+  let selectedMessages: ChatMessage[] = [...recentMessages];
+  let usedTokens = messageTokens.slice(-8).reduce((sum, tokens) => sum + tokens, 0);
+
+  // Add older messages if they fit within the token budget
+  for (let i = olderMessages.length - 1; i >= 0; i--) {
+    const msgTokens = messageTokens[i];
+    if (usedTokens + msgTokens > maxTokens) break;
+    selectedMessages.unshift(olderMessages[i]);
+    usedTokens += msgTokens;
+  }
+
+  return selectedMessages;
 }

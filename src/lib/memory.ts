@@ -213,7 +213,9 @@ export async function retrieveRelevantMemories(
   }));
   
   // Save updates (don't await to not block)
-  memoryDB.saveMany(toUpdate).catch(() => {});
+  memoryDB.saveMany(toUpdate).catch((error) => {
+    console.error('Failed to update memory access counts:', error);
+  });
 
   return selected.map(s => s.memory);
 }

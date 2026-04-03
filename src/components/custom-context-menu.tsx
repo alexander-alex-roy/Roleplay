@@ -21,7 +21,7 @@ export function CustomContextMenu({ state }: CustomContextMenuProps) {
 
   return (
     <div
-      className="fixed z-50 bg-popover border border-border rounded-lg shadow-lg py-1 min-w-[160px] animate-in fade-in zoom-in-95 duration-100"
+      className="fixed z-50 bg-popover border border-border rounded-lg shadow-lg py-1 min-w-[160px] sm:min-w-[180px] animate-in fade-in zoom-in-95 duration-100 touch-manipulation"
       style={{
         left: state.x,
         top: state.y,
@@ -37,7 +37,7 @@ export function CustomContextMenu({ state }: CustomContextMenuProps) {
         return (
           <button
             key={index}
-            className={`w-full px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
+            className={`w-full px-3 py-2 text-sm flex items-center gap-2 transition-colors touch-manipulation ${
               item.disabled
                 ? 'opacity-50 cursor-not-allowed'
                 : item.destructive
@@ -52,8 +52,8 @@ export function CustomContextMenu({ state }: CustomContextMenuProps) {
               }
             }}
           >
-            {item.icon && <span className="w-4 h-4">{item.icon}</span>}
-            <span>{item.label}</span>
+            {item.icon && <span className="w-4 h-4 flex-shrink-0">{item.icon}</span>}
+            <span className="truncate">{item.label}</span>
           </button>
         );
       })}

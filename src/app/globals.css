@@ -135,3 +135,278 @@
 .safe-bottom {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
 }
+
+/* Mobile responsiveness improvements */
+@media (max-width: 767px) {
+  /* Prevent horizontal scrolling */
+  html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Improve touch target sizes */
+  button, [role="button"], a, input, textarea, select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Improve scroll behavior */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  /* Fix fixed positioning on mobile */
+  .fixed {
+    -webkit-backface-visibility: hidden;
+  }
+  
+  /* Ensure scroll areas work properly on mobile */
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
+  
+  /* Fix for dialog scrolling on mobile */
+  .DialogContent {
+    overflow: hidden;
+  }
+  
+  /* Ensure ScrollArea containers are properly sized */
+  .flex-1 {
+    min-height: 0;
+    min-width: 0;
+  }
+}
+
+/* Touch action improvements */
+button, [role="button"], a {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection on touch devices */
+@media (hover: none) {
+  * {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
+/* Smooth scrolling for iOS */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ScrollArea improvements for mobile */
+.touch-pan-y {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overflow-y: auto;
+}
+
+/* Ensure ScrollArea containers can scroll properly */
+.ScrollAreaRoot {
+  overflow: hidden;
+}
+
+.ScrollAreaViewport {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.ScrollAreaScrollbar {
+  display: flex;
+  user-select: none;
+  touch-action: none;
+  padding: 2px;
+}
+
+.ScrollAreaThumb {
+  flex: 1;
+  background: hsl(var(--border));
+  border-radius: var(--radius);
+  position: relative;
+}
+
+.ScrollAreaCorner {
+  background: hsl(var(--background));
+}
+
+/* Mobile-specific scroll improvements */
+@media (max-width: 767px) {
+  .touch-pan-y {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  
+  .ScrollAreaViewport {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Mobile context menu improvements */
+  .animate-in.fade-in.zoom-in-95 {
+    transform: none !important;
+    animation: none !important;
+  }
+  
+  /* Ensure context menu is touch-friendly */
+  .fixed.z-50 {
+    touch-action: manipulation;
+  }
+  
+  /* Make context menu items larger on mobile */
+  .min-w-\[160px\] {
+    min-width: 180px;
+  }
+  
+  /* Context menu button improvements */
+  button.w-full.px-3.py-2 {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+  
+  /* Settings dialog improvements for mobile */
+  .DialogContent.max-w-2xl {
+    height: 85vh;
+  }
+  
+  /* Ensure all textareas and inputs are mobile-friendly */
+  textarea, input[type="text"], input[type="password"], input[type="email"] {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  
+  /* Slider improvements for mobile */
+  .Slider {
+    touch-action: manipulation;
+  }
+  
+  /* Button improvements for mobile */
+  button {
+    min-height: 40px;
+  }
+  
+  button.h-8, button.h-9, button.h-10 {
+    min-height: 44px;
+  }
+  
+  /* Ensure long text in settings wraps properly */
+  .text-xs, .text-sm {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Sidebar improvements */
+  .group.flex.items-center {
+    position: relative;
+    width: 100%;
+  }
+  
+  /* Sidebar containers */
+  .w-52,
+  .w-64 {
+    overflow: hidden;
+  }
+  
+  /* Button container visibility */
+  .flex.gap-0\.5,
+  .flex.gap-1\.5 {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    margin-left: auto;
+    padding-left: 4px;
+  }
+  
+  .group:hover .flex.gap-0\.5,
+  .group:hover .flex.gap-1\.5 {
+    opacity: 1;
+  }
+  
+  /* Truncation improvements */
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+  }
+  
+  /* Sidebar text truncation */
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+  
+  /* Chat sidebar specific truncation */
+  [style*="max-width"] .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    font-size: 10px !important;
+    line-height: 12px !important;
+    max-width: inherit !important;
+  }
+  
+  /* Sidebar item layout */
+  .group.flex.items-center {
+    width: 100%;
+  }
+  
+  /* Ensure buttons are visible */
+  .opacity-70.group-hover\:opacity-100 {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+  
+  .group:hover .opacity-70.group-hover\:opacity-100 {
+    opacity: 1;
+  }
+  
+  /* Ensure sidebar items don't wrap */
+  .group.flex.items-center {
+    white-space: nowrap;
+    width: 100%;
+    display: flex;
+  }
+  
+  /* Button container positioning */
+  .ml-auto {
+    margin-left: auto !important;
+  }
+  
+  /* Button improvements */
+  .flex-shrink-0 {
+    flex-shrink: 0;
+  }
+  
+  /* Hover effects */
+  .hover\:text-destructive:hover {
+    color: hsl(var(--destructive));
+  }
+  
+  .hover\:bg-muted:hover {
+    background-color: hsl(var(--muted));
+  }
+  
+  /* Button icon size */
+  .w-3.h-3 {
+    width: 12px;
+    height: 12px;
+  }
+}
