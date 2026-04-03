@@ -29,7 +29,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
@@ -220,7 +220,10 @@ function SetupWizard() {
 
   return (
     <Dialog open={showWizard} onOpenChange={() => {}}>
-      <DialogContent className="max-w-lg p-0 gap-0">
+      <DialogContent className="max-w-lg p-0 gap-0" aria-describedby="wizard-description">
+        <DialogDescription id="wizard-description" className="sr-only">
+          Setup wizard for configuring your AI assistant
+        </DialogDescription>
         {/* Progress */}
         <div className="flex gap-1 p-4 pb-0">
           {steps.map((_, i) => (
@@ -631,7 +634,7 @@ function CharacterSidebar() {
           </Button>
         </div>
       </div>
-      <ScrollArea className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="p-2 space-y-1">
           {filtered.length === 0 && (
             <p className="text-center text-muted-foreground text-xs py-8">
@@ -642,7 +645,7 @@ function CharacterSidebar() {
             <CharacterItem key={char.id} character={char} />
           ))}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
@@ -719,11 +722,10 @@ function CharacterItem({ character }: { character: Character }) {
 
   return (
     <div
-      className="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors min-w-0 hover:bg-muted/50"
+      className="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 overflow-hidden w-full"
       onClick={() => store.selectCharacter(character)}
       onContextMenu={handleContextMenu}
       onTouchStart={handleTouchStart}
-      style={{ minWidth: 0 }}
     >
       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
         {character.avatar ? (
@@ -732,7 +734,7 @@ function CharacterItem({ character }: { character: Character }) {
           <Bot className="w-4 h-4" />
         )}
       </div>
-      <div className="min-w-0 flex-1 overflow-hidden">
+      <div className="min-w-0 flex-1">
         <p className="text-sm font-medium truncate">{character.name}</p>
         <p className="text-xs text-muted-foreground truncate">
           {character.tags?.slice(0, 2).join(', ') || 'No tags'}
@@ -742,7 +744,7 @@ function CharacterItem({ character }: { character: Character }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 flex-shrink-0 text-muted-foreground"
+          className="h-6 w-6 text-muted-foreground"
           onClick={(e) => {
             e.stopPropagation();
             store.setCharacterEditorOpen(true, character);
@@ -753,7 +755,7 @@ function CharacterItem({ character }: { character: Character }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 flex-shrink-0 text-muted-foreground"
+          className="h-6 w-6 text-muted-foreground"
           onClick={(e) => {
             e.stopPropagation();
             store.saveCharacter({ ...character, isFavorite: !character.isFavorite });
@@ -764,7 +766,7 @@ function CharacterItem({ character }: { character: Character }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 flex-shrink-0 text-muted-foreground hover:text-destructive"
+          className="h-6 w-6 text-muted-foreground hover:text-destructive"
           onClick={(e) => {
             e.stopPropagation();
             if (confirm(`Delete "${character.name}"? This cannot be undone.`)) {
@@ -811,7 +813,7 @@ function ChatHistorySidebar() {
           </TooltipProvider>
         </div>
       </div>
-      <ScrollArea className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="p-2 space-y-0.5">
           {store.chats.length === 0 && (
             <p className="text-center text-muted-foreground text-xs py-6">No chats yet</p>
@@ -845,7 +847,7 @@ function ChatHistorySidebar() {
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
@@ -1410,11 +1412,14 @@ function ChatInput() {
                             store.activeCharacter.creatorNotes,
                           ].filter(Boolean).join('. ');
                           
-                          const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai/stabilityai/stable-diffusion-3-medium', {
+                          const imageModel = settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
+                          
+                          const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                               prompt: `cinematic scene featuring ${store.activeCharacter.name}, ${visualDetails}, dramatic moment, photorealistic, highly detailed, atmospheric lighting, depth of field, 16:9 aspect ratio, scene context: ${contextPrompt.slice(-300)}`,
+                              model: imageModel,
                               cfg_scale: 7,
                               aspect_ratio: "16:9",
                               seed: Math.floor(Math.random() * 1000000),
@@ -1430,7 +1435,7 @@ function ChatInput() {
                               const base64Data = data.image.startsWith('data:') 
                                 ? data.image 
                                 : `data:image/jpeg;base64,${data.image}`;
-                              await store.addImageMessage(base64Data);
+                              await store.addImageMessage(base64Data, imageModel);
                             }
                           }
                         } catch (e) {
@@ -1491,7 +1496,7 @@ function SettingsDialog() {
   const settings = settingsStore.settings;
   const [activeTab, setActiveTab] = useState<'providers' | 'model' | 'persona' | 'memory' | 'context' | 'ui' | 'data'>('providers');
   const [showKeys, setShowKeys] = useState(false);
-  const [newProvider, setNewProvider] = useState<AIProvider | ''>('');
+  const [newProvider, setNewProvider] = useState<AIProvider | null>(null);
   const [newKey, setNewKey] = useState('');
   const [newBaseUrl, setNewBaseUrl] = useState('');
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -1614,7 +1619,10 @@ function SettingsDialog() {
 
   return (
     <Dialog open={store.settingsOpen} onOpenChange={store.setSettingsOpen}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden" aria-describedby="settings-description">
+        <DialogDescription id="settings-description" className="sr-only">
+          Application settings and configuration
+        </DialogDescription>
         <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle className="flex items-center gap-2">
             <Settings className="w-5 h-5" /> Settings
@@ -1754,7 +1762,7 @@ function SettingsDialog() {
                   <Separator />
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Add Provider</p>
-                    <Select value={newProvider} onValueChange={(v) => {
+                    <Select value={newProvider || ''} onValueChange={(v) => {
                       setNewProvider(v as AIProvider);
                       setNewKey('');
                       setNewBaseUrl('');
@@ -1978,6 +1986,46 @@ function SettingsDialog() {
                       />
                     </div>
                   </div>
+
+                  {settings.activeProvider === 'nvidia' && (
+                    <>
+                      <Separator />
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium">Image Generation Model</h4>
+                        <p className="text-xs text-muted-foreground">Select which NVIDIA model to use for generating images</p>
+                        <Select 
+                          value={settings.nvidiaImageModel} 
+                          onValueChange={(v) => settingsStore.updateSetting('nvidiaImageModel', v)}
+                        >
+                          <SelectTrigger className="text-sm">
+                            <SelectValue placeholder="Select image model" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="stabilityai/stable-diffusion-3-medium">
+                              Stable Diffusion 3 Medium
+                              <span className="text-muted-foreground ml-2 text-xs">(Default, balanced)</span>
+                            </SelectItem>
+                            <SelectItem value="stabilityai/stable-diffusion-xl">
+                              Stable Diffusion XL
+                              <span className="text-muted-foreground ml-2 text-xs">(1024x1024, detailed)</span>
+                            </SelectItem>
+                            <SelectItem value="black-forest-labs/flux.1-dev">
+                              FLUX.1 Dev
+                              <span className="text-muted-foreground ml-2 text-xs">(More control, slower)</span>
+                            </SelectItem>
+                            <SelectItem value="black-forest-labs/flux.1-schnell">
+                              FLUX.1 Schnell
+                              <span className="text-muted-foreground ml-2 text-xs">(Fast generation)</span>
+                            </SelectItem>
+                            <SelectItem value="black-forest-labs/flux.2-klein-4b">
+                              FLUX.2 Klein 4B
+                              <span className="text-muted-foreground ml-2 text-xs">(Compact, efficient)</span>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -2294,7 +2342,10 @@ function CharacterEditorDialog() {
     <Dialog open={store.characterEditorOpen} onOpenChange={(open) => {
       if (!open) store.setCharacterEditorOpen(false);
     }}>
-      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0">
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0" aria-describedby="character-editor-description">
+        <DialogDescription id="character-editor-description" className="sr-only">
+          Character editor for creating and modifying AI characters
+        </DialogDescription>
         <CharacterEditorInner key={editingCharacter?.id || 'new'} />
       </DialogContent>
     </Dialog>
@@ -2599,13 +2650,16 @@ function CharacterEditorInner() {
                             form.scenario || '',
                           ].filter(Boolean).join(', ');
                           
-                          const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai/stabilityai/stable-diffusion-3-medium', {
+                          const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
+                          
+                          const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
                             method: 'POST',
                             headers: {
                               'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
                               prompt: ` photorealistic portrait of ${form.name}, ${characterDetails || 'character'}, detailed face, natural lighting, high quality, 8k, realistic, professional photography${form.personality ? `, ${form.personality}` : ''}`,
+                              model: imageModel,
                               cfg_scale: 7,
                               aspect_ratio: "1:1",
                               seed: Math.floor(Math.random() * 1000000),

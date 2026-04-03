@@ -56,7 +56,7 @@ interface ChatState {
   deleteMessage: (id: string) => Promise<void>;
   stopStreaming: () => void;
   regenerateMessage: () => Promise<void>;
-  addImageMessage: (imageDataUrl: string) => Promise<void>;
+  addImageMessage: (imageDataUrl: string, model?: string) => Promise<void>;
 
   // Memory actions
   loadMemories: (characterId: string) => Promise<void>;
@@ -593,11 +593,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
     await get().sendMessage(lastUserMsg.content);
   },
 
-  addImageMessage: async (imageDataUrl: string) => {
+  addImageMessage: async (imageDataUrl: string, model?: string) => {
     const { activeCharacter, activeChat } = get();
     if (!activeCharacter || !activeChat) return;
 
     const now = Date.now();
+    const imageModel = model || 'stable-diffusion-3-medium';
     const imageMsg: ChatMessage = {
       id: genMsgId(),
       role: 'assistant',
@@ -607,7 +608,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       chatId: activeChat.id,
       metadata: { 
         image: imageDataUrl,
-        model: 'stable-diffusion-3-medium',
+        model: imageModel,
         provider: 'nvidia'
       },
     };

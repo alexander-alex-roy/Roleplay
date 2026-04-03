@@ -293,6 +293,9 @@ export interface AppSettings {
   // Identity
   userPersona: UserPersona;
 
+  // NVIDIA Image Generation
+  nvidiaImageModel: string;
+
   // Onboarding
   showSetupWizard: boolean;
 }
@@ -331,6 +334,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   jailbreakPrompt: undefined,
 
   userPersona: DEFAULT_USER_PERSONA,
+  nvidiaImageModel: 'stable-diffusion-3-medium',
   showSetupWizard: true,
 };
 
