@@ -2965,6 +2965,17 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="h-7 w-7 text-muted-foreground"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        store.setCharacterEditorOpen(true, char);
+                      }}
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="h-7 w-7 text-muted-foreground hover:text-destructive"
                       onClick={(e) => {
                         e.stopPropagation();

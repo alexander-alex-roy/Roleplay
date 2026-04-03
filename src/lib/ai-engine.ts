@@ -884,6 +884,7 @@ JSON format:
   "name": "Unique Character Name",
   "description": "Physical appearance and background. 2 sentences.",
   "personality": "Traits and behavior. 2 sentences.",
+  "knowledge": "What the character knows: skills, history, secrets. 2-3 sentences.",
   "scenario": "Setting and situation. 1-2 sentences.",
   "firstMessage": "Immersive greeting with actions in asterisks. Meet user first time.",
   "speechPatterns": "How they talk. 1-2 sentences.",
@@ -905,6 +906,7 @@ export interface GeneratedCharacter {
   name: string;
   description: string;
   personality: string;
+  knowledge: string;
   scenario: string;
   firstMessage: string;
   speechPatterns: string;
@@ -997,6 +999,7 @@ export async function generateCharacter(
     name: typeof parsed.name === 'string' && parsed.name.trim() ? parsed.name.trim() : 'Unnamed Character',
     description: typeof parsed.description === 'string' ? parsed.description : '',
     personality: typeof parsed.personality === 'string' ? parsed.personality : '',
+    knowledge: typeof parsed.knowledge === 'string' ? parsed.knowledge : '',
     scenario: typeof parsed.scenario === 'string' ? parsed.scenario : '',
     firstMessage: typeof parsed.firstMessage === 'string' ? parsed.firstMessage : '',
     speechPatterns: typeof parsed.speechPatterns === 'string' ? parsed.speechPatterns : '',
