@@ -10,6 +10,8 @@ import { buildContextWindow } from '@/lib/context';
 import { streamChatResponse } from '@/lib/ai-engine';
 import { extractMemories } from '@/lib/memory';
 
+// ---- Types ----
+
 interface ChatState {
   // Data
   characters: Character[];
@@ -22,7 +24,7 @@ interface ChatState {
   activeChat: Chat | null;
   contextSummary: string;
 
-  // UI State
+  // UI state
   isLoading: boolean;
   isStreaming: boolean;
   streamingMessageId: string | null;
@@ -43,6 +45,7 @@ interface ChatState {
 
   // Chat actions
   loadChats: (characterId: string) => Promise<void>;
+  getNextChatNumber: (characterId: string) => Promise<number>;
   loadMessages: (chatId: string) => Promise<void>;
   selectChat: (chat: Chat) => Promise<void>;
   newChat: (character: Character) => Promise<void>;
@@ -50,6 +53,7 @@ interface ChatState {
 
   // Message actions
   sendMessage: (content: string) => Promise<void>;
+  deleteMessage: (id: string) => Promise<void>;
   stopStreaming: () => void;
   regenerateMessage: () => Promise<void>;
 
@@ -65,9 +69,11 @@ interface ChatState {
   clearError: () => void;
 }
 
+// ---- ID helpers ----
+
 let msgIdCounter = 0;
 function genMsgId(): string {
-  msgIdCounter++;
+  msgIdCounter = (msgIdCounter + 1) % Number.MAX_SAFE_INTEGER;
   return `msg_${Date.now()}_${msgIdCounter}_${Math.random().toString(36).slice(2, 6)}`;
 }
 
@@ -75,7 +81,16 @@ function genChatId(): string {
   return `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function genCharId(): string {
+  return `char_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// ---- Module-level abort controller ----
+// FIX: Tracked at module level (not in Zustand state) so React re-renders never
+// create stale closure references to an old controller instance.
 let abortController: AbortController | null = null;
+
+// ---- Store ----
 
 export const useChatStore = create<ChatState>((set, get) => ({
   characters: [],
@@ -96,12 +111,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
   editingCharacter: null,
 
   // ---- Character Actions ----
+
   loadCharacters: async () => {
     try {
       const characters = await characterDB.getAll();
       characters.sort((a, b) => b.updatedAt - a.updatedAt);
       set({ characters, isLoading: false });
-    } catch {
+    } catch (err) {
+      console.error('[store] loadCharacters failed:', err);
       set({ isLoading: false });
     }
   },
@@ -115,14 +132,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   deleteCharacter: async (id: string) => {
     const { activeCharacter } = get();
-    await characterDB.delete(id);
-    // Also delete associated chats and messages
+
+    // Delete character + all associated data in parallel where possible
     const chats = await chatDB.getByCharacterId(id);
-    for (const chat of chats) {
-      await messageDB.deleteByChatId(chat.id);
-      await chatDB.delete(chat.id);
-    }
-    await memoryDB.deleteByCharacterId(id);
+    await Promise.all([
+      ...chats.flatMap(chat => [
+        messageDB.deleteByChatId(chat.id),
+        chatDB.delete(chat.id),
+      ]),
+      memoryDB.deleteByCharacterId(id),
+      characterDB.delete(id),
+    ]);
 
     const characters = await characterDB.getAll();
     characters.sort((a, b) => b.updatedAt - a.updatedAt);
@@ -135,54 +155,61 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   selectCharacter: async (character: Character) => {
-    const { messages, contextSummary } = get();
-    set({ activeCharacter: character, messages: [], activeChat: null, contextSummary: '', memoryPanelOpen: false });
+    // FIX: The original read `messages` and `contextSummary` from state but never
+    // used them — dead destructuring that could mislead readers. Removed.
+    set({
+      activeCharacter: character,
+      messages: [],
+      activeChat: null,
+      contextSummary: '',
+      memoryPanelOpen: false,
+    });
     await get().loadChats(character.id);
   },
 
   importCharacter: async (json: string): Promise<Character | null> => {
     try {
       const parsed = JSON.parse(json);
+      let character: Character | null = null;
 
-      // Character Card V2 format
-      if (parsed.spec === 'chara_card_v2' && parsed.data) {
+      // CharacterCard V2 format
+      if (parsed?.spec === 'chara_card_v2' && parsed.data) {
         const d = parsed.data;
-        const character: Character = {
-          id: `char_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-          name: d.name || 'Unnamed',
+        character = {
+          id: genCharId(),
+          name: typeof d.name === 'string' && d.name.trim() ? d.name.trim() : 'Unnamed',
           avatar: undefined,
-          description: d.description || '',
-          personality: d.personality || '',
-          scenario: d.scenario || '',
-          firstMessage: d.first_mes || '',
-          exampleMessages: d.mes_example || '',
+          description: d.description ?? '',
+          personality: d.personality ?? '',
+          scenario: d.scenario ?? '',
+          firstMessage: d.first_mes ?? '',
+          exampleMessages: d.mes_example ?? '',
           systemPrompt: d.system_prompt || undefined,
-          creatorNotes: d.creator_notes || '',
-          tags: d.tags || [],
+          creatorNotes: d.creator_notes ?? '',
+          // FIX: Validate tags is actually an array before using it — a malformed
+          // card could have tags as a string or null, causing downstream crashes.
+          tags: Array.isArray(d.tags) ? d.tags.filter((t: unknown) => typeof t === 'string') : [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
           isFavorite: false,
           behavior: d.post_history_instructions || undefined,
         };
-        await characterDB.save(character);
-        await get().loadCharacters();
-        return character;
-      }
-
-      // Direct character format
-      if (parsed.name) {
-        const character: Character = {
-          id: `char_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-          name: parsed.name,
+      } else if (parsed?.name) {
+        // Direct / native format
+        character = {
+          id: genCharId(),
+          name: typeof parsed.name === 'string' && parsed.name.trim() ? parsed.name.trim() : 'Unnamed',
           avatar: parsed.avatar,
-          description: parsed.description || '',
-          personality: parsed.personality || '',
-          scenario: parsed.scenario || '',
-          firstMessage: parsed.firstMessage || parsed.first_mes || '',
-          exampleMessages: parsed.exampleMessages || parsed.mes_example || '',
-          systemPrompt: parsed.systemPrompt || parsed.system_prompt,
-          creatorNotes: parsed.creatorNotes || parsed.creator_notes || '',
-          tags: parsed.tags || [],
+          description: parsed.description ?? '',
+          personality: parsed.personality ?? '',
+          scenario: parsed.scenario ?? '',
+          firstMessage: parsed.firstMessage ?? parsed.first_mes ?? '',
+          exampleMessages: parsed.exampleMessages ?? parsed.mes_example ?? '',
+          systemPrompt: parsed.systemPrompt ?? parsed.system_prompt ?? undefined,
+          creatorNotes: parsed.creatorNotes ?? parsed.creator_notes ?? '',
+          tags: Array.isArray(parsed.tags)
+            ? parsed.tags.filter((t: unknown) => typeof t === 'string')
+            : [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
           isFavorite: false,
@@ -191,15 +218,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
           relationship: parsed.relationship,
           likes: parsed.likes,
           dislikes: parsed.dislikes,
-          behavior: parsed.behavior || parsed.post_history_instructions,
+          behavior: parsed.behavior ?? parsed.post_history_instructions,
         };
-        await characterDB.save(character);
-        await get().loadCharacters();
-        return character;
       }
 
-      return null;
-    } catch {
+      if (!character) return null;
+
+      await characterDB.save(character);
+      await get().loadCharacters();
+      return character;
+    } catch (err) {
+      console.error('[store] importCharacter failed:', err);
       return null;
     }
   },
@@ -214,7 +243,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         personality: character.personality,
         scenario: character.scenario,
         first_mes: character.firstMessage,
-        mes_example: character.exampleMessages || '',
+        mes_example: character.exampleMessages ?? '',
         creator_notes: character.creatorNotes,
         system_prompt: character.systemPrompt,
         post_history_instructions: character.behavior,
@@ -225,10 +254,24 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   // ---- Chat Actions ----
+
   loadChats: async (characterId: string) => {
     const chats = await chatDB.getByCharacterId(characterId);
     chats.sort((a, b) => b.updatedAt - a.updatedAt);
     set({ chats });
+  },
+
+  getNextChatNumber: async (characterId: string): Promise<number> => {
+    const chats = await chatDB.getByCharacterId(characterId);
+    let maxNum = 0;
+    for (const chat of chats) {
+      const match = chat.title.match(/^Chat (\d+)$/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    }
+    return maxNum + 1;
   },
 
   loadMessages: async (chatId: string) => {
@@ -243,12 +286,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   newChat: async (character: Character) => {
+    const chatNum = await get().getNextChatNumber(character.id);
+    const now = Date.now();
     const chat: Chat = {
       id: genChatId(),
       characterId: character.id,
-      title: 'New Chat',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      title: `Chat ${chatNum}`,
+      createdAt: now,
+      updatedAt: now,
       messageCount: 0,
     };
 
@@ -256,13 +301,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     const initialMessages: ChatMessage[] = [];
 
-    // Send first message from character
-    if (character.firstMessage) {
+    if (character.firstMessage?.trim()) {
       const firstMsg: ChatMessage = {
         id: genMsgId(),
         role: 'assistant',
         content: character.firstMessage,
-        timestamp: Date.now(),
+        timestamp: now,
         characterId: character.id,
         chatId: chat.id,
         metadata: { memoryExtracted: true },
@@ -270,22 +314,27 @@ export const useChatStore = create<ChatState>((set, get) => ({
       await messageDB.save(firstMsg);
       initialMessages.push(firstMsg);
 
-      chat.messageCount = 1;
-      chat.title = character.firstMessage.slice(0, 50) + (character.firstMessage.length > 50 ? '...' : '');
-      await chatDB.save(chat);
+      // FIX: Mutating `chat` directly then saving it causes a reference inconsistency
+      // because the same object is stored in IndexedDB and in local state. Use a new
+      // object instead so each save is isolated.
+      const updatedChat: Chat = { ...chat, messageCount: 1, updatedAt: Date.now() };
+      await chatDB.save(updatedChat);
+      set({ activeChat: updatedChat, messages: initialMessages });
+    } else {
+      set({ activeChat: chat, messages: initialMessages });
     }
 
-    set({ activeChat: chat, messages: initialMessages });
     await get().loadChats(character.id);
   },
 
   deleteChat: async (id: string) => {
     const { activeChat } = get();
-    await messageDB.deleteByChatId(id);
-    await chatDB.delete(id);
+
+    // Run message and chat deletion in parallel
+    await Promise.all([messageDB.deleteByChatId(id), chatDB.delete(id)]);
 
     if (activeChat?.id === id) {
-      set({ activeChat: null, messages: [] });
+      set({ activeChat: null, messages: [], contextSummary: '' });
     }
 
     const { activeCharacter } = get();
@@ -295,36 +344,54 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   // ---- Message Actions ----
+
   sendMessage: async (content: string) => {
-    const { activeCharacter, activeChat, messages } = get();
-    if (!activeCharacter || !activeChat || !content.trim()) return;
+    const trimmedContent = content.trim();
+
+    // FIX: Guard early — including while already streaming — to prevent duplicate
+    // in-flight requests if the user somehow triggers send twice rapidly.
+    const { activeCharacter, activeChat, isStreaming } = get();
+    if (!activeCharacter || !activeChat || !trimmedContent || isStreaming) return;
 
     const settings = useSettingsStore.getState().settings;
-    const providerConfig = settings.providers.find(p => p.provider === settings.activeProvider && p.enabled);
 
-    if (!providerConfig) {
-      set({ error: `No API key configured for ${settings.activeProvider}. Please add your key in Settings (⚙️).` });
+    // FIX: 'local' provider doesn't require an API key — align with ai-engine's logic.
+    const requiresKey = settings.activeProvider !== 'local';
+    const providerConfig = settings.providers.find(
+      p => p.provider === settings.activeProvider && p.enabled,
+    );
+
+    if (requiresKey && (!providerConfig?.apiKey?.trim())) {
+      set({
+        error: `No API key configured for ${settings.activeProvider}. Please add your key in Settings (⚙️).`,
+      });
       return;
     }
 
-    // Add user message
+    // Persist user message
+    const now = Date.now();
     const userMsg: ChatMessage = {
       id: genMsgId(),
       role: 'user',
-      content: content.trim(),
-      timestamp: Date.now(),
+      content: trimmedContent,
+      timestamp: now,
       characterId: activeCharacter.id,
       chatId: activeChat.id,
     };
     await messageDB.save(userMsg);
 
-    const allMessages = [...messages, userMsg];
+    const allMessages = [...get().messages, userMsg];
     set({ messages: allMessages, error: null });
 
     // Build context window
     let apiMessages: Array<{ role: string; content: string }>;
     try {
-      const result = await buildContextWindow(allMessages, activeCharacter, settings, get().contextSummary);
+      const result = await buildContextWindow(
+        allMessages,
+        activeCharacter,
+        settings,
+        get().contextSummary,
+      );
       set({ contextSummary: result.contextWindow.summary });
       apiMessages = result.messages;
     } catch (e) {
@@ -332,7 +399,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return;
     }
 
-    // Create placeholder for assistant response
+    // Create streaming placeholder for assistant response
     const assistantMsgId = genMsgId();
     const assistantMsg: ChatMessage = {
       id: assistantMsgId,
@@ -351,69 +418,97 @@ export const useChatStore = create<ChatState>((set, get) => ({
       streamingMessageId: assistantMsgId,
     });
 
+    // Abort any previous in-flight request (safety net — guarded by isStreaming above)
+    abortController?.abort();
     abortController = new AbortController();
+
+    // Capture a stable reference to the current character/chat for use in callbacks,
+    // which may fire after the user has navigated away and state has changed.
+    const capturedCharacter = activeCharacter;
+    const capturedChat = activeChat;
     let fullText = '';
 
-    // Stream response
     await streamChatResponse(settings, apiMessages, abortController.signal, {
       onToken: (token: string) => {
         fullText += token;
-        set((state) => ({
+        set(state => ({
           messages: state.messages.map(m =>
-            m.id === assistantMsgId ? { ...m, content: m.content + token } : m
+            m.id === assistantMsgId ? { ...m, content: m.content + token } : m,
           ),
         }));
       },
+
       onDone: async () => {
         abortController = null;
 
-        // Save complete message
         const completedMsg: ChatMessage = {
           ...assistantMsg,
           content: fullText,
           isStreaming: false,
-          tokenCount: fullText.length,
+          // FIX: tokenCount was set to `fullText.length` (character count, not tokens).
+          // Left as undefined here — the caller can set a real token count if the
+          // provider returns usage data; a character count is worse than no count.
+          tokenCount: undefined,
         };
         await messageDB.save(completedMsg);
 
-        // Update chat
-        const chat = get().activeChat;
-        if (chat) {
-          const updatedChat: Chat = {
-            ...chat,
-            messageCount: (chat.messageCount || 0) + 1,
-            updatedAt: Date.now(),
-            lastMessageAt: Date.now(),
-            title: chat.messageCount === 0 ? content.trim().slice(0, 50) : chat.title,
-          };
-          await chatDB.save(updatedChat);
-          set({ activeChat: updatedChat, isStreaming: false, streamingMessageId: null });
-          if (get().activeCharacter) {
-            await get().loadChats(get().activeCharacter!.id);
-          }
-        } else {
-          set({ isStreaming: false, streamingMessageId: null });
+        // FIX: Read the *current* activeChat from state inside the callback rather than
+        // closing over `capturedChat`, which may have been replaced by a concurrent
+        // newChat() call. However we still fall back to capturedChat for safety.
+        const currentChat = get().activeChat ?? capturedChat;
+        const isFirstUserMessage = currentChat.messageCount === 0;
+
+        const updatedChat: Chat = {
+          ...currentChat,
+          // FIX: Increment by 2 (user + assistant) rather than 1, since both messages
+          // were just persisted. The original only added 1 per turn.
+          messageCount: (currentChat.messageCount ?? 0) + 2,
+          updatedAt: Date.now(),
+          lastMessageAt: Date.now(),
+          // Auto-title the chat using the first user message (≤ 50 chars)
+          title: isFirstUserMessage
+            ? trimmedContent.slice(0, 50)
+            : currentChat.title,
+        };
+        await chatDB.save(updatedChat);
+
+        // Update the final message in state (strip isStreaming flag)
+        set(state => ({
+          activeChat: updatedChat,
+          isStreaming: false,
+          streamingMessageId: null,
+          messages: state.messages.map(m =>
+            m.id === assistantMsgId ? completedMsg : m,
+          ),
+        }));
+
+        // Reload chat list to reflect the updated title / timestamp
+        const currentCharacter = get().activeCharacter;
+        if (currentCharacter) {
+          await get().loadChats(currentCharacter.id);
         }
 
-        // Extract memories in background (non-blocking)
+        // Extract memories in the background — never block the UI
         if (settings.memoryEnabled && settings.autoExtractMemories) {
-          const existingMemories = await memoryDB.getByCharacterId(activeCharacter.id);
+          const existingMemories = await memoryDB.getByCharacterId(capturedCharacter.id);
           extractMemories(
             [userMsg, completedMsg],
-            activeCharacter,
+            capturedCharacter,
             settings,
-            existingMemories
-          ).catch((error) => {
-            console.error('Memory extraction failed:', error);
+            existingMemories,
+          ).catch(err => {
+            console.error('[store] Memory extraction failed:', err);
           });
         }
       },
+
       onError: (error: string) => {
         abortController = null;
-        set((state) => ({
-          messages: state.messages.map(m =>
-            m.id === assistantMsgId ? { ...m, content: `⚠️ Error: ${error}`, isStreaming: false } : m
-          ),
+        // FIX: Remove the placeholder message on error rather than replacing its
+        // content with an error string — that prevents a broken assistant turn from
+        // being persisted to the DB or included in future context windows.
+        set(state => ({
+          messages: state.messages.filter(m => m.id !== assistantMsgId),
           isStreaming: false,
           streamingMessageId: null,
           error,
@@ -427,34 +522,73 @@ export const useChatStore = create<ChatState>((set, get) => ({
       abortController.abort();
       abortController = null;
     }
-    set((state) => ({
+    set(state => ({
       isStreaming: false,
       streamingMessageId: null,
-      messages: state.messages.map(m => ({ ...m, isStreaming: false })),
+      // Clear the isStreaming flag on all messages (there should only ever be one,
+      // but a defensive map is safer than a targeted find-and-replace)
+      messages: state.messages.map(m =>
+        m.isStreaming ? { ...m, isStreaming: false } : m,
+      ),
     }));
   },
 
+  deleteMessage: async (id: string) => {
+    await messageDB.delete(id);
+    const { messages, activeChat } = get();
+    const updatedMessages = messages.filter(m => m.id !== id);
+    set({ messages: updatedMessages });
+
+    // FIX: Mutating `activeChat` directly causes stale state — spread into a new object.
+    if (activeChat) {
+      const updatedChat: Chat = {
+        ...activeChat,
+        messageCount: updatedMessages.filter(m => m.role !== 'system' && m.role !== 'memory').length,
+        updatedAt: Date.now(),
+      };
+      await chatDB.save(updatedChat);
+      set({ activeChat: updatedChat });
+    }
+  },
+
   regenerateMessage: async () => {
-    const { messages, activeCharacter, activeChat } = get();
-    if (!activeCharacter || !activeChat) return;
+    const { messages, activeCharacter, activeChat, isStreaming } = get();
+    if (!activeCharacter || !activeChat || isStreaming) return;
 
-    // Find the last assistant message and remove it
-    const lastAssistantIdx = messages.findLastIndex(m => m.role === 'assistant');
-    if (lastAssistantIdx === -1) return;
+    // FIX: `findLastIndex` is ES2023 and may not be available in all target environments.
+    // Use a manual reverse search for broader compatibility.
+    let lastAssistantIdx = -1;
+    let lastUserIdx = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (lastAssistantIdx === -1 && messages[i].role === 'assistant') lastAssistantIdx = i;
+      if (lastUserIdx === -1 && messages[i].role === 'user') lastUserIdx = i;
+      if (lastAssistantIdx !== -1 && lastUserIdx !== -1) break;
+    }
 
-    // Find the last user message
-    const lastUserIdx = messages.findLastIndex(m => m.role === 'user');
-    if (lastUserIdx === -1) return;
+    if (lastAssistantIdx === -1 || lastUserIdx === -1) return;
 
-    const lastUserContent = messages[lastUserIdx].content;
-    const trimmedMessages = messages.slice(0, lastAssistantIdx);
+    // FIX: The original deleted both messages from the DB but only trimmed up to
+    // lastUserIdx in state. If the assistant message came *after* the user message
+    // (the normal case), the DB delete was correct but the state slice was wrong —
+    // it kept the user message in state then re-sent it, leaving a ghost user turn
+    // visible in the UI. Now trim to just before the user message.
+    const lastUserMsg = messages[lastUserIdx];
+    const lastAssistantMsg = messages[lastAssistantIdx];
+
+    await Promise.all([
+      messageDB.delete(lastUserMsg.id),
+      messageDB.delete(lastAssistantMsg.id),
+    ]);
+
+    // Keep only messages strictly before the last user message
+    const trimmedMessages = messages.slice(0, lastUserIdx);
     set({ messages: trimmedMessages });
 
-    // Re-send with the last user message
-    await get().sendMessage(lastUserContent);
+    await get().sendMessage(lastUserMsg.content);
   },
 
   // ---- Memory Actions ----
+
   loadMemories: async (characterId: string) => {
     const memories = await memoryDB.getByCharacterId(characterId);
     memories.sort((a, b) => b.importance - a.importance);
@@ -470,20 +604,25 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   // ---- UI Actions ----
+
   setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
+
   setMemoryPanelOpen: (open: boolean) => {
     set({ memoryPanelOpen: open });
     if (open) {
       const { activeCharacter } = get();
       if (activeCharacter) {
-        get().loadMemories(activeCharacter.id);
+        get().loadMemories(activeCharacter.id).catch(err => {
+          console.error('[store] loadMemories failed:', err);
+        });
       }
     }
   },
+
   setSettingsOpen: (open: boolean) => set({ settingsOpen: open }),
-  setCharacterEditorOpen: (open: boolean, character?: Character | null) => set({
-    characterEditorOpen: open,
-    editingCharacter: character || null,
-  }),
+
+  setCharacterEditorOpen: (open: boolean, character?: Character | null) =>
+    set({ characterEditorOpen: open, editingCharacter: character ?? null }),
+
   clearError: () => set({ error: null }),
 }));

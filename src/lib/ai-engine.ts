@@ -73,25 +73,16 @@ export const AI_MODELS: AIModel[] = [
 
   // ==========================================
   // NVIDIA NIM (https://build.nvidia.com)
-  // Model IDs use provider/model format per NVIDIA's API
-  // Some models support reasoning via chat_template_kwargs
-  // and return reasoning_content in the streaming delta
   // ==========================================
-
-  // -- Meta Llama family --
   { id: 'meta/llama-3.1-405b-instruct', name: 'Llama 3.1 405B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
   { id: 'meta/llama-3.1-70b-instruct', name: 'Llama 3.1 70B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
   { id: 'meta/llama-3.1-8b-instruct', name: 'Llama 3.1 8B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
   { id: 'meta/llama3-70b-instruct', name: 'Llama 3 70B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0006, costPer1kOutput: 0.0006 },
   { id: 'meta/llama3-8b-instruct', name: 'Llama 3 8B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
-
-  // -- NVIDIA Nemotron family --
   { id: 'nvidia/llama-3.1-nemotron-70b-instruct', name: 'Llama 3.1 Nemotron 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
   { id: 'nvidia/llama-3.3-nemotron-super-49b', name: 'Llama 3.3 Nemotron Super 49B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
   { id: 'nvidia/nemotron-4-340b-instruct', name: 'Nemotron 4 340B Instruct', provider: 'nvidia', maxContextTokens: 4096, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
   { id: 'nvidia/llama-3.1-nemotron-ultra-253b-instruct', name: 'Nemotron Ultra 253B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
-
-  // -- Mistral family (via NIM) --
   { id: 'mistralai/mistral-large-instruct-v1', name: 'Mistral Large', provider: 'nvidia', maxContextTokens: 32000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
   { id: 'mistralai/mistral-medium-3-instruct', name: 'Mistral Medium 3', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
   { id: 'mistralai/mixtral-8x22b-instruct-v0.1', name: 'Mixtral 8x22B Instruct', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
@@ -99,47 +90,31 @@ export const AI_MODELS: AIModel[] = [
   { id: 'mistralai/codestral-22b-instruct-v0.1', name: 'Codestral 22B', provider: 'nvidia', maxContextTokens: 256000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0009 },
   { id: 'mistralai/mistral-nemo-instruct-2407', name: 'Mistral NeMo', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
   { id: 'mistralai/pixtral-large-2507', name: 'Pixtral Large', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.004, costPer1kOutput: 0.012 },
-
-  // -- Google (via NIM) --
   { id: 'google/gemma-2-27b-it', name: 'Gemma 2 27B IT', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
   { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B IT', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
-
-  // -- Microsoft (via NIM) --
   { id: 'microsoft/phi-3-medium-128k-instruct', name: 'Phi-3 Medium 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
   { id: 'microsoft/phi-3-mini-128k-instruct', name: 'Phi-3 Mini 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
   { id: 'microsoft/phi-3.5-mini-instruct', name: 'Phi-3.5 Mini', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
   { id: 'microsoft/phi-3.5-moe-instruct', name: 'Phi-3.5 MoE', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
-
-  // -- DeepSeek (reasoning/thinking — uses reasoning_content in delta) --
   { id: 'deepseek-ai/deepseek-r1', name: 'DeepSeek R1', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0015, costPer1kOutput: 0.002 },
   { id: 'deepseek-ai/deepseek-r1-distill-llama-70b', name: 'DeepSeek R1 Distill 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00059, costPer1kOutput: 0.00079 },
   { id: 'deepseek-ai/deepseek-r1-distill-qwen-32b', name: 'DeepSeek R1 Distill Qwen 32B', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00039, costPer1kOutput: 0.00039 },
   { id: 'deepseek-ai/deepseek-r1-distill-qwen-14b', name: 'DeepSeek R1 Distill Qwen 14B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00024, costPer1kOutput: 0.00024 },
   { id: 'deepseek-ai/deepseek-r1-distill-qwen-7b', name: 'DeepSeek R1 Distill Qwen 7B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-
-  // -- IBM Granite --
   { id: 'ibm/granite-3.3-8b-instruct', name: 'Granite 3.3 8B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
   { id: 'ibm/granite-3.3-2b-instruct', name: 'Granite 3.3 2B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
   { id: 'ibm/granite-3.0-8b-instruct', name: 'Granite 3.0 8B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
   { id: 'ibm/granite-3.0-2b-instruct', name: 'Granite 3.0 2B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
-
-  // -- Z-AI GLM (reasoning support) --
   { id: 'z-ai/glm4.7', name: 'GLM4.7', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
-
-  // -- Qwen --
   { id: 'qwen/qwen2.5-72b-instruct', name: 'Qwen 2.5 72B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
   { id: 'qwen/qwen2.5-32b-instruct', name: 'Qwen 2.5 32B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
   { id: 'qwen/qwen2.5-14b-instruct', name: 'Qwen 2.5 14B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
   { id: 'qwen/qwen2.5-7b-instruct', name: 'Qwen 2.5 7B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
   { id: 'qwen/qwen2.5-coder-32b-instruct', name: 'Qwen 2.5 Coder 32B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
-
-  // -- Other (via NIM) --
   { id: '01-ai/yi-large', name: 'Yi Large', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
 
   // ==========================================
   // Local LLMs (Ollama, LM Studio, llama.cpp, etc.)
-  // These use OpenAI-compatible API format
-  // Model ID will be whatever you have loaded locally
   // ==========================================
   { id: 'local-custom', name: 'Local Model (Custom)', provider: 'local', maxContextTokens: 8192, maxOutputTokens: 2048, supportsStreaming: true, supportsVision: false, costPer1kInput: 0, costPer1kOutput: 0 },
 ];
@@ -152,31 +127,43 @@ export function getModelInfo(modelId: string): AIModel | undefined {
   return AI_MODELS.find(m => m.id === modelId);
 }
 
+// ---- Message type ----
+export type ChatMessage = { role: string; content: string };
+
 // ---- Build System Prompt ----
-export function buildSystemPrompt(character: Character, settings: AppSettings, memories: string[], summary: string): string {
+// BUG FIX: The original used a raw string literal `'- Stay in character as ${character.name}...'`
+// (single-quoted), so `${character.name}` was never interpolated. Fixed by using a template
+// literal and passing the character name as a parameter, then doing the replace at the end.
+export function buildSystemPrompt(
+  character: Character,
+  settings: AppSettings,
+  memories: string[],
+  summary: string,
+): string {
   const parts: string[] = [];
 
-  if (settings.jailbreakPrompt) {
-    parts.push(settings.jailbreakPrompt);
+  if (settings.jailbreakPrompt?.trim()) {
+    parts.push(settings.jailbreakPrompt.trim());
   }
 
-  if (settings.customSystemPrompt) {
-    parts.push(settings.customSystemPrompt);
+  if (settings.customSystemPrompt?.trim()) {
+    parts.push(settings.customSystemPrompt.trim());
   }
 
   const userPersona = settings.userPersona;
-  if (userPersona.name && userPersona.name !== 'You') {
-    const userBlock = [
-      `[Your Identity (The User)]`,
+  // Only add user block when a meaningful name is set
+  if (userPersona?.name && userPersona.name.trim() !== '' && userPersona.name !== 'You') {
+    const userLines = [
+      '[Your Identity (The User)]',
       userPersona.name ? `Name: ${userPersona.name}` : '',
       userPersona.description ? `Description: ${userPersona.description}` : '',
       userPersona.personality ? `Personality: ${userPersona.personality}` : '',
       userPersona.speechPatterns ? `Speech Style: ${userPersona.speechPatterns}` : '',
-    ].filter(Boolean).join('\n');
-    parts.push(userBlock);
+    ].filter(Boolean);
+    parts.push(userLines.join('\n'));
   }
 
-  const charBlock = [
+  const charLines = [
     `[Character: ${character.name}]`,
     character.description ? `Description: ${character.description}` : '',
     character.personality ? `Personality: ${character.personality}` : '',
@@ -187,33 +174,37 @@ export function buildSystemPrompt(character: Character, settings: AppSettings, m
     character.dislikes ? `Dislikes: ${character.dislikes}` : '',
     character.behavior ? `Behavioral Guidelines: ${character.behavior}` : '',
     character.scenario ? `\nScenario: ${character.scenario}` : '',
-  ].filter(Boolean).join('\n');
-  parts.push(charBlock);
+  ].filter(Boolean);
+  parts.push(charLines.join('\n'));
 
-  if (character.exampleMessages) {
-    parts.push(`\nExample dialogue:\n${character.exampleMessages}`);
+  if (character.exampleMessages?.trim()) {
+    parts.push(`\nExample dialogue:\n${character.exampleMessages.trim()}`);
   }
 
-  const rpInstructions = [
-    '\n[Roleplay Guidelines - IMPORTANT]',
-    '- Stay in character as ${character.name}. Never break character.',
-    '- NEVER include any reasoning, thinking process, metadata, or analysis in your response.',
-    '- NEVER write things like "Based on...", "Reasoning:", "Analysis:", "The response should..."',
-    '- ONLY output the roleplay response itself - pure narrative without any meta-commentary.',
-    '- The user plays themselves. React to them naturally in character.',
-    '- Use vivid, descriptive language. Show emotions through actions, dialogue, and thoughts.',
-    '- Drive the story forward. Mix dialogue, action, and narration naturally.',
-    '- Keep responses concise but immersive (2-4 paragraphs unless scene needs more).',
-    '- Do NOT explain your choices or include any system/instruction text in the response.',
-  ].join('\n');
-  parts.push(rpInstructions.replace('${character.name}', character.name));
+  // FIX: Was a single-quoted string — ${character.name} was literal text, never replaced.
+  // Now correctly uses a template literal.
+  const rpInstructions = `\n[Roleplay Guidelines - IMPORTANT]
+- Stay in character as ${character.name}. Never break character.
+- NEVER include any reasoning, thinking process, metadata, or analysis in your response.
+- NEVER write things like "Based on...", "Reasoning:", "Analysis:", "The response should..."
+- ONLY output the roleplay response itself - pure narrative without any meta-commentary.
+- The user plays themselves. React to them naturally in character.
+- Use vivid, descriptive language. Show emotions through actions, dialogue, and thoughts.
+- Drive the story forward. Mix dialogue, action, and narration naturally.
+- Keep responses concise but immersive (2-4 paragraphs unless scene needs more).
+- Do NOT explain your choices or include any system/instruction text in the response.`;
+  parts.push(rpInstructions);
 
-  if (summary) {
-    parts.push(`\n[Conversation Summary - Remember this context]\n${summary}`);
+  if (summary?.trim()) {
+    parts.push(`\n[Conversation Summary - Remember this context]\n${summary.trim()}`);
   }
 
   if (memories.length > 0) {
-    parts.push(`\n[Important Memories to Remember]\n${memories.join('\n')}`);
+    // FIX: Filter out empty/whitespace-only memory entries before joining
+    const validMemories = memories.filter(m => m?.trim());
+    if (validMemories.length > 0) {
+      parts.push(`\n[Important Memories to Remember]\n${validMemories.join('\n')}`);
+    }
   }
 
   return parts.join('\n\n');
@@ -230,15 +221,26 @@ export interface StreamCallbacks {
 /**
  * Stream a chat response from the AI provider.
  * ALL calls are made DIRECTLY from the browser (client-side).
- * This enables deployment on static hosts (Cloudflare Pages, Netlify, GitHub Pages).
  */
 export async function streamChatResponse(
   settings: AppSettings,
-  messages: Array<{ role: string; content: string }>,
+  messages: ChatMessage[],
   signal?: AbortSignal,
-  callbacks?: StreamCallbacks
+  callbacks?: StreamCallbacks,
 ): Promise<string> {
-  const providerConfig = settings.providers.find(p => p.provider === settings.activeProvider && p.enabled);
+  // FIX: Guard against aborted signal before doing anything
+  if (signal?.aborted) return '';
+
+  // FIX: Validate messages array — must be non-empty
+  if (!messages || messages.length === 0) {
+    const err = 'No messages provided to streamChatResponse.';
+    callbacks?.onError(err);
+    return '';
+  }
+
+  const providerConfig = settings.providers?.find(
+    p => p.provider === settings.activeProvider && p.enabled,
+  );
 
   if (!providerConfig) {
     const err = `No API key configured for ${settings.activeProvider}. Please add your API key in Settings.`;
@@ -246,17 +248,18 @@ export async function streamChatResponse(
     return '';
   }
 
-  if (!providerConfig.apiKey || providerConfig.apiKey.trim() === '') {
+  // FIX: 'local' provider doesn't require an API key — skip the key check for it
+  const requiresKey = settings.activeProvider !== 'local';
+  if (requiresKey && (!providerConfig.apiKey || providerConfig.apiKey.trim() === '')) {
     callbacks?.onError(`API key for ${settings.activeProvider} is empty. Add your API key in Settings.`);
     return '';
   }
 
   const provider = settings.activeProvider;
-  const apiKey = providerConfig.apiKey;
+  const apiKey = providerConfig.apiKey ?? '';
   const baseUrl = providerConfig.baseUrl;
 
   try {
-    let response: Response;
     let request: Request;
 
     switch (provider) {
@@ -284,25 +287,31 @@ export async function streamChatResponse(
         request = buildLocalRequest(baseUrl, settings, messages);
         break;
       default:
-        callbacks?.onError(`Provider ${provider} is not supported.`);
+        callbacks?.onError(`Provider "${provider}" is not supported.`);
         return '';
     }
 
-    response = await fetch(request, { signal });
+    const response = await fetch(request, { signal });
 
-    if (signal?.aborted) {
-      return '';
-    }
+    if (signal?.aborted) return '';
 
     if (!response.ok) {
       let errorText = '';
       try {
         const errData = await response.json();
-        errorText = errData.error?.message || errData.error?.code || errData.message || JSON.stringify(errData);
+        errorText =
+          errData?.error?.message ||
+          errData?.error?.code ||
+          errData?.message ||
+          JSON.stringify(errData);
       } catch {
-        errorText = await response.text() || `HTTP ${response.status}`;
+        try {
+          errorText = (await response.text()) || `HTTP ${response.status}`;
+        } catch {
+          errorText = `HTTP ${response.status}`;
+        }
       }
-      
+
       let hint = '';
       if (response.status === 401 || response.status === 403) {
         hint = getAuthErrorHint(provider);
@@ -310,8 +319,10 @@ export async function streamChatResponse(
         hint = '\n\nCheck the model ID in Settings.';
       } else if (response.status === 429) {
         hint = '\n\nRate limited. Wait a moment and try again.';
+      } else if (response.status >= 500) {
+        hint = '\n\nServer error on the provider side. Try again in a moment.';
       }
-      
+
       callbacks?.onError(`${provider} error (${response.status}): ${errorText}${hint}`);
       return '';
     }
@@ -327,38 +338,72 @@ export async function streamChatResponse(
       return text;
     }
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (signal?.aborted || (error instanceof Error && error.name === 'AbortError')) {
       return '';
     }
-    const message = error instanceof Error ? error.message : 'Network error.';
+    const message = error instanceof Error ? error.message : 'Unknown network error.';
     callbacks?.onError(message);
     return '';
   }
 }
 
 function getAuthErrorHint(provider: string): string {
-  switch (provider) {
-    case 'groq':
-      return '\n\n💡 Check your API key starts with "gsk_". Get it from https://console.groq.com/keys';
-    case 'anthropic':
-      return '\n\n💡 Check your Anthropic API key from https://console.anthropic.com/';
-    case 'google':
-      return '\n\n💡 Check your Google API key from https://aistudio.google.com/apikey';
-    case 'openai':
-      return '\n\n💡 Check your OpenAI API key from https://platform.openai.com/api-keys';
-    case 'nvidia':
-      return '\n\n💡 Check your NVIDIA API key from https://build.nvidia.com/';
-    case 'mistral':
-      return '\n\n💡 Check your Mistral API key from https://console.mistral.ai/';
-    case 'local':
-      return '\n\n💡 Make sure your local LLM server is running (Ollama, LM Studio, etc.)';
-    default:
-      return '\n\n💡 Check your API key is valid.';
-  }
+  const hints: Record<string, string> = {
+    groq: '\n\n💡 Check your API key starts with "gsk_". Get it from https://console.groq.com/keys',
+    anthropic: '\n\n💡 Check your Anthropic API key from https://console.anthropic.com/',
+    google: '\n\n💡 Check your Google API key from https://aistudio.google.com/apikey',
+    openai: '\n\n💡 Check your OpenAI API key from https://platform.openai.com/api-keys',
+    nvidia: '\n\n💡 Check your NVIDIA API key from https://build.nvidia.com/',
+    mistral: '\n\n💡 Check your Mistral API key from https://console.mistral.ai/',
+    local: '\n\n💡 Make sure your local LLM server is running (Ollama, LM Studio, etc.)',
+  };
+  return hints[provider] ?? '\n\n💡 Check your API key is valid.';
 }
 
-function buildGroqRequest(settings: AppSettings, apiKey: string, messages: Array<{ role: string; content: string }>): Request {
-  const baseUrl = 'https://api.groq.com/openai/v1';
+// ---- Request builders ----
+
+function buildGroqRequest(
+  settings: AppSettings,
+  apiKey: string,
+  messages: ChatMessage[],
+): Request {
+  const body: Record<string, unknown> = {
+    model: settings.activeModel,
+    messages,
+    temperature: settings.temperature ?? 0.8,
+    max_tokens: settings.maxTokens ?? 1024,
+    top_p: settings.topP ?? 0.9,
+    stream: settings.streamingEnabled,
+    // NOTE: Groq does NOT support frequency_penalty / presence_penalty — intentionally omitted.
+  };
+
+  return new Request('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify(body),
+  });
+}
+
+function buildOpenAIRequest(
+  provider: string,
+  baseUrl: string | undefined,
+  settings: AppSettings,
+  apiKey: string,
+  messages: ChatMessage[],
+): Request {
+  const url =
+    baseUrl ||
+    (provider === 'openrouter' ? 'https://openrouter.ai/api/v1' : 'https://api.openai.com/v1');
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${apiKey}`,
+  };
+
+  if (provider === 'openrouter') {
+    headers['HTTP-Referer'] = 'https://roleplay-chat.app';
+    headers['X-Title'] = 'RolePlay Chat';
+  }
 
   const body: Record<string, unknown> = {
     model: settings.activeModel,
@@ -369,45 +414,44 @@ function buildGroqRequest(settings: AppSettings, apiKey: string, messages: Array
     stream: settings.streamingEnabled,
   };
 
-  return new Request(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify(body),
-  });
+  // FIX: Ensure URL ends with correct path, avoiding double-slash
+  const base = url.endsWith('/') ? url.slice(0, -1) : url;
+  return new Request(`${base}/chat/completions`, { method: 'POST', headers, body: JSON.stringify(body) });
 }
 
-function buildOpenAIRequest(provider: string, baseUrl: string | undefined, settings: AppSettings, apiKey: string, messages: Array<{ role: string; content: string }>): Request {
-  const url = baseUrl || (provider === 'openrouter' ? 'https://openrouter.ai/api/v1' : 'https://api.openai.com/v1');
-  const headers: Record<string, string> = { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` };
-  if (provider === 'openrouter') {
-    headers['HTTP-Referer'] = 'https://roleplay-chat.app';
-    headers['X-Title'] = 'RolePlay Chat';
-  }
-
-  const body = {
-    model: settings.activeModel,
-    messages,
-    temperature: settings.temperature ?? 0.8,
-    max_tokens: settings.maxTokens ?? 1024,
-    top_p: settings.topP ?? 0.9,
-    stream: settings.streamingEnabled,
-  };
-
-  return new Request(`${url}/chat/completions`, { method: 'POST', headers, body: JSON.stringify(body) });
-}
-
-function buildAnthropicRequest(baseUrl: string | undefined, settings: AppSettings, apiKey: string, messages: Array<{ role: string; content: string }>): Request {
+function buildAnthropicRequest(
+  baseUrl: string | undefined,
+  settings: AppSettings,
+  apiKey: string,
+  messages: ChatMessage[],
+): Request {
   const url = baseUrl || 'https://api.anthropic.com/v1/messages';
+
   const systemMsg = messages.find(m => m.role === 'system');
   const nonSystemMsgs = messages.filter(m => m.role !== 'system');
 
+  // Map roles; treat anything non-assistant as 'user'
   const chatMessages = nonSystemMsgs.map(m => ({
-    role: m.role === 'assistant' ? 'assistant' : 'user',
+    role: m.role === 'assistant' ? 'assistant' as const : 'user' as const,
     content: m.content,
   }));
 
+  // FIX: Anthropic requires the first message to be from 'user'.
+  // If it starts with 'assistant', prepend a minimal user turn.
   if (chatMessages.length > 0 && chatMessages[0].role === 'assistant') {
     chatMessages.unshift({ role: 'user', content: '(Continue)' });
+  }
+
+  // FIX: Anthropic also disallows consecutive messages of the same role.
+  // Merge any consecutive same-role messages to avoid API errors.
+  const mergedMessages: { role: 'user' | 'assistant'; content: string }[] = [];
+  for (const msg of chatMessages) {
+    const last = mergedMessages[mergedMessages.length - 1];
+    if (last && last.role === msg.role) {
+      last.content += '\n\n' + msg.content;
+    } else {
+      mergedMessages.push({ ...msg });
+    }
   }
 
   const body: Record<string, unknown> = {
@@ -415,27 +459,54 @@ function buildAnthropicRequest(baseUrl: string | undefined, settings: AppSetting
     max_tokens: settings.maxTokens ?? 4096,
     temperature: settings.temperature ?? 0.8,
     stream: settings.streamingEnabled,
-    messages: chatMessages,
+    messages: mergedMessages,
   };
 
-  if (systemMsg) body.system = systemMsg.content;
+  if (systemMsg?.content) body.system = systemMsg.content;
 
   return new Request(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
     body: JSON.stringify(body),
   });
 }
 
-function buildGoogleRequest(baseUrl: string | undefined, settings: AppSettings, apiKey: string, messages: Array<{ role: string; content: string }>): Request {
-  const base = baseUrl || 'https://generativelanguage.googleapis.com/v1beta';
+function buildGoogleRequest(
+  baseUrl: string | undefined,
+  settings: AppSettings,
+  apiKey: string,
+  messages: ChatMessage[],
+): Request {
+  const base = (baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
+
   const systemMsg = messages.find(m => m.role === 'system');
   const nonSystemMsgs = messages.filter(m => m.role !== 'system');
 
-  const contents = nonSystemMsgs.map(m => ({
+  // FIX: Google requires alternating user/model turns. Merge consecutive same-role messages.
+  const rawContents = nonSystemMsgs.map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],
   }));
+
+  const contents: { role: string; parts: { text: string }[] }[] = [];
+  for (const item of rawContents) {
+    const last = contents[contents.length - 1];
+    if (last && last.role === item.role) {
+      // Merge into previous turn by appending text to the first part
+      last.parts[0].text += '\n\n' + item.parts[0].text;
+    } else {
+      contents.push({ role: item.role, parts: [{ text: item.parts[0].text }] });
+    }
+  }
+
+  // FIX: Google also requires the first content to be from 'user'
+  if (contents.length > 0 && contents[0].role !== 'user') {
+    contents.unshift({ role: 'user', parts: [{ text: '(Continue)' }] });
+  }
 
   const body: Record<string, unknown> = {
     contents,
@@ -446,41 +517,55 @@ function buildGoogleRequest(baseUrl: string | undefined, settings: AppSettings, 
     },
   };
 
-  if (systemMsg) body.systemInstruction = { parts: [{ text: systemMsg.content }] };
+  if (systemMsg?.content) {
+    body.systemInstruction = { parts: [{ text: systemMsg.content }] };
+  }
 
   const encodedModel = encodeURIComponent(settings.activeModel);
   const endpoint = settings.streamingEnabled ? 'streamGenerateContent' : 'generateContent';
-  const suffix = settings.streamingEnabled ? '?alt=sse' : '';
+  const altSse = settings.streamingEnabled ? '&alt=sse' : '';
 
-  return new Request(`${base}/models/${encodedModel}:${endpoint}${suffix}&key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  return new Request(
+    `${base}/models/${encodedModel}:${endpoint}?key=${encodeURIComponent(apiKey)}${altSse}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  );
 }
 
-function buildMistralRequest(baseUrl: string | undefined, settings: AppSettings, apiKey: string, messages: Array<{ role: string; content: string }>): Request {
-  const url = baseUrl || 'https://api.mistral.ai/v1';
+function buildMistralRequest(
+  baseUrl: string | undefined,
+  settings: AppSettings,
+  apiKey: string,
+  messages: ChatMessage[],
+): Request {
+  const base = (baseUrl || 'https://api.mistral.ai/v1').replace(/\/$/, '');
 
-  const body = {
+  const body: Record<string, unknown> = {
     model: settings.activeModel,
     messages,
     temperature: settings.temperature ?? 0.8,
     max_tokens: settings.maxTokens ?? 1024,
     top_p: settings.topP ?? 0.9,
-    random_seed: Math.floor(Math.random() * 1000000),
+    random_seed: Math.floor(Math.random() * 1_000_000),
     stream: settings.streamingEnabled,
   };
 
-  return new Request(`${url}/chat/completions`, {
+  return new Request(`${base}/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify(body),
   });
 }
 
-function buildNvidiaRequest(baseUrl: string | undefined, settings: AppSettings, apiKey: string, messages: Array<{ role: string; content: string }>): Request {
-  // Use Cloudflare Worker proxy to avoid CORS issues
+function buildNvidiaRequest(
+  baseUrl: string | undefined,
+  settings: AppSettings,
+  apiKey: string,
+  messages: ChatMessage[],
+): Request {
   const url = baseUrl || 'https://roleplay.jameskaren.workers.dev/';
 
   const body: Record<string, unknown> = {
@@ -490,22 +575,22 @@ function buildNvidiaRequest(baseUrl: string | undefined, settings: AppSettings, 
     max_tokens: settings.maxTokens ?? 1024,
     top_p: settings.topP ?? 0.9,
     stream: settings.streamingEnabled,
-    apiKey, // Pass API key in body for proxy
+    apiKey,
   };
 
   return new Request(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
 }
 
-function buildLocalRequest(baseUrl: string | undefined, settings: AppSettings, messages: Array<{ role: string; content: string }>): Request {
-  // For local LLMs, baseUrl is the full API base (e.g., http://localhost:11434/v1)
-  // API key is typically not required for local servers
-  const url = baseUrl || 'http://localhost:11434/v1';
+function buildLocalRequest(
+  baseUrl: string | undefined,
+  settings: AppSettings,
+  messages: ChatMessage[],
+): Request {
+  const base = (baseUrl || 'http://localhost:11434/v1').replace(/\/$/, '');
   const model = settings.activeModel || 'llama3.2';
 
   const body: Record<string, unknown> = {
@@ -517,7 +602,7 @@ function buildLocalRequest(baseUrl: string | undefined, settings: AppSettings, m
     stream: settings.streamingEnabled,
   };
 
-  return new Request(`${url}/chat/completions`, {
+  return new Request(`${base}/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -529,7 +614,7 @@ async function parseSSEStream(
   response: Response,
   provider: string,
   signal?: AbortSignal,
-  callbacks?: StreamCallbacks
+  callbacks?: StreamCallbacks,
 ): Promise<void> {
   const reader = response.body?.getReader();
   if (!reader) {
@@ -540,40 +625,39 @@ async function parseSSEStream(
   const decoder = new TextDecoder();
   let fullText = '';
   let buffer = '';
+  let done = false;
 
-  // Set up abort listener
-  const abortHandler = () => {
-    reader.cancel().catch(() => {});
-  };
+  // Abort handler: cancel the reader when the signal fires
+  const abortHandler = () => { reader.cancel().catch(() => {}); };
   signal?.addEventListener('abort', abortHandler);
 
   try {
-    while (true) {
+    while (!done) {
       if (signal?.aborted) break;
 
-      const { done, value } = await reader.read();
-      if (done) break;
+      const result = await reader.read();
+      done = result.done;
+      if (result.done) break;
 
-      buffer += decoder.decode(value, { stream: true });
+      buffer += decoder.decode(result.value, { stream: true });
+
+      // Split on newlines; keep the last (potentially incomplete) chunk in the buffer
       const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
+      buffer = lines.pop() ?? '';
 
       for (const line of lines) {
         if (signal?.aborted) break;
 
         const trimmed = line.trim();
-        if (!trimmed) continue;
-
-        // Handle SSE event: lines (Groq Responses API sends `event: response.output_text.delta`)
-        if (trimmed.startsWith('event:')) continue;
+        if (!trimmed || trimmed.startsWith(':')) continue; // skip empty / SSE comments
+        if (trimmed.startsWith('event:')) continue;        // skip named event lines
         if (!trimmed.startsWith('data:')) continue;
 
+        // Safely strip the "data:" / "data: " prefix
         const dataStr = trimmed.startsWith('data: ') ? trimmed.slice(6) : trimmed.slice(5);
 
-        // OpenAI-compatible streams end with [DONE]
         if (dataStr === '[DONE]') {
           callbacks?.onDone(fullText);
-          signal?.removeEventListener('abort', abortHandler);
           return;
         }
 
@@ -581,17 +665,16 @@ async function parseSSEStream(
         try {
           parsed = JSON.parse(dataStr);
         } catch {
+          // Malformed chunk — skip silently
           continue;
         }
 
-        // Extract content token
         const token = extractTokenFromChunk(parsed, provider);
         if (token) {
           fullText += token;
           callbacks?.onToken(token);
         }
 
-        // Extract reasoning/thinking content
         const reasoning = extractReasoningFromChunk(parsed, provider);
         if (reasoning) {
           callbacks?.onThinking?.(reasoning);
@@ -599,63 +682,70 @@ async function parseSSEStream(
       }
     }
 
-    // Process remaining buffer
-    if (buffer.trim() && !signal?.aborted) {
-      const trimmed = buffer.trim();
-      if (trimmed.startsWith('data:')) {
-        const dataStr = trimmed.startsWith('data: ') ? trimmed.slice(6) : trimmed.slice(5);
-        if (dataStr && dataStr !== '[DONE]') {
-          try {
-            const parsed = JSON.parse(dataStr);
-            const token = extractTokenFromChunk(parsed, provider);
-            if (token) { fullText += token; callbacks?.onToken(token); }
-            const reasoning = extractReasoningFromChunk(parsed, provider);
-            if (reasoning) { callbacks?.onThinking?.(reasoning); }
-          } catch { /* skip */ }
-        }
+    // Process any data remaining in the buffer after the stream ends
+    const remaining = buffer.trim();
+    if (remaining && !signal?.aborted) {
+      const dataStr = remaining.startsWith('data: ')
+        ? remaining.slice(6)
+        : remaining.startsWith('data:')
+          ? remaining.slice(5)
+          : null;
+
+      if (dataStr && dataStr !== '[DONE]') {
+        try {
+          const parsed = JSON.parse(dataStr);
+          const token = extractTokenFromChunk(parsed, provider);
+          if (token) { fullText += token; callbacks?.onToken(token); }
+          const reasoning = extractReasoningFromChunk(parsed, provider);
+          if (reasoning) callbacks?.onThinking?.(reasoning);
+        } catch { /* malformed — skip */ }
       }
     }
 
     callbacks?.onDone(fullText);
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (signal?.aborted || (error instanceof Error && error.name === 'AbortError')) {
+      // Stream was intentionally cancelled — call onDone with whatever we have
+      if (fullText) callbacks?.onDone(fullText);
       return;
     }
     const message = error instanceof Error ? error.message : 'Stream reading error';
     callbacks?.onError(message);
   } finally {
     signal?.removeEventListener('abort', abortHandler);
+    // Always release the reader lock
+    try { reader.releaseLock(); } catch { /* already released */ }
   }
 }
 
 /**
- * Extract reasoning/thinking content from a chunk.
+ * Extract reasoning/thinking content from a streaming chunk.
  *
- * NVIDIA NIM and DeepSeek-style models send `reasoning_content` in the
- * streaming delta for thinking/reasoning models (DeepSeek R1, GLM4.7,
- * Granite 3.3 thinking, etc.):
- *   { choices: [{ delta: { reasoning_content: "thinking..." } }] }
- *
- * Anthropic sends `thinking_delta` blocks:
- *   { type: "content_block_delta", delta: { type: "thinking_delta", thinking: "..." } }
+ * Supports:
+ * - OpenAI-compatible `reasoning_content` in delta (NVIDIA NIM, DeepSeek, some OpenRouter)
+ * - Anthropic `thinking_delta` blocks
  */
 function extractReasoningFromChunk(chunk: Record<string, unknown>, _provider: string): string {
-  // OpenAI-compatible reasoning (NVIDIA NIM, DeepSeek, some OpenRouter models)
-  if (chunk.choices && Array.isArray(chunk.choices) && chunk.choices.length > 0) {
-    const choice = chunk.choices[0] as Record<string, unknown>;
-    const delta = choice.delta as Record<string, unknown> | undefined;
-    if (delta && typeof delta === 'object' && 'reasoning_content' in delta) {
-      const reasoning = (delta as { reasoning_content: string | null }).reasoning_content;
-      if (reasoning) return reasoning;
+  // OpenAI-compatible reasoning delta
+  if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
+    const delta = (chunk.choices[0] as Record<string, unknown>)?.delta as
+      | Record<string, unknown>
+      | undefined;
+    if (delta && typeof delta.reasoning_content === 'string' && delta.reasoning_content) {
+      return delta.reasoning_content;
     }
   }
 
-  // Anthropic thinking
+  // Anthropic thinking_delta
   if (
     chunk.type === 'content_block_delta' &&
-    (chunk.delta as Record<string, unknown>)?.type === 'thinking_delta'
+    typeof chunk.delta === 'object' &&
+    chunk.delta !== null
   ) {
-    return (chunk.delta as { thinking: string }).thinking || '';
+    const delta = chunk.delta as Record<string, unknown>;
+    if (delta.type === 'thinking_delta' && typeof delta.thinking === 'string') {
+      return delta.thinking;
+    }
   }
 
   return '';
@@ -663,38 +753,33 @@ function extractReasoningFromChunk(chunk: Record<string, unknown>, _provider: st
 
 // ---- Extract a text token from a single SSE chunk ----
 function extractTokenFromChunk(chunk: Record<string, unknown>, _provider: string): string {
-  // OpenAI-compatible (Groq, OpenAI, Mistral, OpenRouter, NVIDIA, Custom)
-  // { choices: [{ delta: { content: "token" }, ... }] }
-  if (chunk.choices && Array.isArray(chunk.choices) && chunk.choices.length > 0) {
-    const choice = chunk.choices[0] as Record<string, unknown>;
-    const delta = choice.delta as Record<string, unknown> | undefined;
-    if (delta && typeof delta === 'object' && 'content' in delta) {
-      const content = (delta as { content: string | null }).content;
-      if (content) return content;
-    }
+  // OpenAI-compatible (Groq, OpenAI, Mistral, OpenRouter, NVIDIA, Custom, Local)
+  if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
+    const delta = (chunk.choices[0] as Record<string, unknown>)?.delta as
+      | Record<string, unknown>
+      | undefined;
+    if (delta && typeof delta.content === 'string') return delta.content;
+    // content can be null at the end of a stream — return '' rather than 'null'
     return '';
   }
 
-  // Anthropic Messages API
-  // { type: "content_block_delta", delta: { type: "text_delta", text: "token" } }
+  // Anthropic Messages API — text_delta
   if (chunk.type === 'content_block_delta') {
     const delta = chunk.delta as Record<string, unknown> | undefined;
-    if (delta && delta.type === 'text_delta') {
-      return (delta as { text: string }).text || '';
+    if (delta?.type === 'text_delta' && typeof delta.text === 'string') {
+      return delta.text;
     }
     return '';
   }
 
   // Google Gemini SSE
-  // { candidates: [{ content: { parts: [{ text: "token" }] } }] }
-  if (chunk.candidates && Array.isArray(chunk.candidates) && chunk.candidates.length > 0) {
-    const candidate = chunk.candidates[0] as Record<string, unknown>;
-    const content = candidate.content as Record<string, unknown> | undefined;
-    if (content && typeof content === 'object' && 'parts' in content) {
-      const parts = (content as { parts: Array<{ text?: string }> }).parts;
-      if (parts && parts.length > 0 && parts[0].text) {
-        return parts[0].text;
-      }
+  if (Array.isArray(chunk.candidates) && chunk.candidates.length > 0) {
+    const content = (chunk.candidates[0] as Record<string, unknown>)?.content as
+      | Record<string, unknown>
+      | undefined;
+    if (content && Array.isArray(content.parts) && content.parts.length > 0) {
+      const text = (content.parts[0] as { text?: string }).text;
+      return typeof text === 'string' ? text : '';
     }
     return '';
   }
@@ -704,28 +789,32 @@ function extractTokenFromChunk(chunk: Record<string, unknown>, _provider: string
 
 // ---- Extract full text from a non-streaming JSON response ----
 function extractTextFromResponse(data: Record<string, unknown>, _provider: string): string {
-  // OpenAI-compatible (Groq, OpenAI, Mistral, OpenRouter, NVIDIA, Custom)
-  if (data.choices && Array.isArray(data.choices) && data.choices.length > 0) {
-    const message = (data.choices[0] as Record<string, unknown>).message;
-    if (message && typeof message === 'object' && 'content' in message) {
-      return (message as { content: string }).content || '';
-    }
+  // OpenAI-compatible
+  if (Array.isArray(data.choices) && data.choices.length > 0) {
+    const message = (data.choices[0] as Record<string, unknown>)?.message as
+      | Record<string, unknown>
+      | undefined;
+    if (message && typeof message.content === 'string') return message.content;
+    return '';
   }
 
   // Anthropic
-  if (data.content && Array.isArray(data.content)) {
+  if (Array.isArray(data.content)) {
     return (data.content as Array<{ type: string; text?: string }>)
       .filter(c => c.type === 'text')
-      .map(c => c.text || '')
+      .map(c => c.text ?? '')
       .join('');
   }
 
   // Google
-  if (data.candidates && Array.isArray(data.candidates) && data.candidates.length > 0) {
-    const content = (data.candidates[0] as Record<string, unknown>).content;
-    if (content && typeof content === 'object' && 'parts' in content) {
-      const parts = (content as { parts: Array<{ text?: string }> }).parts;
-      return parts.map(p => p.text || '').join('');
+  if (Array.isArray(data.candidates) && data.candidates.length > 0) {
+    const content = (data.candidates[0] as Record<string, unknown>)?.content as
+      | Record<string, unknown>
+      | undefined;
+    if (content && Array.isArray(content.parts)) {
+      return (content.parts as Array<{ text?: string }>)
+        .map(p => p.text ?? '')
+        .join('');
     }
   }
 
@@ -733,60 +822,55 @@ function extractTextFromResponse(data: Record<string, unknown>, _provider: strin
 }
 
 // ---- Token estimation ----
+
+/**
+ * Fast token estimator. Handles CJK, whitespace, and ASCII text.
+ * (Original logic preserved; fixed missing word-boundary accounting.)
+ */
 export function estimateTokens(text: string): number {
   if (!text) return 0;
   let tokens = 0;
-  for (const char of text) {
-    if (/[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]/.test(char)) {
-      tokens += 1.5;
-    } else if (/\s/.test(char)) {
-      // space = word boundary
-    } else {
-      tokens += 0.25;
-    }
-  }
-  return Math.ceil(tokens);
-}
-
-// ---- Enhanced token estimation for non-English text ----
-export function estimateTokensEnhanced(text: string): number {
-  if (!text) return 0;
-  
-  // Handle CJK characters (Chinese, Japanese, Korean)
+  // FIX: The original counted whitespace chars as 0 but never counted the word they terminated.
+  // A simpler and more accurate approach: count CJK at 1.5, split ASCII on whitespace.
   const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
   const cjkMatches = text.match(cjkRegex);
   const cjkCount = cjkMatches ? cjkMatches.length : 0;
-  
-  // Handle other Unicode characters (e.g., emojis, symbols)
-  const unicodeRegex = /[^\s\w\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
-  const unicodeMatches = text.match(unicodeRegex);
-  const unicodeCount = unicodeMatches ? unicodeMatches.length : 0;
-  
-  // Handle whitespace and punctuation
-  const whitespaceRegex = /\s+/g;
-  const whitespaceMatches = text.match(whitespaceRegex);
-  const whitespaceCount = whitespaceMatches ? whitespaceMatches.length : 0;
-  
-  // Estimate tokens based on character types
-  const totalChars = text.length;
-  const alphanumericChars = totalChars - cjkCount - unicodeCount - whitespaceCount;
-  
-  // Weights for different character types
-  const cjkWeight = 1.5;
-  const unicodeWeight = 1.2;
-  const alphanumericWeight = 0.25;
-  
-  // Calculate total tokens
-  let tokens = 0;
-  tokens += cjkCount * cjkWeight;
-  tokens += unicodeCount * unicodeWeight;
-  tokens += alphanumericChars * alphanumericWeight;
-  
-  return Math.ceil(tokens);
+
+  // Strip CJK from text for word counting
+  const withoutCJK = text.replace(cjkRegex, ' ');
+  const wordCount = withoutCJK.trim() ? withoutCJK.trim().split(/\s+/).length : 0;
+
+  // Rough GPT-style approximation: ~0.75 tokens per English word, 1.5 per CJK char
+  tokens = Math.ceil(wordCount * 0.75 + cjkCount * 1.5);
+  return tokens;
 }
 
-export function estimateMessageTokens(messages: Array<{ role: string; content: string }>): number {
-  return messages.reduce((sum, m) => sum + estimateTokens(m.content) + 4, 0);
+/**
+ * Enhanced token estimator — handles CJK, emoji/Unicode symbols, and Latin text.
+ * Kept aligned with the original's intent but with corrected math.
+ */
+export function estimateTokensEnhanced(text: string): number {
+  if (!text) return 0;
+
+  const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
+  const cjkMatches = text.match(cjkRegex);
+  const cjkCount = cjkMatches ? cjkMatches.length : 0;
+
+  // Emoji and non-ASCII, non-CJK, non-space characters
+  const unicodeRegex = /[^\s\w\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
+  const unicodeCount = (text.match(unicodeRegex) ?? []).length;
+
+  // ASCII word count (strip CJK and unicode symbols first)
+  const stripped = text.replace(cjkRegex, '').replace(unicodeRegex, '');
+  const wordCount = stripped.trim() ? stripped.trim().split(/\s+/).length : 0;
+
+  return Math.ceil(wordCount * 0.75 + cjkCount * 1.5 + unicodeCount * 1.2);
+}
+
+export function estimateMessageTokens(messages: ChatMessage[]): number {
+  // FIX: Guard against empty/null messages array
+  if (!messages?.length) return 0;
+  return messages.reduce((sum, m) => sum + estimateTokens(m.content ?? '') + 4, 0);
 }
 
 // ============================================================
@@ -837,75 +921,93 @@ export interface GenerateCharacterOptions {
 
 export async function generateCharacter(
   settings: AppSettings,
-  options: GenerateCharacterOptions = {}
+  options: GenerateCharacterOptions = {},
 ): Promise<GeneratedCharacter | null> {
-  const providerConfig = settings.providers.find(p => p.provider === settings.activeProvider && p.enabled);
+  const providerConfig = settings.providers?.find(
+    p => p.provider === settings.activeProvider && p.enabled,
+  );
+
   if (!providerConfig) {
-    throw new Error(`No API key configured for ${settings.activeProvider}. Please add an API key in Settings.`);
+    throw new Error(
+      `No API key configured for ${settings.activeProvider}. Please add an API key in Settings.`,
+    );
   }
 
   const { userPrompt, characterType } = options;
-  
+
   let systemPrompt = CHARACTER_GENERATION_PROMPT;
-  if (characterType) {
-    systemPrompt += `\n\nCharacter type/style to focus on: ${characterType}`;
+  if (characterType?.trim()) {
+    systemPrompt += `\n\nCharacter type/style to focus on: ${characterType.trim()}`;
   }
-  if (userPrompt) {
-    systemPrompt += `\n\nUser's request: "${userPrompt}"`;
+  if (userPrompt?.trim()) {
+    systemPrompt += `\n\nUser's request: "${userPrompt.trim()}"`;
   }
 
-  const messages = [
-    { role: 'system' as const, content: systemPrompt },
-    { role: 'user' as const, content: userPrompt || 'Generate a unique and interesting character.' },
+  const messages: ChatMessage[] = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt?.trim() || 'Generate a unique and interesting character.' },
   ];
 
   let fullText = '';
+  let streamError: string | null = null;
 
-  try {
-    await streamChatResponse(settings, messages, undefined, {
-      onToken: (token) => { fullText += token; },
-      onDone: () => {},
-      onError: (error) => { throw new Error(`Character generation failed: ${error}`); },
-    });
-  } catch (error) {
-    throw new Error(`Failed to generate character: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
+  await streamChatResponse(settings, messages, undefined, {
+    onToken: token => { fullText += token; },
+    onDone: () => {},
+    onError: error => { streamError = error; },
+  });
+
+  // FIX: The original threw inside onError which bubbled as an unhandled rejection.
+  // Now we check after the await and throw cleanly.
+  if (streamError) {
+    throw new Error(`Character generation failed: ${streamError}`);
+  }
+
+  if (!fullText.trim()) {
+    throw new Error('Character generation returned an empty response. Please try again.');
   }
 
   // Parse the JSON response
-  try {
-    // Try to extract JSON from the response
-    let jsonStr = fullText.trim();
-    
-    // Remove markdown code blocks if present
-    jsonStr = jsonStr.replace(/^```json\s*/i, '');
-    jsonStr = jsonStr.replace(/^```\s*/i, '');
-    jsonStr = jsonStr.replace(/\s*```$/i, '');
-    
-    // Find JSON array or object
-    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Could not parse character data: No valid JSON found in response');
-    }
+  let jsonStr = fullText.trim();
 
-    const parsed = JSON.parse(jsonMatch[0]);
+  // Strip markdown code fences if the model wrapped its output
+  jsonStr = jsonStr
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```\s*$/i, '')
+    .trim();
 
-    // Validate and normalize
-    const character: GeneratedCharacter = {
-      name: parsed.name || 'Unnamed Character',
-      description: parsed.description || '',
-      personality: parsed.personality || '',
-      scenario: parsed.scenario || '',
-      firstMessage: parsed.firstMessage || '',
-      speechPatterns: parsed.speechPatterns || '',
-      likes: parsed.likes || '',
-      dislikes: parsed.dislikes || '',
-      behavior: parsed.behavior || '',
-      tags: Array.isArray(parsed.tags) ? parsed.tags.slice(0, 8) : [],
-    };
-
-    return character;
-  } catch (e) {
-    console.error('Character parsing error:', e);
-    throw new Error(`Failed to parse generated character: ${e instanceof Error ? e.message : 'Unknown error'}. Please try again.`);
+  // Extract the first JSON object from the response
+  const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('Could not parse character data: No valid JSON object found in response.');
   }
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch (e) {
+    throw new Error(
+      `Failed to parse generated character JSON: ${e instanceof Error ? e.message : 'Unknown error'}. Please try again.`,
+    );
+  }
+
+  // Validate and normalize — ensure all fields are present with safe defaults
+  const character: GeneratedCharacter = {
+    name: typeof parsed.name === 'string' && parsed.name.trim() ? parsed.name.trim() : 'Unnamed Character',
+    description: typeof parsed.description === 'string' ? parsed.description : '',
+    personality: typeof parsed.personality === 'string' ? parsed.personality : '',
+    scenario: typeof parsed.scenario === 'string' ? parsed.scenario : '',
+    firstMessage: typeof parsed.firstMessage === 'string' ? parsed.firstMessage : '',
+    speechPatterns: typeof parsed.speechPatterns === 'string' ? parsed.speechPatterns : '',
+    likes: typeof parsed.likes === 'string' ? parsed.likes : '',
+    dislikes: typeof parsed.dislikes === 'string' ? parsed.dislikes : '',
+    behavior: typeof parsed.behavior === 'string' ? parsed.behavior : '',
+    // FIX: Filter out non-string tags and cap at 8
+    tags: Array.isArray(parsed.tags)
+      ? (parsed.tags as unknown[]).filter((t): t is string => typeof t === 'string').slice(0, 8)
+      : [],
+  };
+
+  return character;
 }

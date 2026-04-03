@@ -68,7 +68,7 @@ export default function RoleplayChat() {
       document.removeEventListener('scroll', handleScroll, true);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [contextMenu]);
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -76,6 +76,7 @@ export default function RoleplayChat() {
       store.loadCharacters();
       settingsStore.loadSettings();
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!mounted) {
@@ -126,7 +127,7 @@ export default function RoleplayChat() {
       <SetupWizard />
 
       {/* Global Context Menu */}
-      <ContextMenu state={{ visible: contextMenu.visible, x: contextMenu.x, y: contextMenu.y, items: contextMenu.items }} menuRef={{ current: null }} />
+      <ContextMenu state={{ visible: contextMenu.visible, x: contextMenu.x, y: contextMenu.y, items: contextMenu.items }} />
     </div>
   );
 }
@@ -143,11 +144,13 @@ function SetupWizard() {
   const [charName, setCharName] = useState('');
   const [showWizard, setShowWizard] = useState(false);
 
+  const showSetupWizard = settingsStore.settings.showSetupWizard;
+
   useEffect(() => {
-    if (settingsStore.isLoaded && settingsStore.settings.showSetupWizard) {
+    if (settingsStore.isLoaded && showSetupWizard) {
       setShowWizard(true);
     }
-  }, [settingsStore.isLoaded, settingsStore.settings.showSetupWizard]);
+  }, [settingsStore.isLoaded, showSetupWizard]);
 
   if (!showWizard || !settingsStore.isLoaded) return null;
 
@@ -254,6 +257,7 @@ function SetupWizard() {
                   onChange={(e) => setUserName(e.target.value)}
                   placeholder="Enter your name..."
                   className="mt-1.5"
+                  maxLength={50}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Characters will use this name when talking to you.
@@ -296,6 +300,7 @@ function SetupWizard() {
                     onChange={(e) => setCharName(e.target.value)}
                     placeholder="Enter character name..."
                     className="mt-1.5"
+                    maxLength={100}
                   />
                 </div>
               )}
@@ -338,28 +343,29 @@ function SetupWizard() {
 // ============================================================
 function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobileNav: () => void }) {
   const store = useChatStore();
-  const [importText, setImportText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImport = async (jsonStr?: string) => {
-    const text = jsonStr || importText;
-    if (!text.trim()) return;
-    const character = await store.importCharacter(text);
-    if (character) {
-      store.selectCharacter(character);
-      setImportText('');
-    }
-  };
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const text = ev.target?.result as string;
-      handleImport(text);
+      if (!text?.trim()) return;
+      try {
+        const character = await store.importCharacter(text);
+        if (character) {
+          store.selectCharacter(character);
+        }
+      } catch (err) {
+        console.error('Import failed:', err);
+      }
+    };
+    reader.onerror = () => {
+      console.error('Failed to read file');
     };
     reader.readAsText(file);
+    // Reset input so same file can be re-imported
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -416,38 +422,26 @@ function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenM
               <Plus className="w-5 h-5" /> Create Character
             </Button>
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1 gap-2 min-h-[44px]"
-                onClick={() => store.setCharacterEditorOpen(true)}
-              >
-                <Upload className="w-4 h-4" /> Import
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json,.charx"
-                className="hidden"
-                onChange={handleFileImport}
-              />
-              <Button
-                variant="outline"
-                className="flex-1 gap-2 min-h-[44px]"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="w-4 h-4" /> File Import
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              className="w-full gap-2 min-h-[44px]"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="w-4 h-4" /> Import Character from File
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,.charx"
+              className="hidden"
+              onChange={handleFileImport}
+            />
 
-            {store.characters.length > 0 && !isMobile && (
+            {store.characters.length > 0 && (
               <p className="text-sm text-muted-foreground">
-                Or select a character from the sidebar →
-              </p>
-            )}
-            {store.characters.length > 0 && isMobile && (
-              <p className="text-sm text-muted-foreground">
-                Or tap the menu to see your characters
+                {isMobile 
+                  ? 'Or tap the menu to see your characters' 
+                  : 'Or select a character from the sidebar →'}
               </p>
             )}
           </div>
@@ -507,8 +501,10 @@ function EmptyChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpe
             <Bot className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold">{store.activeCharacter.name}</h2>
-          <p className="text-muted-foreground text-sm line-clamp-3">{store.activeCharacter.description}</p>
-          <Button size="lg" className="gap-2 min-h-[44px]" onClick={() => store.newChat(store.activeCharacter!)}>
+          {store.activeCharacter.description && (
+            <p className="text-muted-foreground text-sm line-clamp-3">{store.activeCharacter.description}</p>
+          )}
+          <Button size="lg" className="gap-2 min-h-[44px]" onClick={() => store.newChat(store.activeCharacter)}>
             <MessageSquare className="w-5 h-5" /> Start Chat
           </Button>
           {store.chats.length > 0 && (
@@ -542,16 +538,19 @@ function CharacterSidebar() {
   const filtered = useMemo(() => {
     let chars = store.characters;
     if (showFavorites) chars = chars.filter(c => c.isFavorite);
-    if (search) chars = chars.filter(c =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.tags.some(t => t.toLowerCase().includes(search.toLowerCase()))
-    );
+    if (search) {
+      const lowerSearch = search.toLowerCase();
+      chars = chars.filter(c =>
+        c.name.toLowerCase().includes(lowerSearch) ||
+        c.tags?.some(t => t.toLowerCase().includes(lowerSearch))
+      );
+    }
     return chars;
   }, [store.characters, search, showFavorites]);
 
   return (
-    <div className={`${store.sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 border-r border-border bg-card flex flex-col overflow-hidden`}>
-      <div className="p-3 space-y-3 border-b border-border">
+    <div className={`${store.sidebarOpen ? 'w-56 sm:w-64' : 'w-0'} transition-all duration-300 border-r border-border bg-card flex flex-col overflow-hidden flex-shrink-0 max-w-full`}>
+      <div className="p-3 space-y-3 border-b border-border flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-sm flex items-center gap-1.5">
             <Bot className="w-4 h-4" /> Characters
@@ -599,10 +598,12 @@ function CharacterSidebar() {
           </Button>
         </div>
       </div>
-      <ScrollArea className="flex-1 overflow-y-auto touch-pan-y">
-        <div className="p-2 space-y-1 min-w-full">
+      <ScrollArea className="flex-1 overflow-hidden">
+        <div className="p-2 space-y-1">
           {filtered.length === 0 && (
-            <p className="text-center text-muted-foreground text-xs py-8">No characters yet</p>
+            <p className="text-center text-muted-foreground text-xs py-8">
+              {showFavorites ? 'No favorites yet' : 'No characters yet'}
+            </p>
           )}
           {filtered.map(char => (
             <CharacterItem key={char.id} character={char} />
@@ -616,9 +617,21 @@ function CharacterSidebar() {
 function CharacterItem({ character }: { character: Character }) {
   const store = useChatStore();
   const contextMenu = useContextMenuStore();
-  const isActive = store.activeCharacter?.id === character.id;
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchCountRef = useRef<number>(0);
 
-  const handleContextMenu = (e: React.MouseEvent | React.TouchEvent) => {
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (touchTimerRef.current) {
+        clearTimeout(touchTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     contextMenu.show(e, [
       {
         label: 'Chat',
@@ -635,7 +648,7 @@ function CharacterItem({ character }: { character: Character }) {
         icon: <Star className={`w-4 h-4 ${character.isFavorite ? 'fill-yellow-400 text-yellow-400' : ''}`} />,
         onClick: () => store.saveCharacter({ ...character, isFavorite: !character.isFavorite }),
       },
-      { label: '', onClick: () => {}, separator: true },
+      { label: '', onClick: () => {}, separator: true as const },
       {
         label: 'Delete',
         icon: <Trash2 className="w-4 h-4" />,
@@ -647,35 +660,52 @@ function CharacterItem({ character }: { character: Character }) {
         },
       },
     ]);
-  };
+  }, [character, contextMenu, store]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Don't trigger on buttons
+    if ((e.target as HTMLElement).closest('button')) return;
+    
+    touchCountRef.current += 1;
+    
+    if (touchTimerRef.current) {
+      clearTimeout(touchTimerRef.current);
+      touchTimerRef.current = null;
+      // Double tap detected
+      if (touchCountRef.current >= 2) {
+        handleContextMenu(e);
+        touchCountRef.current = 0;
+      }
+    } else {
+      touchTimerRef.current = setTimeout(() => {
+        touchCountRef.current = 0;
+        touchTimerRef.current = null;
+      }, 400);
+    }
+  }, [handleContextMenu]);
 
   return (
     <div
-      className={`group flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-        isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
-      }`}
+      className="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors min-w-0 hover:bg-muted/50"
       onClick={() => store.selectCharacter(character)}
       onContextMenu={handleContextMenu}
-      onTouchEnd={(e) => {
-        const now = Date.now();
-        if ((e.currentTarget as HTMLElement).dataset.lastTouch === String(now - 500)) {
-          handleContextMenu(e as unknown as React.TouchEvent);
-        }
-        (e.currentTarget as HTMLElement).dataset.lastTouch = String(now);
-      }}
+      onTouchStart={handleTouchStart}
+      style={{ minWidth: 0 }}
     >
       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0">
         <Bot className="w-4 h-4" />
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium truncate block">{character.name}</p>
-        <p className="text-xs text-muted-foreground truncate block">{character.tags.slice(0, 2).join(', ') || 'No tags'}</p>
+      <div className="min-w-0 flex-1 overflow-hidden">
+        <p className="text-sm font-medium truncate">{character.name}</p>
+        <p className="text-xs text-muted-foreground truncate">
+          {character.tags?.slice(0, 2).join(', ') || 'No tags'}
+        </p>
       </div>
-      <div className="flex gap-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
+      <div className="flex gap-0.5 flex-shrink-0">
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 text-muted-foreground"
+          className="h-6 w-6 flex-shrink-0 text-muted-foreground"
           onClick={(e) => {
             e.stopPropagation();
             store.setCharacterEditorOpen(true, character);
@@ -686,7 +716,7 @@ function CharacterItem({ character }: { character: Character }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 text-muted-foreground"
+          className="h-6 w-6 flex-shrink-0 text-muted-foreground"
           onClick={(e) => {
             e.stopPropagation();
             store.saveCharacter({ ...character, isFavorite: !character.isFavorite });
@@ -697,7 +727,7 @@ function CharacterItem({ character }: { character: Character }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 text-muted-foreground hover:text-destructive"
+          className="h-6 w-6 flex-shrink-0 text-muted-foreground hover:text-destructive"
           onClick={(e) => {
             e.stopPropagation();
             if (confirm(`Delete "${character.name}"? This cannot be undone.`)) {
@@ -717,23 +747,24 @@ function CharacterItem({ character }: { character: Character }) {
 // ============================================================
 function ChatHistorySidebar() {
   const store = useChatStore();
-  const contextMenu = useContextMenuStore();
 
   if (!store.activeCharacter) return null;
 
   return (
-    <div className="w-52 border-r border-border bg-card flex flex-col overflow-hidden">
+    <div className="w-44 sm:w-52 flex-shrink-0 border-r border-border bg-card flex flex-col overflow-hidden">
       <div className="p-3 border-b border-border">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Chats</h3>
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">Chats</h3>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6"
-                  onClick={() => store.newChat(store.activeCharacter!)}
+                  className="h-6 w-6 flex-shrink-0"
+                  onClick={() => {
+                    if (store.activeCharacter) store.newChat(store.activeCharacter);
+                  }}
                 >
                   <Plus className="w-3.5 h-3.5" />
                 </Button>
@@ -743,72 +774,39 @@ function ChatHistorySidebar() {
           </TooltipProvider>
         </div>
       </div>
-      <ScrollArea className="flex-1 overflow-y-auto touch-pan-y">
-        <div className="p-2 space-y-0.5 min-w-full">
+      <ScrollArea className="flex-1 overflow-hidden">
+        <div className="p-2 space-y-0.5">
           {store.chats.length === 0 && (
             <p className="text-center text-muted-foreground text-xs py-6">No chats yet</p>
           )}
-          {store.chats.map(chat => {
-            const handleChatContextMenu = (e: React.MouseEvent | React.TouchEvent) => {
-              contextMenu.show(e, [
-                {
-                  label: 'Open Chat',
-                  icon: <MessageSquare className="w-4 h-4" />,
-                  onClick: () => store.selectChat(chat),
-                },
-                {
-                  label: 'Delete Chat',
-                  icon: <Trash2 className="w-4 h-4" />,
-                  destructive: true,
-                  onClick: () => {
-                    if (confirm('Delete this chat?')) {
-                      store.deleteChat(chat.id);
-                    }
-                  },
-                },
-              ]);
-            };
-
-            return (
-              <div
-                key={chat.id}
-                className={`group flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer text-sm transition-colors w-full ${
-                  store.activeChat?.id === chat.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
-                }`}
-                onClick={() => store.selectChat(chat)}
-                onContextMenu={handleChatContextMenu}
-                onTouchEnd={(e) => {
-                  const now = Date.now();
-                  if ((e.currentTarget as HTMLElement).dataset.lastTouch === String(now - 500)) {
-                    handleChatContextMenu(e as unknown as React.TouchEvent);
+          {store.chats.map(chat => (
+            <div
+              key={chat.id}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer text-sm transition-colors min-w-0 ${
+                store.activeChat?.id === chat.id ? 'bg-muted' : 'hover:bg-muted/50'
+              }`}
+              onClick={() => store.selectChat(chat)}
+              style={{ minWidth: 0 }}
+            >
+              <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
+              <span className="truncate flex-1 min-w-0" style={{ minWidth: 0 }}>
+                {chat.title}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 flex-shrink-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm('Delete this chat?')) {
+                    store.deleteChat(chat.id);
                   }
-                  (e.currentTarget as HTMLElement).dataset.lastTouch = String(now);
                 }}
               >
-                <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0 overflow-hidden" style={{maxWidth: '130px'}}>
-                  <div className="truncate text-xs" style={{fontSize: '10px', lineHeight: '12px', maxWidth: '130px'}}>
-                    {chat.title}
-                  </div>
-                </div>
-                <div className="flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-5 w-5 text-muted-foreground hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm('Delete this chat?')) {
-                        store.deleteChat(chat.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
+                <Trash2 className="w-3 h-3" />
+              </Button>
+            </div>
+          ))}
         </div>
       </ScrollArea>
     </div>
@@ -821,16 +819,33 @@ function ChatHistorySidebar() {
 function ChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobileNav: () => void }) {
   const store = useChatStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isAutoScrollRef = useRef(true);
 
-  // Auto-scroll to bottom
+  const messages = store.messages;
+  const activeCharacter = store.activeCharacter;
+  const activeChat = store.activeChat;
+
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isAutoScrollRef.current && messagesEndRef.current) {
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      });
     }
-  }, [store.messages]);
+  }, [messages]);
 
-  if (!store.activeCharacter || !store.activeChat) return null;
+  // Detect if user has scrolled up (to not auto-scroll)
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    // If user is within 100px of bottom, consider it auto-scroll
+    isAutoScrollRef.current = scrollHeight - scrollTop - clientHeight < 100;
+  }, []);
+
+  if (!activeCharacter || !activeChat) return null;
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -849,9 +864,9 @@ function ChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobi
           <Bot className="w-4 h-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className={`font-semibold truncate ${isMobile ? 'text-sm' : 'text-sm'}`}>{store.activeCharacter.name}</h2>
+          <h2 className={`font-semibold truncate ${isMobile ? 'text-sm' : 'text-sm'}`}>{activeCharacter.name}</h2>
           {!isMobile && (
-            <p className="text-xs text-muted-foreground truncate">{store.activeChat.title}</p>
+            <p className="text-xs text-muted-foreground truncate">{activeChat.title}</p>
           )}
         </div>
         <div className="flex gap-1">
@@ -870,7 +885,7 @@ function ChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobi
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => store.setCharacterEditorOpen(true, store.activeCharacter)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => store.setCharacterEditorOpen(true, activeCharacter)}>
                       <Pencil className="w-4 h-4" />
                     </Button>
                   </TooltipTrigger>
@@ -881,8 +896,8 @@ function ChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobi
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" onClick={() => {
-                      if (store.activeChat && confirm('Delete this chat?')) {
-                        store.deleteChat(store.activeChat.id);
+                      if (confirm('Delete this chat?')) {
+                        store.deleteChat(activeChat.id);
                       }
                     }}>
                       <Trash2 className="w-4 h-4" />
@@ -908,19 +923,30 @@ function ChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobi
 
       {/* Error Banner */}
       {store.error && (
-        <div className="mx-4 mt-2 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
+        <div className="mx-4 mt-2 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive flex-shrink-0">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span className="flex-1">{store.error}</span>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={store.clearError}>
+          <span className="flex-1 break-words">{store.error}</span>
+          <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={store.clearError}>
             <X className="w-3 h-3" />
           </Button>
         </div>
       )}
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      <div 
+        ref={scrollContainerRef} 
+        className="flex-1 overflow-y-auto"
+        onScroll={handleScroll}
+      >
         <div className={`mx-auto p-4 space-y-4 ${isMobile ? 'max-w-full' : 'max-w-3xl'}`}>
-          {store.messages.map(msg => (
+          {messages.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">
+                Start a conversation with {activeCharacter.name}
+              </p>
+            </div>
+          )}
+          {messages.map(msg => (
             <MessageBubble key={msg.id} message={msg} />
           ))}
           <div ref={messagesEndRef} />
@@ -936,41 +962,87 @@ function ChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobi
 // ============================================================
 // MESSAGE BUBBLE
 // ============================================================
-function MessageBubble({ message }: { message: { id: string; role: string; content: string; isStreaming?: boolean; timestamp: number } }) {
+interface MessageData {
+  id: string;
+  role: string;
+  content: string;
+  isStreaming?: boolean;
+  timestamp: number;
+}
+
+function MessageBubble({ message }: { message: MessageData }) {
   const store = useChatStore();
   const contextMenu = useContextMenuStore();
   const isUser = message.role === 'user';
+  const lastTouchTimeRef = useRef<number>(0);
 
-  const handleContextMenu = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleContextMenu = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (!message.content) return;
-    contextMenu.show(e, [
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const items = [
       {
         label: 'Copy Text',
         icon: <CopyIcon className="w-4 h-4" />,
-        onClick: () => navigator.clipboard.writeText(message.content),
+        onClick: () => {
+          navigator.clipboard.writeText(message.content).catch(() => {
+            // Fallback for clipboard API failure
+            const textarea = document.createElement('textarea');
+            textarea.value = message.content;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+          });
+        },
       },
-      { label: '', onClick: () => {}, separator: true },
-      {
+    ];
+
+    if (!isUser && !message.isStreaming) {
+      items.push({
         label: 'Regenerate',
         icon: <RefreshCw className="w-4 h-4" />,
-        disabled: isUser || message.isStreaming || store.messages.length < 2,
+        disabled: store.messages.length < 2,
         onClick: () => store.regenerateMessage(),
-      },
-    ]);
-  };
+      });
+    }
+
+    items.push(
+      { label: '', onClick: () => {}, separator: true as const },
+      {
+        label: 'Delete',
+        icon: <Trash2 className="w-4 h-4" />,
+        destructive: true,
+        onClick: () => {
+          if (confirm('Delete this message?')) {
+            store.deleteMessage(message.id);
+          }
+        },
+      }
+    );
+
+    contextMenu.show(e, items);
+  }, [message.content, message.id, message.isStreaming, isUser, contextMenu, store]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const now = Date.now();
+    const timeSinceLastTouch = now - lastTouchTimeRef.current;
+    lastTouchTimeRef.current = now;
+    
+    if (timeSinceLastTouch < 400 && timeSinceLastTouch > 0) {
+      handleContextMenu(e);
+    }
+  }, [handleContextMenu]);
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`group relative max-w-[85%] sm:max-w-[75%] ${isUser ? '' : ''}`}
+        className="group relative max-w-[85%] sm:max-w-[75%]"
         onContextMenu={handleContextMenu}
-        onTouchEnd={(e) => {
-          const now = Date.now();
-          if ((e.currentTarget as HTMLElement).dataset.lastTouch === String(now - 500)) {
-            handleContextMenu(e as unknown as React.TouchEvent);
-          }
-          (e.currentTarget as HTMLElement).dataset.lastTouch = String(now);
-        }}
+        onTouchEnd={handleTouchEnd}
       >
         {!isUser && store.activeCharacter && (
           <div className="flex items-center gap-1.5 mb-1 ml-1">
@@ -984,11 +1056,15 @@ function MessageBubble({ message }: { message: { id: string; role: string; conte
           className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
             isUser
               ? 'bg-blue-600 text-white rounded-tr-sm'
-              : 'bg-gray-100 dark:bg-gray-800 rounded-tl-sm'
+              : 'bg-muted rounded-tl-sm'
           }`}
         >
-          {formatMessageContent(message.content)}
-          {message.isStreaming && <span className="animate-pulse ml-0.5">▊</span>}
+          {message.content ? (
+            formatMessageContent(message.content)
+          ) : message.isStreaming ? (
+            <span className="animate-pulse">▊</span>
+          ) : null}
+          {message.isStreaming && message.content && <span className="animate-pulse ml-0.5">▊</span>}
         </div>
         <div className={`flex items-center gap-1 mt-1 ${isUser ? 'justify-end mr-1' : 'ml-1'}`}>
           <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
@@ -999,7 +1075,19 @@ function MessageBubble({ message }: { message: { id: string; role: string; conte
               variant="ghost"
               size="icon"
               className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => navigator.clipboard.writeText(message.content)}
+              onClick={() => {
+                navigator.clipboard.writeText(message.content).catch(() => {
+                  const textarea = document.createElement('textarea');
+                  textarea.value = message.content;
+                  textarea.style.position = 'fixed';
+                  textarea.style.opacity = '0';
+                  document.body.appendChild(textarea);
+                  textarea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textarea);
+                });
+              }}
+              aria-label="Copy message"
             >
               <CopyIcon className="w-3 h-3" />
             </Button>
@@ -1019,15 +1107,39 @@ function CopyIcon({ className }: { className?: string }) {
   );
 }
 
-// Format message content with styling for *text* and "text"
+// Format message content with styling for *text* (actions/narration) and "text" (dialogue)
 function formatMessageContent(content: string): React.ReactNode {
-  const parts = content.split(/(\*[^\*]+\*|'[^']+'|"[^"]+")/);
+  if (!content) return null;
+  
+  // Split by *...* for actions and "..." for dialogue, handling edge cases
+  const parts = content.split(/(\*[^\*]+\*|"[^"]+"|'[^']+')/g);
+  
   return parts.map((part, index) => {
-    if (part.startsWith('*') && part.endsWith('*')) {
-      return <span key={index} className="text-gray-500 dark:text-gray-400">{part.slice(1, -1)}</span>;
-    } else if ((part.startsWith("'") && part.endsWith("'")) || (part.startsWith('"') && part.endsWith('"'))) {
-      return <span key={index} className="font-medium text-black dark:text-white">{part.slice(1, -1)}</span>;
+    if (!part) return null;
+    
+    if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+      // Action/narration text between asterisks
+      return (
+        <span key={index} className="italic text-muted-foreground">
+          {part.slice(1, -1)}
+        </span>
+      );
+    } else if (part.startsWith('"') && part.endsWith('"') && part.length > 2) {
+      // Dialogue in double quotes
+      return (
+        <span key={index} className="font-medium">
+          &ldquo;{part.slice(1, -1)}&rdquo;
+        </span>
+      );
+    } else if (part.startsWith("'") && part.endsWith("'") && part.length > 2) {
+      // Dialogue in single quotes
+      return (
+        <span key={index} className="font-medium">
+          &lsquo;{part.slice(1, -1)}&rsquo;
+        </span>
+      );
     } else {
+      // Regular text - escape HTML
       return <span key={index}>{part}</span>;
     }
   });
@@ -1041,37 +1153,49 @@ function ChatInput() {
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const settings = useSettingsStore(s => s.settings);
+  const activeChatId = store.activeChat?.id;
 
   const handleSend = useCallback(() => {
-    if (!text.trim() || store.isStreaming) return;
-    store.sendMessage(text);
+    const trimmed = text.trim();
+    if (!trimmed || store.isStreaming) return;
+    store.sendMessage(trimmed);
     setText('');
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
-  }, [text, store]);
+    // Reset textarea height
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
+    });
+  }, [text, store.isStreaming, store]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && settings.sendOnEnter) {
       e.preventDefault();
       handleSend();
     }
-  };
+  }, [settings.sendOnEnter, handleSend]);
 
-  const handleInput = () => {
+  const handleInput = useCallback(() => {
     const ta = textareaRef.current;
     if (ta) {
       ta.style.height = 'auto';
-      ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+      const newHeight = Math.min(ta.scrollHeight, 200);
+      ta.style.height = newHeight + 'px';
     }
-  };
+  }, []);
 
-  // Focus textarea when chat loads
+  // Focus textarea when chat changes
   useEffect(() => {
-    if (store.activeChat && textareaRef.current) {
-      textareaRef.current.focus();
+    if (activeChatId && textareaRef.current) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [store.activeChat?.id]);
+  }, [activeChatId]);
+
+  const characterName = store.activeCharacter?.name || '...';
 
   return (
     <div className="border-t border-border bg-card p-3 safe-bottom flex-shrink-0">
@@ -1084,10 +1208,11 @@ function ChatInput() {
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
               onInput={handleInput}
-              placeholder={`Message ${store.activeCharacter?.name || '...'}...`}
+              placeholder={`Message ${characterName}...`}
               className="min-h-[44px] max-h-[200px] resize-none pr-12 rounded-xl text-sm"
               rows={1}
               disabled={store.isStreaming}
+              maxLength={10000}
             />
           </div>
           {store.isStreaming ? (
@@ -1096,6 +1221,7 @@ function ChatInput() {
               size="icon"
               className="h-10 w-10 rounded-xl flex-shrink-0"
               onClick={store.stopStreaming}
+              aria-label="Stop generating"
             >
               <Square className="w-4 h-4" />
             </Button>
@@ -1105,6 +1231,7 @@ function ChatInput() {
               className="h-10 w-10 rounded-xl flex-shrink-0"
               onClick={handleSend}
               disabled={!text.trim()}
+              aria-label="Send message"
             >
               <Send className="w-4 h-4" />
             </Button>
@@ -1113,7 +1240,7 @@ function ChatInput() {
         <div className="flex items-center justify-between mt-1.5 px-1">
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-              {settings.activeModel}
+              {settings.activeModel || 'No model'}
             </Badge>
             {store.messages.length > 0 && (
               <span>{store.messages.length} messages</span>
@@ -1129,11 +1256,34 @@ function ChatInput() {
                     className="h-6 w-6"
                     onClick={store.regenerateMessage}
                     disabled={store.isStreaming || store.messages.length < 2}
+                    aria-label="Regenerate"
                   >
                     <RefreshCw className="w-3 h-3" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Regenerate last response</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-destructive"
+                    onClick={() => {
+                      const lastMsg = store.messages[store.messages.length - 1];
+                      if (lastMsg && confirm('Delete the last message?')) {
+                        store.deleteMessage(lastMsg.id);
+                      }
+                    }}
+                    disabled={store.isStreaming || store.messages.length === 0}
+                    aria-label="Delete last message"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Delete last message</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
@@ -1174,7 +1324,7 @@ function SettingsDialog() {
   const localPresets = [
     { id: 'ollama', name: 'Ollama', baseUrl: 'http://localhost:11434/v1', defaultModel: 'llama3.2' },
     { id: 'lmstudio', name: 'LM Studio', baseUrl: 'http://localhost:1234/v1', defaultModel: 'local-model' },
-    { id: 'ollamx', name: 'OllamaX', baseUrl: 'http://localhost:3000/v1', defaultModel: 'llama3.2' },
+    { id: 'ollamax', name: 'OllamaX', baseUrl: 'http://localhost:3000/v1', defaultModel: 'llama3.2' },
     { id: 'llamacpp', name: 'llama.cpp', baseUrl: 'http://localhost:8080/v1', defaultModel: 'model' },
     { id: 'custom', name: 'Custom URL', baseUrl: '', defaultModel: '' },
   ];
@@ -1184,50 +1334,84 @@ function SettingsDialog() {
   const [useCustomModel, setUseCustomModel] = useState(false);
 
   const handleAddProvider = async () => {
-    if (!newProvider || !newKey) return;
+    if (!newProvider) return;
+    if (newProvider !== 'local' && !newKey.trim()) return;
+    
     await settingsStore.setProvider({
       provider: newProvider,
-      apiKey: newKey,
+      apiKey: newKey.trim() || (newProvider === 'local' ? 'local' : ''),
       baseUrl: newBaseUrl || undefined,
       enabled: true,
     });
     // Auto-select the new provider
     await settingsStore.setActiveProvider(newProvider);
+    
+    // If local preset was selected, also set the model
+    if (newProvider === 'local') {
+      const preset = localPresets.find(p => p.id === localPreset);
+      if (preset && preset.id !== 'custom' && preset.defaultModel) {
+        await settingsStore.setActiveModel(preset.defaultModel);
+      }
+    }
+    
     setNewProvider('');
     setNewKey('');
     setNewBaseUrl('');
   };
 
   const handleExportData = async () => {
-    const data = await exportAllData();
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `roleplay-chat-backup-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const data = await exportAllData();
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `roleplay-chat-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+      alert('Failed to export data');
+    }
   };
 
   const handleImportData = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const text = await file.text();
-    await importAllData(text);
-    store.loadCharacters();
-    settingsStore.loadSettings();
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    try {
+      const text = await file.text();
+      await importAllData(text);
+      store.loadCharacters();
+      settingsStore.loadSettings();
+    } catch (err) {
+      console.error('Import failed:', err);
+      alert('Failed to import data. Please check the file format.');
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handleClearData = async () => {
     if (confirm('Are you sure? This will delete ALL characters, chats, messages, and memories permanently.')) {
-      await clearAllData();
-      store.loadCharacters();
-      settingsStore.loadSettings();
+      try {
+        await clearAllData();
+        store.loadCharacters();
+        settingsStore.loadSettings();
+      } catch (err) {
+        console.error('Clear failed:', err);
+      }
     }
   };
 
-  const models = getModelsForProvider(settings.activeProvider);
+  const models = useMemo(() => getModelsForProvider(settings.activeProvider), [settings.activeProvider]);
+
+  // Reset custom model toggle when provider changes
+  useEffect(() => {
+    setUseCustomModel(false);
+    setCustomModelInput('');
+  }, [settings.activeProvider]);
 
   const tabs = [
     { id: 'providers' as const, label: 'API Keys', icon: <Key className="w-4 h-4" /> },
@@ -1268,588 +1452,640 @@ function SettingsDialog() {
           <ScrollArea className="flex-1 p-4 overflow-y-auto touch-pan-y">
             <div className="min-h-full">
               {activeTab === 'providers' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-sm">API Keys (BYOK)</h3>
-                    <p className="text-xs text-muted-foreground">Keys stored locally on your device only</p>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={async () => {
-                        setTesting(true);
-                        setTestResult(null);
-                        const result = await settingsStore.testConnection();
-                        setTestResult(result);
-                        setTesting(false);
-                      }}
-                      disabled={testing}
-                      className="gap-1"
-                    >
-                      {testing ? (
-                        <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Zap className="w-3 h-3" />
-                      )}
-                      Test
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => setShowKeys(!showKeys)} className="gap-1">
-                      {showKeys ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                      {showKeys ? 'Hide' : 'Show'}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Test result banner */}
-                {testResult && (
-                  <div className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 ${
-                    testResult.success
-                      ? 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
-                      : 'bg-destructive/10 text-destructive border border-destructive/20'
-                  }`}>
-                    {testResult.success ? (
-                      <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5-5 5"/><path d="M20 6H9"/></svg>
-                    ) : (
-                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    )}
-                    <span className="flex-1">{testResult.message}</span>
-                  </div>
-                )}
-
-                {/* Configured providers */}
-                <div className="space-y-2">
-                  {settings.providers.map(p => (
-                    <div key={p.provider} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
-                      <span className="text-lg flex-shrink-0">
-                        {providers.find(pr => pr.id === p.provider)?.icon || '🔑'}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{providers.find(pr => pr.id === p.provider)?.name || p.provider}</p>
-                        <p 
-                          className="text-xs text-muted-foreground font-mono truncate" 
-                          title={showKeys ? p.apiKey : `••••${p.apiKey.slice(-4)}`}
-                        >
-                          {showKeys 
-                            ? `${p.apiKey.slice(0, 8)}...${p.apiKey.slice(-4)}` 
-                            : '•'.repeat(Math.min(p.apiKey.length, 16))
-                          }
-                        </p>
-                      </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-sm">API Keys (BYOK)</h3>
+                      <p className="text-xs text-muted-foreground">Keys stored locally on your device only</p>
+                    </div>
+                    <div className="flex gap-1">
                       <Button
-                        variant={settings.activeProvider === p.provider ? 'default' : 'outline'}
+                        variant="outline"
                         size="sm"
-                        className="h-7 text-xs shrink-0"
-                        onClick={() => settingsStore.setActiveProvider(p.provider)}
+                        onClick={async () => {
+                          setTesting(true);
+                          setTestResult(null);
+                          try {
+                            const result = await settingsStore.testConnection();
+                            setTestResult(result);
+                          } catch (err) {
+                            setTestResult({ success: false, message: 'Connection test failed' });
+                          } finally {
+                            setTesting(false);
+                          }
+                        }}
+                        disabled={testing}
+                        className="gap-1"
                       >
-                        {settings.activeProvider === p.provider ? 'Active' : 'Select'}
+                        {testing ? (
+                          <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Zap className="w-3 h-3" />
+                        )}
+                        Test
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 shrink-0"
-                        onClick={() => settingsStore.removeProvider(p.provider)}
-                      >
-                        <Trash2 className="w-3 h-3" />
+                      <Button variant="outline" size="sm" onClick={() => setShowKeys(!showKeys)} className="gap-1">
+                        {showKeys ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        {showKeys ? 'Hide' : 'Show'}
                       </Button>
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                {/* Add new provider */}
-                <Separator />
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">Add Provider</p>
-                  <Select value={newProvider} onValueChange={(v) => setNewProvider(v as AIProvider)}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue placeholder="Select provider..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {providers.filter(p => !settings.providers.some(sp => sp.provider === p.id)).map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.icon} {p.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Local LLM specific options */}
-                  {newProvider === 'local' && (
-                    <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
-                      <p className="text-xs font-medium text-muted-foreground">Local LLM Settings</p>
-                      <Select value={localPreset} onValueChange={(v) => {
-                        setLocalPreset(v);
-                        const preset = localPresets.find(p => p.id === v);
-                        if (preset && preset.id !== 'custom') {
-                          setNewBaseUrl(preset.baseUrl);
-                          settingsStore.setActiveModel(preset.defaultModel);
-                        } else {
-                          setNewBaseUrl('');
-                        }
-                      }}>
-                        <SelectTrigger className="h-9 text-sm">
-                          <SelectValue placeholder="Select preset..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {localPresets.map(p => (
-                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  {/* Test result banner */}
+                  {testResult && (
+                    <div className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 ${
+                      testResult.success
+                        ? 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
+                        : 'bg-destructive/10 text-destructive border border-destructive/20'
+                    }`}>
+                      {testResult.success ? (
+                        <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                      ) : (
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      )}
+                      <span className="flex-1 break-words">{testResult.message}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-5 w-5 flex-shrink-0" 
+                        onClick={() => setTestResult(null)}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Configured providers */}
+                  <div className="space-y-2">
+                    {settings.providers.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No providers configured. Add one below.
+                      </p>
+                    )}
+                    {settings.providers.map(p => {
+                      const providerInfo = providers.find(pr => pr.id === p.provider);
+                      return (
+                        <div key={p.provider} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                          <span className="text-lg flex-shrink-0">
+                            {providerInfo?.icon || '🔑'}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{providerInfo?.name || p.provider}</p>
+                            <p className="text-xs text-muted-foreground font-mono truncate">
+                              {showKeys 
+                                ? `${p.apiKey.slice(0, 8)}...${p.apiKey.slice(-4)}`
+                                : '•'.repeat(Math.min(p.apiKey.length, 16))
+                              }
+                            </p>
+                          </div>
+                          <Button
+                            variant={settings.activeProvider === p.provider ? 'default' : 'outline'}
+                            size="sm"
+                            className="h-7 text-xs shrink-0"
+                            onClick={() => settingsStore.setActiveProvider(p.provider)}
+                          >
+                            {settings.activeProvider === p.provider ? 'Active' : 'Select'}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 shrink-0 hover:text-destructive"
+                            onClick={() => settingsStore.removeProvider(p.provider)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Add new provider */}
+                  <Separator />
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Add Provider</p>
+                    <Select value={newProvider} onValueChange={(v) => {
+                      setNewProvider(v as AIProvider);
+                      setNewKey('');
+                      setNewBaseUrl('');
+                    }}>
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select provider..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {providers.filter(p => !settings.providers.some(sp => sp.provider === p.id)).map(p => (
+                          <SelectItem key={p.id} value={p.id}>{p.icon} {p.name}</SelectItem>
+                        ))}
+                        {settings.providers.length === providers.length && (
+                          <SelectItem value="_none" disabled>All providers added</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Local LLM specific options */}
+                    {newProvider === 'local' && (
+                      <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground">Local LLM Settings</p>
+                        <Select value={localPreset} onValueChange={(v) => {
+                          setLocalPreset(v);
+                          const preset = localPresets.find(p => p.id === v);
+                          if (preset && preset.id !== 'custom') {
+                            setNewBaseUrl(preset.baseUrl);
+                          } else {
+                            setNewBaseUrl('');
+                          }
+                        }}>
+                          <SelectTrigger className="h-9 text-sm">
+                            <SelectValue placeholder="Select preset..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {localPresets.map(p => (
+                              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          placeholder="Base URL (e.g., http://localhost:11434/v1)"
+                          value={newBaseUrl}
+                          onChange={(e) => setNewBaseUrl(e.target.value)}
+                          className="h-9 text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Make sure your local LLM server is running before testing.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {/* API Key for cloud providers */}
+                    {newProvider && newProvider !== 'local' && (
                       <Input
-                        placeholder="Base URL (e.g., http://localhost:11434/v1)"
+                        type={showKeys ? 'text' : 'password'}
+                        placeholder="API Key"
+                        value={newKey}
+                        onChange={(e) => setNewKey(e.target.value)}
+                        className="h-9 text-sm"
+                        autoComplete="off"
+                      />
+                    )}
+                    
+                    {/* Base URL for custom provider */}
+                    {newProvider === 'custom' && (
+                      <Input
+                        placeholder="Custom Base URL (optional)"
                         value={newBaseUrl}
                         onChange={(e) => setNewBaseUrl(e.target.value)}
                         className="h-9 text-sm"
                       />
+                    )}
+                    
+                    <Button 
+                      size="sm" 
+                      onClick={handleAddProvider} 
+                      disabled={!newProvider || (newProvider !== 'local' && !newKey.trim())} 
+                      className="gap-1"
+                    >
+                      <Plus className="w-3 h-3" /> Add Provider
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'model' && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-sm">Model Selection</h3>
+                    <p className="text-xs text-muted-foreground">Choose the AI model for roleplay</p>
+                  </div>
+                  
+                  {/* Custom model toggle */}
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="useCustomModel" 
+                      checked={useCustomModel} 
+                      onCheckedChange={(checked) => {
+                        const isChecked = checked === true;
+                        setUseCustomModel(isChecked);
+                        if (!isChecked) {
+                          setCustomModelInput('');
+                        }
+                      }} 
+                    />
+                    <Label htmlFor="useCustomModel" className="text-sm cursor-pointer">
+                      Enter custom model ID
+                    </Label>
+                  </div>
+                  
+                  {useCustomModel ? (
+                    <div className="space-y-2">
+                      <Input
+                        placeholder="Enter custom model ID (e.g., gpt-4o, claude-3-5-sonnet)"
+                        value={customModelInput}
+                        onChange={(e) => {
+                          setCustomModelInput(e.target.value);
+                          if (e.target.value.trim()) {
+                            settingsStore.setActiveModel(e.target.value.trim());
+                          }
+                        }}
+                        className="text-sm"
+                        maxLength={200}
+                      />
                       <p className="text-xs text-muted-foreground">
-                        Make sure your local LLM server is running before testing.
+                        Enter the exact model ID your API provider expects
                       </p>
                     </div>
+                  ) : (
+                    <Select 
+                      value={settings.activeModel} 
+                      onValueChange={(v) => settingsStore.setActiveModel(v)}
+                    >
+                      <SelectTrigger className="text-sm">
+                        <SelectValue placeholder="Select a model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {models.length > 0 ? (
+                          models.map(m => (
+                            <SelectItem key={m.id} value={m.id}>
+                              {m.name}
+                              <span className="text-muted-foreground ml-2 text-xs">
+                                ({(m.maxContextTokens / 1000).toFixed(0)}k ctx)
+                              </span>
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="_none" disabled>
+                            No models available for {settings.activeProvider}
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
                   )}
-                  
-                  {/* API Key for cloud providers */}
-                  {newProvider && newProvider !== 'local' && (
-                    <Input
-                      type={showKeys ? 'text' : 'password'}
-                      placeholder="API Key"
-                      value={newKey}
-                      onChange={(e) => setNewKey(e.target.value)}
-                      className="h-9 text-sm"
-                    />
-                  )}
-                  
-                  {/* Base URL for custom provider */}
-                  {newProvider === 'custom' && (
-                    <Input
-                      placeholder="Custom Base URL (optional)"
-                      value={newBaseUrl}
-                      onChange={(e) => setNewBaseUrl(e.target.value)}
-                      className="h-9 text-sm"
-                    />
-                  )}
-                  
-                  <Button 
-                    size="sm" 
-                    onClick={handleAddProvider} 
-                    disabled={!newProvider || (newProvider !== 'local' && !newKey)} 
-                    className="gap-1"
-                  >
-                    <Plus className="w-3 h-3" /> Add Provider
-                  </Button>
-                </div>
-              </div>
-            )}
 
-            {activeTab === 'model' && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-sm">Model Selection</h3>
-                  <p className="text-xs text-muted-foreground">Choose the AI model for roleplay</p>
+                  <Separator />
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium">Generation Parameters</h4>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <Label>Temperature: {settings.temperature.toFixed(2)}</Label>
+                        <span className="text-muted-foreground">Higher = more creative</span>
+                      </div>
+                      <Slider
+                        value={[settings.temperature]}
+                        min={0} max={2} step={0.05}
+                        onValueChange={([v]) => settingsStore.updateSetting('temperature', v)}
+                        className="touch-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <Label>Max Tokens: {settings.maxTokens}</Label>
+                        <span className="text-muted-foreground">Max response length</span>
+                      </div>
+                      <Slider
+                        value={[settings.maxTokens]}
+                        min={64} max={4096} step={64}
+                        onValueChange={([v]) => settingsStore.updateSetting('maxTokens', v)}
+                        className="touch-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <Label>Top P: {settings.topP.toFixed(2)}</Label>
+                      </div>
+                      <Slider
+                        value={[settings.topP]}
+                        min={0} max={1} step={0.05}
+                        onValueChange={([v]) => settingsStore.updateSetting('topP', v)}
+                        className="touch-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <Label>Frequency Penalty: {settings.frequencyPenalty.toFixed(2)}</Label>
+                        <span className="text-muted-foreground">Reduce repetition</span>
+                      </div>
+                      <Slider
+                        value={[settings.frequencyPenalty]}
+                        min={0} max={2} step={0.1}
+                        onValueChange={([v]) => settingsStore.updateSetting('frequencyPenalty', v)}
+                        className="touch-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <Label>Presence Penalty: {settings.presencePenalty.toFixed(2)}</Label>
+                        <span className="text-muted-foreground">Encourage new topics</span>
+                      </div>
+                      <Slider
+                        value={[settings.presencePenalty]}
+                        min={0} max={2} step={0.1}
+                        onValueChange={([v]) => settingsStore.updateSetting('presencePenalty', v)}
+                        className="touch-none"
+                      />
+                    </div>
+                  </div>
                 </div>
-                
-                {/* Custom model toggle */}
-                <div className="flex items-center gap-2">
-                  <Checkbox 
-                    id="useCustomModel" 
-                    checked={useCustomModel} 
-                    onCheckedChange={(checked) => {
-                      setUseCustomModel(checked === true);
-                      if (checked !== true) {
-                        setCustomModelInput('');
-                      }
-                    }} 
-                  />
-                  <Label htmlFor="useCustomModel" className="text-sm cursor-pointer">
-                    Enter custom model ID
-                  </Label>
-                </div>
-                
-                {useCustomModel ? (
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Enter custom model ID (e.g., gpt-4o, claude-3-5-sonnet)"
-                      value={customModelInput}
-                      onChange={(e) => {
-                        setCustomModelInput(e.target.value);
-                        if (e.target.value.trim()) {
-                          settingsStore.setActiveModel(e.target.value.trim());
-                        }
-                      }}
-                      className="text-sm"
-                    />
+              )}
+
+              {activeTab === 'persona' && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-sm">Your Profile</h3>
+                    <p className="text-xs text-muted-foreground">Define who you are in roleplay conversations</p>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-muted/50 space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Bot className="w-4 h-4" />
+                      This is Optional
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      Enter the exact model ID your API provider expects
+                      Characters will use this information to address you and understand your role in the story.
                     </p>
                   </div>
-                ) : (
-                  <Select value={settings.activeModel} onValueChange={(v) => settingsStore.setActiveModel(v)}>
-                    <SelectTrigger className="text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {models.map(m => (
-                        <SelectItem key={m.id} value={m.id}>
-                          {m.name}
-                          <span className="text-muted-foreground ml-2 text-xs">
-                            ({(m.maxContextTokens / 1000).toFixed(0)}k ctx)
-                          </span>
-                        </SelectItem>
-                      ))}
-                      {models.length === 0 && (
-                        <SelectItem value="_none" disabled>No models available - enable custom model above</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                )}
 
-                <Separator />
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Generation Parameters</h4>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <Label>Temperature: {settings.temperature.toFixed(2)}</Label>
-                      <span className="text-muted-foreground">Higher = more creative</span>
-                    </div>
-                    <Slider
-                      value={[settings.temperature]}
-                      min={0} max={2} step={0.05}
-                      onValueChange={([v]) => settingsStore.updateSetting('temperature', v)}
-                      className="touch-none"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <Label>Max Tokens: {settings.maxTokens}</Label>
-                      <span className="text-muted-foreground">Max response length</span>
-                    </div>
-                    <Slider
-                      value={[settings.maxTokens]}
-                      min={64} max={4096} step={64}
-                      onValueChange={([v]) => settingsStore.updateSetting('maxTokens', v)}
-                      className="touch-none"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <Label>Top P: {settings.topP.toFixed(2)}</Label>
-                    </div>
-                    <Slider
-                      value={[settings.topP]}
-                      min={0} max={1} step={0.05}
-                      onValueChange={([v]) => settingsStore.updateSetting('topP', v)}
-                      className="touch-none"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <Label>Frequency Penalty: {settings.frequencyPenalty.toFixed(2)}</Label>
-                      <span className="text-muted-foreground">Reduce repetition</span>
-                    </div>
-                    <Slider
-                      value={[settings.frequencyPenalty]}
-                      min={0} max={2} step={0.1}
-                      onValueChange={([v]) => settingsStore.updateSetting('frequencyPenalty', v)}
-                      className="touch-none"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <Label>Presence Penalty: {settings.presencePenalty.toFixed(2)}</Label>
-                      <span className="text-muted-foreground">Encourage new topics</span>
-                    </div>
-                    <Slider
-                      value={[settings.presencePenalty]}
-                      min={0} max={2} step={0.1}
-                      onValueChange={([v]) => settingsStore.updateSetting('presencePenalty', v)}
-                      className="touch-none"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'persona' && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-sm">Your Profile</h3>
-                  <p className="text-xs text-muted-foreground">Define who you are in roleplay conversations</p>
-                </div>
-
-                <div className="p-3 rounded-lg bg-muted/50 space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Bot className="w-4 h-4" />
-                    This is Optional
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Characters will use this information to address you and understand your role in the story.
-                  </p>
-                </div>
-
-                <div>
-                  <Label className="text-sm">Your Name</Label>
-                  <Input
-                    value={settings.userPersona.name}
-                    onChange={(e) => settingsStore.updateUserPersona({ name: e.target.value })}
-                    placeholder="How characters should call you..."
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm">Your Description</Label>
-                  <Textarea
-                    value={settings.userPersona.description}
-                    onChange={(e) => settingsStore.updateUserPersona({ description: e.target.value })}
-                    placeholder="Your appearance, background, who you are in the story..."
-                    className="mt-1 min-h-[80px]"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm">Your Personality</Label>
-                  <Textarea
-                    value={settings.userPersona.personality || ''}
-                    onChange={(e) => settingsStore.updateUserPersona({ personality: e.target.value })}
-                    placeholder="Your traits, behavior patterns, communication style..."
-                    className="mt-1 min-h-[60px]"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm">Your Speech Style</Label>
-                  <Textarea
-                    value={settings.userPersona.speechPatterns || ''}
-                    onChange={(e) => settingsStore.updateUserPersona({ speechPatterns: e.target.value })}
-                    placeholder="How you typically speak - formal, casual, uses certain phrases..."
-                    className="mt-1 min-h-[60px]"
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-sm">Remember My Profile</Label>
-                    <p className="text-xs text-muted-foreground">Include profile in system prompt</p>
-                  </div>
-                  <Switch
-                    checked={!!settings.userPersona.name}
-                    onCheckedChange={(v) => {
-                      if (!v) {
-                        settingsStore.updateUserPersona({ name: '', description: '', personality: '', speechPatterns: '' });
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'memory' && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-sm">Memory System</h3>
-                  <p className="text-xs text-muted-foreground">Auto-extract and recall important information</p>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-sm">Enable Memory</Label>
-                      <p className="text-xs text-muted-foreground">Extract and use memories in chat</p>
-                    </div>
-                    <Switch
-                      checked={settings.memoryEnabled}
-                      onCheckedChange={(v) => settingsStore.updateSetting('memoryEnabled', v)}
+                    <Label className="text-sm">Your Name</Label>
+                    <Input
+                      value={settings.userPersona.name}
+                      onChange={(e) => settingsStore.updateUserPersona({ name: e.target.value })}
+                      placeholder="How characters should call you..."
+                      className="mt-1"
+                      maxLength={50}
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-sm">Auto-Extract Memories</Label>
-                      <p className="text-xs text-muted-foreground">Automatically extract facts from messages</p>
-                    </div>
-                    <Switch
-                      checked={settings.autoExtractMemories}
-                      onCheckedChange={(v) => settingsStore.updateSetting('autoExtractMemories', v)}
+                  <div>
+                    <Label className="text-sm">Your Description</Label>
+                    <Textarea
+                      value={settings.userPersona.description}
+                      onChange={(e) => settingsStore.updateUserPersona({ description: e.target.value })}
+                      placeholder="Your appearance, background, who you are in the story..."
+                      className="mt-1 min-h-[80px]"
+                      maxLength={2000}
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <Label>Max Memories Per Query: {settings.maxMemoriesPerQuery}</Label>
-                    </div>
-                    <Slider
-                      value={[settings.maxMemoriesPerQuery]}
-                      min={1} max={30} step={1}
-                      onValueChange={([v]) => settingsStore.updateSetting('maxMemoriesPerQuery', v)}
+                  <div>
+                    <Label className="text-sm">Your Personality</Label>
+                    <Textarea
+                      value={settings.userPersona.personality || ''}
+                      onChange={(e) => settingsStore.updateUserPersona({ personality: e.target.value })}
+                      placeholder="Your traits, behavior patterns, communication style..."
+                      className="mt-1 min-h-[60px]"
+                      maxLength={1000}
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <Label>Min Importance: {settings.memoryImportanceThreshold}</Label>
-                      <span className="text-muted-foreground">Only store memories above this</span>
-                    </div>
-                    <Slider
-                      value={[settings.memoryImportanceThreshold]}
-                      min={1} max={8} step={1}
-                      onValueChange={([v]) => settingsStore.updateSetting('memoryImportanceThreshold', v)}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'context' && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-sm">Context Window</h3>
-                  <p className="text-xs text-muted-foreground">Controls how much conversation the AI remembers</p>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <Label>Summarize After: {settings.summarizeThreshold} messages</Label>
-                    </div>
-                    <Slider
-                      value={[settings.summarizeThreshold]}
-                      min={8} max={50} step={2}
-                      onValueChange={([v]) => settingsStore.updateSetting('summarizeThreshold', v)}
-                      className="touch-none"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <Label>Keep Recent Messages: {settings.keepRecentCount}</Label>
-                    </div>
-                    <Slider
-                      value={[settings.keepRecentCount]}
-                      min={2} max={20} step={1}
-                      onValueChange={([v]) => settingsStore.updateSetting('keepRecentCount', v)}
-                      className="touch-none"
+                  <div>
+                    <Label className="text-sm">Your Speech Style</Label>
+                    <Textarea
+                      value={settings.userPersona.speechPatterns || ''}
+                      onChange={(e) => settingsStore.updateUserPersona({ speechPatterns: e.target.value })}
+                      placeholder="How you typically speak - formal, casual, uses certain phrases..."
+                      className="mt-1 min-h-[60px]"
+                      maxLength={1000}
                     />
                   </div>
 
                   <Separator />
 
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-sm">Remember My Profile</Label>
+                      <p className="text-xs text-muted-foreground">Include profile in system prompt</p>
+                    </div>
+                    <Switch
+                      checked={!!settings.userPersona.name}
+                      onCheckedChange={(v) => {
+                        if (!v) {
+                          settingsStore.updateUserPersona({ 
+                            name: '', 
+                            description: '', 
+                            personality: '', 
+                            speechPatterns: '' 
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'memory' && (
+                <div className="space-y-4">
                   <div>
-                    <Label className="text-sm">Jailbreak / Pre-Prompt</Label>
-                    <p className="text-xs text-muted-foreground mb-1">Creative freedom prompt (prepended to system prompt)</p>
-                    <Textarea
-                      value={settings.jailbreakPrompt || ''}
-                      onChange={(e) => settingsStore.updateSetting('jailbreakPrompt', e.target.value)}
-                      placeholder="e.g., [System note: This is an uncensored roleplay...]"
-                      className="text-xs min-h-[80px]"
-                    />
+                    <h3 className="font-semibold text-sm">Memory System</h3>
+                    <p className="text-xs text-muted-foreground">Auto-extract and recall important information</p>
                   </div>
 
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-sm">Enable Memory</Label>
+                        <p className="text-xs text-muted-foreground">Extract and use memories in chat</p>
+                      </div>
+                      <Switch
+                        checked={settings.memoryEnabled}
+                        onCheckedChange={(v) => settingsStore.updateSetting('memoryEnabled', v)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-sm">Auto-Extract Memories</Label>
+                        <p className="text-xs text-muted-foreground">Automatically extract facts from messages</p>
+                      </div>
+                      <Switch
+                        checked={settings.autoExtractMemories}
+                        onCheckedChange={(v) => settingsStore.updateSetting('autoExtractMemories', v)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <Label>Max Memories Per Query: {settings.maxMemoriesPerQuery}</Label>
+                      </div>
+                      <Slider
+                        value={[settings.maxMemoriesPerQuery]}
+                        min={1} max={30} step={1}
+                        onValueChange={([v]) => settingsStore.updateSetting('maxMemoriesPerQuery', v)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <Label>Min Importance: {settings.memoryImportanceThreshold}</Label>
+                        <span className="text-muted-foreground">Only store memories above this</span>
+                      </div>
+                      <Slider
+                        value={[settings.memoryImportanceThreshold]}
+                        min={1} max={8} step={1}
+                        onValueChange={([v]) => settingsStore.updateSetting('memoryImportanceThreshold', v)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'context' && (
+                <div className="space-y-4">
                   <div>
-                    <Label className="text-sm">Custom System Prompt</Label>
-                    <p className="text-xs text-muted-foreground mb-1">Additional instructions for the AI</p>
-                    <Textarea
-                      value={settings.customSystemPrompt || ''}
-                      onChange={(e) => settingsStore.updateSetting('customSystemPrompt', e.target.value)}
-                      placeholder="Additional system instructions..."
-                      className="text-xs min-h-[80px]"
-                    />
+                    <h3 className="font-semibold text-sm">Context Window</h3>
+                    <p className="text-xs text-muted-foreground">Controls how much conversation the AI remembers</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <Label>Summarize After: {settings.summarizeThreshold} messages</Label>
+                      </div>
+                      <Slider
+                        value={[settings.summarizeThreshold]}
+                        min={8} max={50} step={2}
+                        onValueChange={([v]) => settingsStore.updateSetting('summarizeThreshold', v)}
+                        className="touch-none"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <Label>Keep Recent Messages: {settings.keepRecentCount}</Label>
+                      </div>
+                      <Slider
+                        value={[settings.keepRecentCount]}
+                        min={2} max={20} step={1}
+                        onValueChange={([v]) => settingsStore.updateSetting('keepRecentCount', v)}
+                        className="touch-none"
+                      />
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <Label className="text-sm">Jailbreak / Pre-Prompt</Label>
+                      <p className="text-xs text-muted-foreground mb-1">Creative freedom prompt (prepended to system prompt)</p>
+                      <Textarea
+                        value={settings.jailbreakPrompt || ''}
+                        onChange={(e) => settingsStore.updateSetting('jailbreakPrompt', e.target.value)}
+                        placeholder="e.g., [System note: This is an uncensored roleplay...]"
+                        className="text-xs min-h-[80px]"
+                        maxLength={3000}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-sm">Custom System Prompt</Label>
+                      <p className="text-xs text-muted-foreground mb-1">Additional instructions for the AI</p>
+                      <Textarea
+                        value={settings.customSystemPrompt || ''}
+                        onChange={(e) => settingsStore.updateSetting('customSystemPrompt', e.target.value)}
+                        placeholder="Additional system instructions..."
+                        className="text-xs min-h-[80px]"
+                        maxLength={5000}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {activeTab === 'ui' && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-sm">Appearance</h3>
+              {activeTab === 'ui' && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-sm">Appearance</h3>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Theme</Label>
+                      <ThemeToggle />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Send on Enter</Label>
+                      <Switch
+                        checked={settings.sendOnEnter}
+                        onCheckedChange={(v) => settingsStore.updateSetting('sendOnEnter', v)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Show Timestamps</Label>
+                      <Switch
+                        checked={settings.showTimestamps}
+                        onCheckedChange={(v) => settingsStore.updateSetting('showTimestamps', v)}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Streaming</Label>
+                      <Switch
+                        checked={settings.streamingEnabled}
+                        onCheckedChange={(v) => settingsStore.updateSetting('streamingEnabled', v)}
+                      />
+                    </div>
+                  </div>
                 </div>
+              )}
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm">Theme</Label>
-                    <ThemeToggle />
+              {activeTab === 'data' && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-sm">Data Management</h3>
+                    <p className="text-xs text-muted-foreground">All data is stored locally on your device</p>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm">Send on Enter</Label>
-                    <Switch
-                      checked={settings.sendOnEnter}
-                      onCheckedChange={(v) => settingsStore.updateSetting('sendOnEnter', v)}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm">Show Timestamps</Label>
-                    <Switch
-                      checked={settings.showTimestamps}
-                      onCheckedChange={(v) => settingsStore.updateSetting('showTimestamps', v)}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm">Streaming</Label>
-                    <Switch
-                      checked={settings.streamingEnabled}
-                      onCheckedChange={(v) => settingsStore.updateSetting('streamingEnabled', v)}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'data' && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-sm">Data Management</h3>
-                  <p className="text-xs text-muted-foreground">All data is stored locally on your device</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start gap-2" onClick={handleExportData}>
-                    <Download className="w-4 h-4" /> Export All Data (JSON backup)
-                  </Button>
-
-                  <Button variant="outline" className="w-full justify-start gap-2" onClick={() => fileInputRef.current?.click()}>
-                    <Upload className="w-4 h-4" /> Import Data
-                  </Button>
-                  <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportData} />
-
-                  <Separator />
-
-                  {store.activeCharacter && (
-                    <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
-                      const json = store.exportCharacter(store.activeCharacter!);
-                      const blob = new Blob([json], { type: 'application/json' });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = `${store.activeCharacter!.name.replace(/[^a-z0-9]/gi, '_')}.json`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                    }}>
-                      <Download className="w-4 h-4" /> Export Current Character
+                  <div className="space-y-2">
+                    <Button variant="outline" className="w-full justify-start gap-2" onClick={handleExportData}>
+                      <Download className="w-4 h-4" /> Export All Data (JSON backup)
                     </Button>
-                  )}
 
-                  <Separator />
+                    <Button variant="outline" className="w-full justify-start gap-2" onClick={() => fileInputRef.current?.click()}>
+                      <Upload className="w-4 h-4" /> Import Data
+                    </Button>
+                    <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportData} />
 
-                  <Button variant="destructive" className="w-full justify-start gap-2" onClick={handleClearData}>
-                    <Trash2 className="w-4 h-4" /> Clear All Data
-                  </Button>
+                    <Separator />
 
-                  <p className="text-xs text-muted-foreground text-center">
-                    <Shield className="w-3 h-3 inline mr-1" />
-                    Your data never leaves your device. No analytics, no tracking.
-                  </p>
+                    {store.activeCharacter && (
+                      <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                        try {
+                          const json = store.exportCharacter(store.activeCharacter!);
+                          const blob = new Blob([json], { type: 'application/json' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `${store.activeCharacter!.name.replace(/[^a-z0-9]/gi, '_')}.json`;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        } catch (err) {
+                          console.error('Export character failed:', err);
+                        }
+                      }}>
+                        <Download className="w-4 h-4" /> Export Current Character
+                      </Button>
+                    )}
+
+                    <Separator />
+
+                    <Button variant="destructive" className="w-full justify-start gap-2" onClick={handleClearData}>
+                      <Trash2 className="w-4 h-4" /> Clear All Data
+                    </Button>
+
+                    <p className="text-xs text-muted-foreground text-center">
+                      <Shield className="w-3 h-3 inline mr-1" />
+                      Your data never leaves your device. No analytics, no tracking.
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             </div>
           </ScrollArea>
         </div>
@@ -1863,10 +2099,14 @@ function SettingsDialog() {
 // ============================================================
 function CharacterEditorDialog() {
   const store = useChatStore();
+  const editingCharacter = store.editingCharacter;
+  
   return (
-    <Dialog open={store.characterEditorOpen} onOpenChange={store.setCharacterEditorOpen}>
+    <Dialog open={store.characterEditorOpen} onOpenChange={(open) => {
+      if (!open) store.setCharacterEditorOpen(false);
+    }}>
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0">
-        <CharacterEditorInner key={store.editingCharacter?.id || 'new'} />
+        <CharacterEditorInner key={editingCharacter?.id || 'new'} />
       </DialogContent>
     </Dialog>
   );
@@ -1899,10 +2139,12 @@ function CharacterEditorInner() {
 
   const [tagInput, setTagInput] = useState('');
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
+    if (!form.name?.trim()) return;
+    
     const character: Character = {
-      id: store.editingCharacter?.id || `char_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      name: form.name || 'Unnamed',
+      id: initialCharacter?.id || `char_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      name: form.name.trim(),
       avatar: form.avatar || undefined,
       description: form.description || '',
       personality: form.personality || '',
@@ -1912,9 +2154,9 @@ function CharacterEditorInner() {
       systemPrompt: form.systemPrompt || undefined,
       creatorNotes: form.creatorNotes || '',
       tags: form.tags || [],
-      createdAt: store.editingCharacter?.createdAt || Date.now(),
+      createdAt: initialCharacter?.createdAt || Date.now(),
       updatedAt: Date.now(),
-      isFavorite: store.editingCharacter?.isFavorite || false,
+      isFavorite: initialCharacter?.isFavorite || false,
       speechPatterns: form.speechPatterns || undefined,
       knowledge: form.knowledge || undefined,
       relationship: form.relationship || undefined,
@@ -1928,17 +2170,22 @@ function CharacterEditorInner() {
     if (!isEditing) {
       store.selectCharacter(character);
     }
-  };
+  }, [form, initialCharacter, isEditing, store]);
 
-  const addTag = () => {
-    if (!tagInput.trim()) return;
-    setForm(f => ({ ...f, tags: [...(f.tags || []), tagInput.trim()] }));
+  const addTag = useCallback(() => {
+    const trimmed = tagInput.trim();
+    if (!trimmed) return;
+    if (form.tags?.includes(trimmed)) {
+      setTagInput('');
+      return;
+    }
+    setForm(f => ({ ...f, tags: [...(f.tags || []), trimmed] }));
     setTagInput('');
-  };
+  }, [tagInput, form.tags]);
 
-  const removeTag = (tag: string) => {
+  const removeTag = useCallback((tag: string) => {
     setForm(f => ({ ...f, tags: (f.tags || []).filter(t => t !== tag) }));
-  };
+  }, []);
 
   const [activeField, setActiveField] = useState(isEditing ? 'identity' : 'templates');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -1946,7 +2193,7 @@ function CharacterEditorInner() {
   const [generationPrompt, setGenerationPrompt] = useState('');
   const [generationError, setGenerationError] = useState<string | null>(null);
 
-  const handleGenerateCharacter = async () => {
+  const handleGenerateCharacter = useCallback(async () => {
     setGenerating(true);
     setGenerationError(null);
     try {
@@ -1975,7 +2222,7 @@ function CharacterEditorInner() {
     } finally {
       setGenerating(false);
     }
-  };
+  }, [generationPrompt, settingsStore.settings]);
 
   const fields = [
     { id: 'templates', label: 'Templates', icon: <Sparkles className="w-4 h-4" /> },
@@ -1985,7 +2232,7 @@ function CharacterEditorInner() {
     { id: 'advanced', label: 'Advanced', icon: <Settings className="w-4 h-4" /> },
   ];
 
-  const applyTemplate = (template: CharacterTemplate) => {
+  const applyTemplate = useCallback((template: CharacterTemplate) => {
     if (!template.character) return;
     setSelectedTemplate(template.id);
     setForm(f => ({
@@ -1993,7 +2240,11 @@ function CharacterEditorInner() {
       ...template.character,
       tags: template.character.tags || f.tags,
     }));
-  };
+  }, []);
+
+  const updateForm = useCallback(<K extends keyof Character>(key: K, value: Character[K]) => {
+    setForm(f => ({ ...f, [key]: value }));
+  }, []);
 
   return (
     <>
@@ -2001,410 +2252,365 @@ function CharacterEditorInner() {
         <DialogTitle>{isEditing ? 'Edit Character' : 'Create Character'}</DialogTitle>
       </DialogHeader>
 
-        <div className="flex-1 overflow-hidden flex flex-col sm:flex-row">
-          {/* Field tabs */}
-          <div className="sm:w-36 border-r border-border p-2 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-x-visible flex-shrink-0">
-            {fields.map(f => (
-              <Button
-                key={f.id}
-                variant={activeField === f.id ? 'secondary' : 'ghost'}
-                size="sm"
-                className="justify-start gap-2 text-xs whitespace-nowrap h-8"
-                onClick={() => setActiveField(f.id)}
-              >
-                {f.icon} {f.label}
-              </Button>
-            ))}
-          </div>
+      <div className="flex-1 overflow-hidden flex flex-col sm:flex-row">
+        {/* Field tabs */}
+        <div className="sm:w-36 border-r border-border p-2 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-x-visible flex-shrink-0">
+          {fields.map(f => (
+            <Button
+              key={f.id}
+              variant={activeField === f.id ? 'secondary' : 'ghost'}
+              size="sm"
+              className="justify-start gap-2 text-xs whitespace-nowrap h-8"
+              onClick={() => setActiveField(f.id)}
+            >
+              {f.icon} {f.label}
+            </Button>
+          ))}
+        </div>
 
-          {/* Form */}
-          <ScrollArea className="flex-1 p-4 overflow-y-auto touch-pan-y">
-            {activeField === 'templates' && !isEditing && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-sm">Create Your Character</h3>
-                  <p className="text-xs text-muted-foreground">Choose a template or let AI generate one</p>
-                </div>
+        {/* Form */}
+        <ScrollArea className="flex-1 p-4 overflow-y-auto touch-pan-y">
+          {activeField === 'templates' && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-sm">Create Your Character</h3>
+                <p className="text-xs text-muted-foreground">Choose a template or let AI generate one</p>
+              </div>
 
-                {/* AI Generate Section */}
-                <div className="p-4 rounded-lg border border-dashed border-primary/30 bg-primary/5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium">AI Generate</span>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={handleGenerateCharacter}
-                      disabled={generating}
-                      className="gap-1"
-                    >
-                      {generating ? (
-                        <>
-                          <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-3 h-3" />
-                          Generate
-                        </>
-                      )}
-                    </Button>
+              {/* AI Generate Section */}
+              <div className="p-4 rounded-lg border border-dashed border-primary/30 bg-primary/5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium">AI Generate</span>
                   </div>
-                  <Input
-                    value={generationPrompt}
-                    onChange={(e) => setGenerationPrompt(e.target.value)}
-                    placeholder="Describe the character you want (optional)"
-                    className="h-8 text-xs"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !generating) {
-                        handleGenerateCharacter();
-                      }
-                    }}
-                  />
-                  {generationError && (
-                    <p className="text-xs text-destructive">{generationError}</p>
-                  )}
-                  <p className="text-[10px] text-muted-foreground">
-                    Describe a character concept and AI will create a full character card.
-                  </p>
+                  <Button
+                    size="sm"
+                    onClick={handleGenerateCharacter}
+                    disabled={generating}
+                    className="gap-1"
+                  >
+                    {generating ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3 h-3" />
+                        Generate
+                      </>
+                    )}
+                  </Button>
                 </div>
+                <Input
+                  value={generationPrompt}
+                  onChange={(e) => setGenerationPrompt(e.target.value)}
+                  placeholder="Describe the character you want (optional)"
+                  className="h-8 text-xs"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !generating) {
+                      handleGenerateCharacter();
+                    }
+                  }}
+                  maxLength={500}
+                />
+                {generationError && (
+                  <p className="text-xs text-destructive">{generationError}</p>
+                )}
+                <p className="text-[10px] text-muted-foreground">
+                  Describe a character concept and AI will create a full character card.
+                </p>
+              </div>
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">or choose a template</span>
-                  </div>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
                 </div>
-
-                {/* Templates Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  {CHARACTER_TEMPLATES.map((template) => (
-                    <button
-                      key={template.id}
-                      onClick={() => applyTemplate(template)}
-                      className={`p-4 rounded-lg border text-left transition-all hover:border-primary/50 ${
-                        selectedTemplate === template.id
-                          ? 'border-primary bg-primary/10 ring-1 ring-primary'
-                          : 'border-border'
-                      }`}
-                    >
-                      <div className="text-3xl mb-2">{template.icon}</div>
-                      <div className="text-sm font-medium">{template.name}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {template.description}
-                      </div>
-                      {template.character.tags && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {template.character.tags.slice(0, 3).map(tag => (
-                            <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </button>
-                  ))}
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">or choose a template</span>
                 </div>
               </div>
-            )}
 
-            {activeField === 'templates' && isEditing && (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-sm">AI Generate</h3>
-                  <p className="text-xs text-muted-foreground">Let AI create a character for you</p>
-                </div>
-
-                <div className="p-4 rounded-lg border border-dashed border-primary/30 bg-primary/5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium">Generate with AI</span>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={handleGenerateCharacter}
-                      disabled={generating}
-                      className="gap-1"
-                    >
-                      {generating ? (
-                        <>
-                          <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-3 h-3" />
-                          Generate
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  <Input
-                    value={generationPrompt}
-                    onChange={(e) => setGenerationPrompt(e.target.value)}
-                    placeholder="Describe the character you want (optional)"
-                    className="h-8 text-xs"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !generating) {
-                        handleGenerateCharacter();
-                      }
-                    }}
-                  />
-                  {generationError && (
-                    <p className="text-xs text-destructive">{generationError}</p>
-                  )}
-                </div>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">or use a template</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {CHARACTER_TEMPLATES.slice(0, -1).map((template) => (
-                    <button
-                      key={template.id}
-                      onClick={() => {
-                        if (confirm('This will replace your current character. Continue?')) {
+              {/* Templates Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {CHARACTER_TEMPLATES.map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => {
+                      if (isEditing && form.name) {
+                        if (confirm('This will replace your current character fields. Continue?')) {
                           applyTemplate(template);
                         }
-                      }}
-                      className="p-4 rounded-lg border border-border text-left transition-all hover:border-primary/50"
-                    >
-                      <div className="text-3xl mb-2">{template.icon}</div>
-                      <div className="text-sm font-medium">{template.name}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {template.description}
+                      } else {
+                        applyTemplate(template);
+                      }
+                    }}
+                    className={`p-4 rounded-lg border text-left transition-all hover:border-primary/50 ${
+                      selectedTemplate === template.id
+                        ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                        : 'border-border'
+                    }`}
+                  >
+                    <div className="text-3xl mb-2">{template.icon}</div>
+                    <div className="text-sm font-medium">{template.name}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {template.description}
+                    </div>
+                    {template.character.tags && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {template.character.tags.slice(0, 3).map(tag => (
+                          <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">
+                            {tag}
+                          </Badge>
+                        ))}
                       </div>
-                    </button>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeField === 'identity' && (
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm">Name *</Label>
+                <Input
+                  value={form.name || ''}
+                  onChange={(e) => updateForm('name', e.target.value)}
+                  placeholder="Character name"
+                  className="mt-1"
+                  maxLength={100}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Avatar URL</Label>
+                <Input
+                  value={form.avatar || ''}
+                  onChange={(e) => updateForm('avatar', e.target.value)}
+                  placeholder="https://..."
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Description *</Label>
+                <p className="text-xs text-muted-foreground mb-1">Physical appearance, background, who they are</p>
+                <Textarea
+                  value={form.description || ''}
+                  onChange={(e) => updateForm('description', e.target.value)}
+                  placeholder="A young woman with long silver hair and piercing blue eyes. She is a wandering mage..."
+                  className="min-h-[120px]"
+                  maxLength={5000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Tags</Label>
+                <div className="flex flex-wrap gap-1 mt-1 mb-1">
+                  {(form.tags || []).map(tag => (
+                    <Badge key={tag} variant="secondary" className="gap-1">
+                      {tag}
+                      <button 
+                        onClick={() => removeTag(tag)} 
+                        className="hover:text-destructive"
+                        type="button"
+                        aria-label={`Remove tag ${tag}`}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {activeField === 'identity' && (
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-sm">Name *</Label>
+                <div className="flex gap-2">
                   <Input
-                    value={form.name || ''}
-                    onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
-                    placeholder="Character name"
-                    className="mt-1"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag();
+                      }
+                    }}
+                    placeholder="Add tag..."
+                    className="h-8 text-sm"
+                    maxLength={30}
                   />
-                </div>
-                <div>
-                  <Label className="text-sm">Avatar URL</Label>
-                  <Input
-                    value={form.avatar || ''}
-                    onChange={(e) => setForm(f => ({ ...f, avatar: e.target.value }))}
-                    placeholder="https://..."
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Description *</Label>
-                  <p className="text-xs text-muted-foreground mb-1">Physical appearance, background, who they are</p>
-                  <Textarea
-                    value={form.description || ''}
-                    onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))}
-                    placeholder="A young woman with long silver hair and piercing blue eyes. She is a wandering mage..."
-                    className="min-h-[120px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Tags</Label>
-                  <div className="flex flex-wrap gap-1 mt-1 mb-1">
-                    {(form.tags || []).map(tag => (
-                      <Badge key={tag} variant="secondary" className="gap-1">
-                        {tag}
-                        <button onClick={() => removeTag(tag)} className="hover:text-destructive">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && addTag()}
-                      placeholder="Add tag..."
-                      className="h-8 text-sm"
-                    />
-                    <Button variant="outline" size="sm" onClick={addTag}>
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
+                  <Button variant="outline" size="sm" onClick={addTag} type="button">
+                    <Plus className="w-3 h-3" />
+                  </Button>
                 </div>
               </div>
-            )}
-
-            {activeField === 'personality' && (
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-sm">Personality *</Label>
-                  <p className="text-xs text-muted-foreground mb-1">Core traits, mannerisms, quirks</p>
-                  <Textarea
-                    value={form.personality || ''}
-                    onChange={(e) => setForm(f => ({ ...f, personality: e.target.value }))}
-                    placeholder="Kind but reserved, slow to trust. Has a dry sense of humor..."
-                    className="min-h-[100px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Speech Patterns</Label>
-                  <p className="text-xs text-muted-foreground mb-1">How they talk (accent, vocabulary, verbal habits)</p>
-                  <Textarea
-                    value={form.speechPatterns || ''}
-                    onChange={(e) => setForm(f => ({ ...f, speechPatterns: e.target.value }))}
-                    placeholder="Speaks formally, occasionally uses archaic phrases..."
-                    className="min-h-[80px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Likes</Label>
-                  <Textarea
-                    value={form.likes || ''}
-                    onChange={(e) => setForm(f => ({ ...f, likes: e.target.value }))}
-                    placeholder="Things they enjoy"
-                    className="min-h-[60px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Dislikes</Label>
-                  <Textarea
-                    value={form.dislikes || ''}
-                    onChange={(e) => setForm(f => ({ ...f, dislikes: e.target.value }))}
-                    placeholder="Things they hate"
-                    className="min-h-[60px]"
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeField === 'scenario' && (
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-sm">Scenario / Setting</Label>
-                  <p className="text-xs text-muted-foreground mb-1">The world, situation, or starting context</p>
-                  <Textarea
-                    value={form.scenario || ''}
-                    onChange={(e) => setForm(f => ({ ...f, scenario: e.target.value }))}
-                    placeholder="A medieval fantasy world where magic is dying. The character runs a small bookshop..."
-                    className="min-h-[100px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Relationship to User</Label>
-                  <Textarea
-                    value={form.relationship || ''}
-                    onChange={(e) => setForm(f => ({ ...f, relationship: e.target.value }))}
-                    placeholder="Strangers who just met at a tavern..."
-                    className="min-h-[60px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">First Message *</Label>
-                  <p className="text-xs text-muted-foreground mb-1">The character's opening greeting</p>
-                  <Textarea
-                    value={form.firstMessage || ''}
-                    onChange={(e) => setForm(f => ({ ...f, firstMessage: e.target.value }))}
-                    placeholder="*The bell above the door chimes as you enter the bookshop* Oh, hello there..."
-                    className="min-h-[120px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Example Dialogue</Label>
-                  <p className="text-xs text-muted-foreground mb-1">Example messages (Character.ai format: &lt;START&gt;)</p>
-                  <Textarea
-                    value={form.exampleMessages || ''}
-                    onChange={(e) => setForm(f => ({ ...f, exampleMessages: e.target.value }))}
-                    placeholder={`<START>\n{{user}}: Hello!\n{{char}}: *smiles warmly* Welcome, traveler.`}
-                    className="min-h-[120px] font-mono text-xs"
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeField === 'advanced' && (
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-sm">Knowledge</Label>
-                  <p className="text-xs text-muted-foreground mb-1">What the character knows (skills, history, secrets)</p>
-                  <Textarea
-                    value={form.knowledge || ''}
-                    onChange={(e) => setForm(f => ({ ...f, knowledge: e.target.value }))}
-                    placeholder="Knows ancient elvish, skilled in potion-making..."
-                    className="min-h-[80px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Behavioral Guidelines</Label>
-                  <p className="text-xs text-muted-foreground mb-1">How the character should behave in the roleplay</p>
-                  <Textarea
-                    value={form.behavior || ''}
-                    onChange={(e) => setForm(f => ({ ...f, behavior: e.target.value }))}
-                    placeholder="Always maintain mystery. Never reveal full backstory at once..."
-                    className="min-h-[80px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Custom System Prompt (Override)</Label>
-                  <p className="text-xs text-muted-foreground mb-1">Replaces auto-generated system prompt entirely</p>
-                  <Textarea
-                    value={form.systemPrompt || ''}
-                    onChange={(e) => setForm(f => ({ ...f, systemPrompt: e.target.value }))}
-                    placeholder="Write {{char}}'s entire system prompt here..."
-                    className="min-h-[120px]"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm">Creator Notes</Label>
-                  <Textarea
-                    value={form.creatorNotes || ''}
-                    onChange={(e) => setForm(f => ({ ...f, creatorNotes: e.target.value }))}
-                    placeholder="Private notes about this character..."
-                    className="min-h-[60px]"
-                  />
-                </div>
-              </div>
-            )}
-          </ScrollArea>
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-3 border-t border-border flex justify-end gap-2">
-          {isEditing && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => {
-                if (confirm('Delete this character?')) {
-                  store.deleteCharacter(store.editingCharacter!.id);
-                  store.setCharacterEditorOpen(false);
-                }
-              }}
-            >
-              Delete
-            </Button>
+            </div>
           )}
-          <Button variant="outline" onClick={() => store.setCharacterEditorOpen(false)}>
-            Cancel
+
+          {activeField === 'personality' && (
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm">Personality *</Label>
+                <p className="text-xs text-muted-foreground mb-1">Core traits, mannerisms, quirks</p>
+                <Textarea
+                  value={form.personality || ''}
+                  onChange={(e) => updateForm('personality', e.target.value)}
+                  placeholder="Kind but reserved, slow to trust. Has a dry sense of humor..."
+                  className="min-h-[100px]"
+                  maxLength={3000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Speech Patterns</Label>
+                <p className="text-xs text-muted-foreground mb-1">How they talk (accent, vocabulary, verbal habits)</p>
+                <Textarea
+                  value={form.speechPatterns || ''}
+                  onChange={(e) => updateForm('speechPatterns', e.target.value)}
+                  placeholder="Speaks formally, occasionally uses archaic phrases..."
+                  className="min-h-[80px]"
+                  maxLength={2000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Likes</Label>
+                <Textarea
+                  value={form.likes || ''}
+                  onChange={(e) => updateForm('likes', e.target.value)}
+                  placeholder="Things they enjoy"
+                  className="min-h-[60px]"
+                  maxLength={1000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Dislikes</Label>
+                <Textarea
+                  value={form.dislikes || ''}
+                  onChange={(e) => updateForm('dislikes', e.target.value)}
+                  placeholder="Things they hate"
+                  className="min-h-[60px]"
+                  maxLength={1000}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeField === 'scenario' && (
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm">Scenario / Setting</Label>
+                <p className="text-xs text-muted-foreground mb-1">The world, situation, or starting context</p>
+                <Textarea
+                  value={form.scenario || ''}
+                  onChange={(e) => updateForm('scenario', e.target.value)}
+                  placeholder="A medieval fantasy world where magic is dying. The character runs a small bookshop..."
+                  className="min-h-[100px]"
+                  maxLength={3000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Relationship to User</Label>
+                <Textarea
+                  value={form.relationship || ''}
+                  onChange={(e) => updateForm('relationship', e.target.value)}
+                  placeholder="Strangers who just met at a tavern..."
+                  className="min-h-[60px]"
+                  maxLength={1000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">First Message *</Label>
+                <p className="text-xs text-muted-foreground mb-1">The character&apos;s opening greeting</p>
+                <Textarea
+                  value={form.firstMessage || ''}
+                  onChange={(e) => updateForm('firstMessage', e.target.value)}
+                  placeholder="*The bell above the door chimes as you enter the bookshop* Oh, hello there..."
+                  className="min-h-[120px]"
+                  maxLength={5000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Example Dialogue</Label>
+                <p className="text-xs text-muted-foreground mb-1">Example messages (Character.ai format: &lt;START&gt;)</p>
+                <Textarea
+                  value={form.exampleMessages || ''}
+                  onChange={(e) => updateForm('exampleMessages', e.target.value)}
+                  placeholder={`<START>\n{{user}}: Hello!\n{{char}}: *smiles warmly* Welcome, traveler.`}
+                  className="min-h-[120px] font-mono text-xs"
+                  maxLength={5000}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeField === 'advanced' && (
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm">Knowledge</Label>
+                <p className="text-xs text-muted-foreground mb-1">What the character knows (skills, history, secrets)</p>
+                <Textarea
+                  value={form.knowledge || ''}
+                  onChange={(e) => updateForm('knowledge', e.target.value)}
+                  placeholder="Knows ancient elvish, skilled in potion-making..."
+                  className="min-h-[80px]"
+                  maxLength={3000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Behavioral Guidelines</Label>
+                <p className="text-xs text-muted-foreground mb-1">How the character should behave in the roleplay</p>
+                <Textarea
+                  value={form.behavior || ''}
+                  onChange={(e) => updateForm('behavior', e.target.value)}
+                  placeholder="Always maintain mystery. Never reveal full backstory at once..."
+                  className="min-h-[80px]"
+                  maxLength={3000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Custom System Prompt (Override)</Label>
+                <p className="text-xs text-muted-foreground mb-1">Replaces auto-generated system prompt entirely</p>
+                <Textarea
+                  value={form.systemPrompt || ''}
+                  onChange={(e) => updateForm('systemPrompt', e.target.value)}
+                  placeholder="Write {{char}}'s entire system prompt here..."
+                  className="min-h-[120px]"
+                  maxLength={10000}
+                />
+              </div>
+              <div>
+                <Label className="text-sm">Creator Notes</Label>
+                <Textarea
+                  value={form.creatorNotes || ''}
+                  onChange={(e) => updateForm('creatorNotes', e.target.value)}
+                  placeholder="Private notes about this character..."
+                  className="min-h-[60px]"
+                  maxLength={2000}
+                />
+              </div>
+            </div>
+          )}
+        </ScrollArea>
+      </div>
+
+      {/* Footer */}
+      <div className="px-6 py-3 border-t border-border flex justify-end gap-2 flex-shrink-0">
+        {isEditing && initialCharacter && (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              if (confirm(`Delete "${initialCharacter.name}"? This cannot be undone.`)) {
+                store.deleteCharacter(initialCharacter.id);
+                store.setCharacterEditorOpen(false);
+              }
+            }}
+          >
+            Delete
           </Button>
-          <Button onClick={handleSave} disabled={!form.name?.trim()}>
-            {isEditing ? 'Save Changes' : 'Create Character'}
-          </Button>
-        </div>
+        )}
+        <Button variant="outline" onClick={() => store.setCharacterEditorOpen(false)}>
+          Cancel
+        </Button>
+        <Button onClick={handleSave} disabled={!form.name?.trim()}>
+          {isEditing ? 'Save Changes' : 'Create Character'}
+        </Button>
+      </div>
     </>
   );
 }
@@ -2420,12 +2626,17 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
   const filtered = useMemo(() => {
     let chars = store.characters;
     if (showFavorites) chars = chars.filter(c => c.isFavorite);
-    if (search) chars = chars.filter(c =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.tags.some(t => t.toLowerCase().includes(search.toLowerCase()))
-    );
+    if (search) {
+      const lowerSearch = search.toLowerCase();
+      chars = chars.filter(c =>
+        c.name.toLowerCase().includes(lowerSearch) ||
+        c.tags?.some(t => t.toLowerCase().includes(lowerSearch))
+      );
+    }
     return chars;
   }, [store.characters, search, showFavorites]);
+
+  const activeCharacter = store.activeCharacter;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -2470,41 +2681,59 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
             </div>
             <div className="px-2 pb-2 space-y-1">
               {filtered.length === 0 && (
-                <p className="text-center text-muted-foreground text-xs py-4">No characters yet</p>
+                <p className="text-center text-muted-foreground text-xs py-4">
+                  {showFavorites ? 'No favorites yet' : 'No characters yet'}
+                </p>
               )}
               {filtered.map(char => (
                 <div
                   key={char.id}
-                  className={`flex items-center gap-2.5 p-2.5 rounded-lg cursor-pointer transition-colors ${
-                    store.activeCharacter?.id === char.id ? 'bg-primary/10 text-primary' : 'active:bg-muted'
-                  }`}
+                  className="flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors min-w-0 hover:bg-muted/50"
                   onClick={() => { store.selectCharacter(char); onOpenChange(false); }}
+                  style={{ minWidth: 0 }}
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0">
                     <Bot className="w-4 h-4" />
                   </div>
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 overflow-hidden">
                     <p className="text-sm font-medium truncate">{char.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{char.tags.slice(0, 2).join(', ') || 'No tags'}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {char.tags?.slice(0, 2).join(', ') || 'No tags'}
+                    </p>
                   </div>
-                  {char.isFavorite && (
-                    <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 flex-shrink-0" />
-                  )}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {char.isFavorite && (
+                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Delete "${char.name}"?`)) {
+                          store.deleteCharacter(char.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Chat History Section */}
-          {store.activeCharacter && (
+          {activeCharacter && (
             <div>
               <div className="p-3 border-b border-border flex items-center justify-between">
-                <h3 className="text-sm font-semibold">Chats with {store.activeCharacter.name}</h3>
+                <h3 className="text-sm font-semibold truncate">Chats with {activeCharacter.name}</h3>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
-                  onClick={() => { store.newChat(store.activeCharacter!); onOpenChange(false); }}
+                  className="h-8 w-8 flex-shrink-0"
+                  onClick={() => { store.newChat(activeCharacter); onOpenChange(false); }}
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
@@ -2516,20 +2745,21 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
                 {store.chats.map(chat => (
                   <div
                     key={chat.id}
-                    className={`flex items-center gap-1.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-sm transition-colors ${
-                      store.activeChat?.id === chat.id ? 'bg-primary/10 text-primary' : 'active:bg-muted'
-                    }`}
+                    className="flex items-center gap-1.5 px-2.5 py-2.5 rounded-lg cursor-pointer text-sm transition-colors min-w-0 hover:bg-muted/50"
                     onClick={() => { store.selectChat(chat); onOpenChange(false); }}
+                    style={{ minWidth: 0 }}
                   >
-                    <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="truncate flex-1">{chat.title}</span>
+                    <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
+                    <span className="truncate flex-1 min-w-0" style={{ minWidth: 0 }}>{chat.title}</span>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 flex-shrink-0"
+                      className="h-7 w-7 flex-shrink-0 text-muted-foreground hover:text-destructive"
                       onClick={(e) => {
                         e.stopPropagation();
-                        store.deleteChat(chat.id);
+                        if (confirm('Delete this chat?')) {
+                          store.deleteChat(chat.id);
+                        }
                       }}
                     >
                       <Trash2 className="w-3 h-3" />
@@ -2561,8 +2791,9 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
 // ============================================================
 function MemoryPanelSheet() {
   const store = useChatStore();
+  const memories = store.memories;
 
-  const getMemoryTypeColor = (type: string) => {
+  const getMemoryTypeColor = useCallback((type: string) => {
     switch (type) {
       case 'fact': return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
       case 'event': return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
@@ -2571,22 +2802,26 @@ function MemoryPanelSheet() {
       case 'instruction': return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
       default: return 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20';
     }
-  };
+  }, []);
 
-  const formatRelativeTime = (timestamp: number) => {
+  const formatRelativeTime = useCallback((timestamp: number) => {
     const diff = Date.now() - timestamp;
+    if (diff < 0) return 'Just now';
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days} days ago`;
     if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
     return `${Math.floor(days / 30)} months ago`;
-  };
+  }, []);
 
-  const memoriesByType = store.memories.reduce((acc, mem) => {
-    acc[mem.type] = (acc[mem.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const memoriesByType = useMemo(() => {
+    return memories.reduce<Record<string, number>>((acc, mem) => {
+      const type = mem.type || 'unknown';
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
+  }, [memories]);
 
   return (
     <Sheet open={store.memoryPanelOpen} onOpenChange={store.setMemoryPanelOpen}>
@@ -2599,15 +2834,15 @@ function MemoryPanelSheet() {
 
         <div className="mt-4 space-y-4 flex-1 overflow-hidden flex flex-col">
           {/* Memory Stats */}
-          {store.memories.length > 0 && (
+          {memories.length > 0 && (
             <div className="grid grid-cols-2 gap-2">
               <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-                <p className="text-2xl font-bold">{store.memories.length}</p>
+                <p className="text-2xl font-bold">{memories.length}</p>
                 <p className="text-xs text-muted-foreground">Total Memories</p>
               </div>
               <div className="p-3 rounded-lg bg-yellow-500/5 border border-yellow-500/10">
                 <p className="text-2xl font-bold">
-                  {store.memories.filter(m => m.accessCount > 2).length}
+                  {memories.filter(m => m.accessCount > 2).length}
                 </p>
                 <p className="text-xs text-muted-foreground">Active</p>
               </div>
@@ -2628,7 +2863,7 @@ function MemoryPanelSheet() {
           {/* Memory List */}
           <ScrollArea className="flex-1 -mx-6 px-6 overflow-y-auto touch-pan-y">
             <div className="space-y-2 pb-4">
-              {store.memories.length === 0 ? (
+              {memories.length === 0 ? (
                 <div className="text-center py-12">
                   <Brain className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
                   <p className="text-sm font-medium text-muted-foreground">No memories yet</p>
@@ -2637,38 +2872,41 @@ function MemoryPanelSheet() {
                   </p>
                 </div>
               ) : (
-                store.memories.map(mem => (
+                memories.map(mem => (
                   <div 
                     key={mem.id} 
                     className="p-3 rounded-lg bg-muted/30 border border-transparent hover:border-border/50 transition-colors space-y-2 group"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <Badge variant="outline" className={`text-[10px] h-5 ${getMemoryTypeColor(mem.type)}`}>
-                        {mem.type}
+                      <Badge variant="outline" className={`text-[10px] h-5 ${getMemoryTypeColor(mem.type || 'unknown')}`}>
+                        {mem.type || 'unknown'}
                       </Badge>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-muted-foreground hover:text-destructive"
                         onClick={() => store.deleteMemory(mem.id)}
+                        aria-label="Delete memory"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
-                    <p className="text-sm leading-relaxed">{mem.content}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {mem.keywords.slice(0, 5).map(kw => (
-                        <span key={kw} className="text-[10px] text-muted-foreground bg-background/50 px-1.5 py-0.5 rounded">
-                          #{kw}
-                        </span>
-                      ))}
-                    </div>
+                    <p className="text-sm leading-relaxed break-words">{mem.content}</p>
+                    {mem.keywords && mem.keywords.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {mem.keywords.slice(0, 5).map(kw => (
+                          <span key={kw} className="text-[10px] text-muted-foreground bg-background/50 px-1.5 py-0.5 rounded">
+                            #{kw}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                       <span>{formatRelativeTime(mem.timestamp)}</span>
                       <div className="flex items-center gap-2">
                         <span>{mem.accessCount} refs</span>
                         <span className="text-yellow-500/70">
-                          {'★'.repeat(Math.min(Math.ceil(mem.importance / 2), 5))}
+                          {'★'.repeat(Math.min(Math.ceil((mem.importance || 0) / 2), 5))}
                         </span>
                       </div>
                     </div>

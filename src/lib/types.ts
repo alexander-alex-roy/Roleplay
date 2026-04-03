@@ -23,13 +23,19 @@ export interface LocalLLMPreset {
   defaultModel: string;
 }
 
+// FIX: Renamed 'ollamx' → 'ollamx' kept as-is (assumed intentional product name),
+// but added a missing trailing-slash note: all baseUrls intentionally have NO trailing
+// slash so they can be safely concatenated with "/chat/completions" elsewhere.
 export const LOCAL_LLM_PRESETS: LocalLLMPreset[] = [
-  { id: 'ollama', name: 'Ollama', baseUrl: 'http://localhost:11434/v1', defaultModel: 'llama3.2' },
-  { id: 'lmstudio', name: 'LM Studio', baseUrl: 'http://localhost:1234/v1', defaultModel: 'local-model' },
-  { id: 'ollamx', name: 'OllamaX', baseUrl: 'http://localhost:3000/v1', defaultModel: 'llama3.2' },
-  { id: 'llamacpp', name: 'llama.cpp Server', baseUrl: 'http://localhost:8080/v1', defaultModel: 'model' },
-  { id: 'lmlegacy', name: 'LM Studio (Legacy)', baseUrl: 'http://localhost:1234', defaultModel: 'local-model' },
-  { id: 'custom-local', name: 'Custom', baseUrl: '', defaultModel: '' },
+  { id: 'ollama',        name: 'Ollama',               baseUrl: 'http://localhost:11434/v1', defaultModel: 'llama3.2'     },
+  { id: 'lmstudio',     name: 'LM Studio',             baseUrl: 'http://localhost:1234/v1',  defaultModel: 'local-model'  },
+  { id: 'ollamx',       name: 'OllamaX',               baseUrl: 'http://localhost:3000/v1',  defaultModel: 'llama3.2'     },
+  { id: 'llamacpp',     name: 'llama.cpp Server',       baseUrl: 'http://localhost:8080/v1',  defaultModel: 'model'        },
+  // FIX: 'lmlegacy' lacked the /v1 suffix, making it the only preset that would produce
+  // a different URL shape and silently fail in buildLocalRequest / buildOpenAIRequest.
+  // Added /v1 to match every other preset and the request-builder expectations.
+  { id: 'lmlegacy',     name: 'LM Studio (Legacy)',    baseUrl: 'http://localhost:1234/v1',  defaultModel: 'local-model'  },
+  { id: 'custom-local', name: 'Custom',                baseUrl: '',                          defaultModel: ''             },
 ];
 
 export interface AIModel {
@@ -51,7 +57,7 @@ export interface ProviderConfig {
   enabled: boolean;
 }
 
-// ---- User Persona (for roleplay) ----
+// ---- User Persona ----
 export interface UserPersona {
   name: string;
   description: string;
@@ -99,7 +105,11 @@ export interface CharacterTemplate {
   name: string;
   description: string;
   icon: string;
-  character: Partial<Character>;
+  // FIX: The `character` partial must always include at minimum `tags` because
+  // spread-merging a template onto a new Character requires `tags` to be defined
+  // to avoid a runtime "Cannot spread undefined" error when tags is accessed.
+  // Made tags required on the partial to enforce this at the type level.
+  character: Partial<Omit<Character, 'tags'>> & { tags: string[] };
 }
 
 export const CHARACTER_TEMPLATES: CharacterTemplate[] = [
@@ -111,7 +121,7 @@ export const CHARACTER_TEMPLATES: CharacterTemplate[] = [
     character: {
       tags: ['fantasy', 'magic', 'scholar'],
       scenario: 'A magical realm where ancient secrets hold the key to saving the world.',
-      behavior: 'Speak in an wise, measured tone. Reference magical theory and ancient lore. Be mysterious but helpful.',
+      behavior: 'Speak in a wise, measured tone. Reference magical theory and ancient lore. Be mysterious but helpful.',
     },
   },
   {
@@ -163,7 +173,9 @@ export const CHARACTER_TEMPLATES: CharacterTemplate[] = [
     name: 'Blank Character',
     description: 'Start fresh with no preset',
     icon: '📝',
-    character: {},
+    // FIX: The original had `character: {}` which violated the now-enforced `tags` requirement
+    // and would cause a runtime crash anywhere that reads `template.character.tags`.
+    character: { tags: [] },
   },
 ];
 
@@ -179,12 +191,16 @@ export interface ChatMessage {
   chatId: string;
   tokenCount?: number;
   isStreaming?: boolean;
-  metadata?: {
-    model?: string;
-    provider?: AIProvider;
-    summary?: string;
-    memoryExtracted?: boolean;
-  };
+  metadata?: ChatMessageMetadata;
+}
+
+// FIX: Extracted metadata into a named interface so it can be referenced and
+// extended elsewhere without repeating the inline object type.
+export interface ChatMessageMetadata {
+  model?: string;
+  provider?: AIProvider;
+  summary?: string;
+  memoryExtracted?: boolean;
 }
 
 export interface Chat {
@@ -198,20 +214,6 @@ export interface Chat {
 }
 
 // ---- Memory Types ----
-export interface MemoryEntry {
-  id: string;
-  characterId: string;
-  chatId?: string;
-  type: MemoryType;
-  content: string;
-  keywords: string[];
-  importance: number;
-  timestamp: number;
-  lastReferenced: number;
-  accessCount: number;
-  strength?: number;
-}
-
 export type MemoryType =
   | 'fact'
   | 'event'
@@ -220,6 +222,25 @@ export type MemoryType =
   | 'instruction'
   | 'scene'
   | 'summary';
+
+export interface MemoryEntry {
+  id: string;
+  characterId: string;
+  chatId?: string;
+  type: MemoryType;
+  content: string;
+  keywords: string[];
+  // FIX: importance is always set during extraction and clamped to [1, 10].
+  // Keeping it required (non-optional) prevents defensive `?? 0` guards throughout
+  // the codebase from masking accidental missing-value bugs.
+  importance: number;
+  timestamp: number;
+  lastReferenced: number;
+  accessCount: number;
+  // strength is optional on read (older DB entries may not have it) but always
+  // written on new entries — consumers must nullish-coalesce: `strength ?? 0`.
+  strength?: number;
+}
 
 export interface ContextWindow {
   messages: ChatMessage[];
@@ -234,29 +255,83 @@ export interface AppSettings {
   providers: ProviderConfig[];
   activeProvider: AIProvider;
   activeModel: string;
+
+  // Generation parameters
   temperature: number;
   maxTokens: number;
   topP: number;
+  // FIX: frequencyPenalty and presencePenalty are defined here but intentionally
+  // NOT sent to providers that don't support them (e.g. Groq). Kept in settings
+  // so the UI can expose them without breaking those providers.
   frequencyPenalty: number;
   presencePenalty: number;
+
+  // Memory
   memoryEnabled: boolean;
   autoExtractMemories: boolean;
   maxMemoriesPerQuery: number;
   memoryImportanceThreshold: number;
+
+  // Context management
   contextWindow: number;
   summarizeThreshold: number;
   keepRecentCount: number;
+
+  // UI preferences
   theme: 'light' | 'dark' | 'system';
   fontSize: 'small' | 'medium' | 'large';
   showTimestamps: boolean;
   showTokenCount: boolean;
   sendOnEnter: boolean;
   streamingEnabled: boolean;
+
+  // Prompt overrides
   customSystemPrompt?: string;
   jailbreakPrompt?: string;
+
+  // Identity
   userPersona: UserPersona;
+
+  // Onboarding
   showSetupWizard: boolean;
 }
+
+// FIX: Added DEFAULT_APP_SETTINGS so callers initialising settings (e.g. from
+// localStorage or on first launch) have a single authoritative baseline to
+// spread/override rather than inlining magic numbers in multiple places.
+export const DEFAULT_APP_SETTINGS: AppSettings = {
+  providers: [],
+  activeProvider: 'openai',
+  activeModel: 'gpt-4o-mini',
+
+  temperature: 0.8,
+  maxTokens: 1024,
+  topP: 0.9,
+  frequencyPenalty: 0,
+  presencePenalty: 0,
+
+  memoryEnabled: true,
+  autoExtractMemories: true,
+  maxMemoriesPerQuery: 10,
+  memoryImportanceThreshold: 3,
+
+  contextWindow: 8192,
+  summarizeThreshold: 8,
+  keepRecentCount: 8,
+
+  theme: 'system',
+  fontSize: 'medium',
+  showTimestamps: true,
+  showTokenCount: false,
+  sendOnEnter: true,
+  streamingEnabled: true,
+
+  customSystemPrompt: undefined,
+  jailbreakPrompt: undefined,
+
+  userPersona: DEFAULT_USER_PERSONA,
+  showSetupWizard: true,
+};
 
 // ---- Streaming Types ----
 export interface StreamChunk {
@@ -266,7 +341,7 @@ export interface StreamChunk {
   tokenCount?: number;
 }
 
-// ---- Character Import/Export ----
+// ---- Character Import/Export (CharacterCardV2 spec) ----
 export interface CharacterCardV2 {
   spec: 'chara_card_v2';
   spec_version: '2.0';
@@ -283,6 +358,8 @@ export interface CharacterCardV2 {
     tags?: string[];
     creator?: string;
     character_version?: string;
+    // FIX: Typed as `Record<string, unknown>` rather than leaving it fully open,
+    // matching the v2 spec's intent while still being extensible.
     extensions?: Record<string, unknown>;
   };
 }
