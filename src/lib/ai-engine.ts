@@ -6,29 +6,30 @@
 import type { AIProvider, AIModel, AppSettings, Character } from './types';
 
 // ---- Model Registry ----
+// Ordered by roleplay quality: BEST at top, WORST at bottom
 export const AI_MODELS: AIModel[] = [
   // ==========================================
-  // OpenAI
+  // OpenAI - Best for roleplay: GPT-4.1 series, then GPT-4o
   // ==========================================
-  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', maxContextTokens: 128000, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.005, costPer1kOutput: 0.015 },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', maxContextTokens: 128000, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
   { id: 'gpt-4.1', name: 'GPT-4.1', provider: 'openai', maxContextTokens: 1047576, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.002, costPer1kOutput: 0.008 },
   { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', provider: 'openai', maxContextTokens: 1047576, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0004, costPer1kOutput: 0.0016 },
   { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', provider: 'openai', maxContextTokens: 1047576, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
-  { id: 'o3-mini', name: 'o3-mini', provider: 'openai', maxContextTokens: 200000, maxOutputTokens: 100000, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0011, costPer1kOutput: 0.0044 },
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', maxContextTokens: 128000, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.005, costPer1kOutput: 0.015 },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', maxContextTokens: 128000, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
   { id: 'o4-mini', name: 'o4-mini', provider: 'openai', maxContextTokens: 200000, maxOutputTokens: 100000, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0011, costPer1kOutput: 0.0044 },
+  { id: 'o3-mini', name: 'o3-mini', provider: 'openai', maxContextTokens: 200000, maxOutputTokens: 100000, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0011, costPer1kOutput: 0.0044 },
 
   // ==========================================
-  // Anthropic
+  // Anthropic - Best for roleplay: Claude Sonnet 4, then Opus
   // ==========================================
   { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 16000, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.003, costPer1kOutput: 0.015 },
   { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.003, costPer1kOutput: 0.015 },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.001, costPer1kOutput: 0.005 },
   { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.015, costPer1kOutput: 0.075 },
+  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.001, costPer1kOutput: 0.005 },
   { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00025, costPer1kOutput: 0.00125 },
 
   // ==========================================
-  // Google
+  // Google - Best for roleplay: Gemini 2.5 Pro, then Flash
   // ==========================================
   { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'google', maxContextTokens: 1000000, maxOutputTokens: 65536, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00125, costPer1kOutput: 0.01 },
   { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'google', maxContextTokens: 1000000, maxOutputTokens: 65536, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
@@ -36,81 +37,79 @@ export const AI_MODELS: AIModel[] = [
   { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', provider: 'google', maxContextTokens: 128000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.000075, costPer1kOutput: 0.0003 },
 
   // ==========================================
-  // Groq (https://console.groq.com)
-  // Ultra-fast inference. OpenAI-compatible format.
-  // No frequency_penalty / presence_penalty support.
+  // Groq - Best for roleplay: Llama 4/3 series, then others
   // ==========================================
-  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00059, costPer1kOutput: 0.00079 },
-  { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00008 },
   { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0003 },
+  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00059, costPer1kOutput: 0.00079 },
   { id: 'moonshotai/kimi-k2-instruct', name: 'Kimi K2 Instruct', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0015 },
-  { id: 'moonshotai/kimi-k2-instruct-0905', name: 'Kimi K2 Instruct (0905)', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0015 },
-  { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.001 },
-  { id: 'openai/gpt-oss-20b', name: 'GPT-OSS 20B', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0006 },
+  { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00008 },
   { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0006 },
-  { id: 'allam-2-7b', name: 'ALLaM 2 7B', provider: 'groq', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00008 },
+  { id: 'moonshotai/kimi-k2-instruct-0905', name: 'Kimi K2 Instruct (0905)', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0015 },
+  { id: 'openai/gpt-oss-20b', name: 'GPT-OSS 20B', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0006 },
+  { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.001 },
   { id: 'groq/compound', name: 'Groq Compound', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
   { id: 'groq/compound-mini', name: 'Groq Compound Mini', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'allam-2-7b', name: 'ALLaM 2 7B', provider: 'groq', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00008 },
   { id: 'canopylabs/orpheus-v1-english', name: 'Orpheus V1 English', provider: 'groq', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00008 },
   { id: 'canopylabs/orpheus-arabic-saudi', name: 'Orpheus Arabic Saudi', provider: 'groq', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00008 },
 
   // ==========================================
-  // Mistral
+  // Mistral - Best for roleplay: Large, then Pixtral
   // ==========================================
   { id: 'mistral-large-latest', name: 'Mistral Large', provider: 'mistral', maxContextTokens: 128000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.004, costPer1kOutput: 0.012 },
+  { id: 'pixtral-large-latest', name: 'Pixtral Large', provider: 'mistral', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.004, costPer1kOutput: 0.012 },
   { id: 'mistral-small-latest', name: 'Mistral Small', provider: 'mistral', maxContextTokens: 32000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.006 },
   { id: 'open-mistral-nemo', name: 'Mistral Nemo', provider: 'mistral', maxContextTokens: 128000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
   { id: 'codestral-latest', name: 'Codestral', provider: 'mistral', maxContextTokens: 256000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0009 },
-  { id: 'pixtral-large-latest', name: 'Pixtral Large', provider: 'mistral', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.004, costPer1kOutput: 0.012 },
 
   // ==========================================
-  // OpenRouter (aggregator — user picks any model)
+  // OpenRouter (aggregator) - Best for roleplay: Claude, then Gemini, Llama
   // ==========================================
-  { id: 'openrouter-auto', name: 'OpenRouter (Auto)', provider: 'openrouter', maxContextTokens: 200000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.001, costPer1kOutput: 0.003 },
   { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4 (OR)', provider: 'openrouter', maxContextTokens: 200000, maxOutputTokens: 16000, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.003, costPer1kOutput: 0.015 },
   { id: 'google/gemini-2.5-pro-preview', name: 'Gemini 2.5 Pro (OR)', provider: 'openrouter', maxContextTokens: 1000000, maxOutputTokens: 65536, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00125, costPer1kOutput: 0.01 },
   { id: 'meta-llama/llama-4-maverick', name: 'Llama 4 Maverick (OR)', provider: 'openrouter', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
+  { id: 'openrouter-auto', name: 'OpenRouter (Auto)', provider: 'openrouter', maxContextTokens: 200000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.001, costPer1kOutput: 0.003 },
 
   // ==========================================
-  // NVIDIA NIM (https://build.nvidia.com)
+  // NVIDIA NIM - Best for roleplay: Nemotron series, then Llama 3.1
   // ==========================================
-  { id: 'meta/llama-3.1-405b-instruct', name: 'Llama 3.1 405B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
-  { id: 'meta/llama-3.1-70b-instruct', name: 'Llama 3.1 70B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
-  { id: 'meta/llama-3.1-8b-instruct', name: 'Llama 3.1 8B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-  { id: 'meta/llama3-70b-instruct', name: 'Llama 3 70B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0006, costPer1kOutput: 0.0006 },
-  { id: 'meta/llama3-8b-instruct', name: 'Llama 3 8B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
+  { id: 'nvidia/llama-3.1-nemotron-ultra-253b-instruct', name: 'Nemotron Ultra 253B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
   { id: 'nvidia/llama-3.1-nemotron-70b-instruct', name: 'Llama 3.1 Nemotron 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
   { id: 'nvidia/llama-3.3-nemotron-super-49b', name: 'Llama 3.3 Nemotron Super 49B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
-  { id: 'nvidia/nemotron-4-340b-instruct', name: 'Nemotron 4 340B Instruct', provider: 'nvidia', maxContextTokens: 4096, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
-  { id: 'nvidia/llama-3.1-nemotron-ultra-253b-instruct', name: 'Nemotron Ultra 253B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
-  { id: 'mistralai/mistral-large-instruct-v1', name: 'Mistral Large', provider: 'nvidia', maxContextTokens: 32000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
-  { id: 'mistralai/mistral-medium-3-instruct', name: 'Mistral Medium 3', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
-  { id: 'mistralai/mixtral-8x22b-instruct-v0.1', name: 'Mixtral 8x22B Instruct', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
-  { id: 'mistralai/mixtral-8x7b-instruct-v0.1', name: 'Mixtral 8x7B Instruct', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00024, costPer1kOutput: 0.00024 },
-  { id: 'mistralai/codestral-22b-instruct-v0.1', name: 'Codestral 22B', provider: 'nvidia', maxContextTokens: 256000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0009 },
-  { id: 'mistralai/mistral-nemo-instruct-2407', name: 'Mistral NeMo', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-  { id: 'mistralai/pixtral-large-2507', name: 'Pixtral Large', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.004, costPer1kOutput: 0.012 },
-  { id: 'google/gemma-2-27b-it', name: 'Gemma 2 27B IT', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-  { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B IT', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
-  { id: 'microsoft/phi-3-medium-128k-instruct', name: 'Phi-3 Medium 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
-  { id: 'microsoft/phi-3-mini-128k-instruct', name: 'Phi-3 Mini 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
-  { id: 'microsoft/phi-3.5-mini-instruct', name: 'Phi-3.5 Mini', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
-  { id: 'microsoft/phi-3.5-moe-instruct', name: 'Phi-3.5 MoE', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
+  { id: 'meta/llama-3.1-70b-instruct', name: 'Llama 3.1 70B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
+  { id: 'meta/llama-3.1-405b-instruct', name: 'Llama 3.1 405B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'meta/llama-3.1-8b-instruct', name: 'Llama 3.1 8B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
   { id: 'deepseek-ai/deepseek-r1', name: 'DeepSeek R1', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0015, costPer1kOutput: 0.002 },
   { id: 'deepseek-ai/deepseek-r1-distill-llama-70b', name: 'DeepSeek R1 Distill 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00059, costPer1kOutput: 0.00079 },
   { id: 'deepseek-ai/deepseek-r1-distill-qwen-32b', name: 'DeepSeek R1 Distill Qwen 32B', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00039, costPer1kOutput: 0.00039 },
   { id: 'deepseek-ai/deepseek-r1-distill-qwen-14b', name: 'DeepSeek R1 Distill Qwen 14B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00024, costPer1kOutput: 0.00024 },
   { id: 'deepseek-ai/deepseek-r1-distill-qwen-7b', name: 'DeepSeek R1 Distill Qwen 7B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'mistralai/mistral-large-instruct-v1', name: 'Mistral Large', provider: 'nvidia', maxContextTokens: 32000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'mistralai/mistral-medium-3-instruct', name: 'Mistral Medium 3', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
+  { id: 'mistralai/mixtral-8x22b-instruct-v0.1', name: 'Mixtral 8x22B Instruct', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
+  { id: 'meta/llama3-70b-instruct', name: 'Llama 3 70B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0006, costPer1kOutput: 0.0006 },
+  { id: 'nvidia/nemotron-4-340b-instruct', name: 'Nemotron 4 340B Instruct', provider: 'nvidia', maxContextTokens: 4096, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'mistralai/pixtral-large-2507', name: 'Pixtral Large', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.004, costPer1kOutput: 0.012 },
+  { id: 'qwen/qwen2.5-72b-instruct', name: 'Qwen 2.5 72B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
+  { id: 'qwen/qwen2.5-32b-instruct', name: 'Qwen 2.5 32B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
+  { id: 'mistralai/mixtral-8x7b-instruct-v0.1', name: 'Mixtral 8x7B Instruct', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00024, costPer1kOutput: 0.00024 },
+  { id: 'google/gemma-2-27b-it', name: 'Gemma 2 27B IT', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'qwen/qwen2.5-14b-instruct', name: 'Qwen 2.5 14B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'meta/llama3-8b-instruct', name: 'Llama 3 8B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
+  { id: 'mistralai/mistral-nemo-instruct-2407', name: 'Mistral NeMo', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'mistralai/codestral-22b-instruct-v0.1', name: 'Codestral 22B', provider: 'nvidia', maxContextTokens: 256000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0009 },
+  { id: 'qwen/qwen2.5-coder-32b-instruct', name: 'Qwen 2.5 Coder 32B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
+  { id: 'qwen/qwen2.5-7b-instruct', name: 'Qwen 2.5 7B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B IT', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
+  { id: 'microsoft/phi-3-medium-128k-instruct', name: 'Phi-3 Medium 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
   { id: 'ibm/granite-3.3-8b-instruct', name: 'Granite 3.3 8B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
+  { id: 'microsoft/phi-3.5-mini-instruct', name: 'Phi-3.5 Mini', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'microsoft/phi-3-mini-128k-instruct', name: 'Phi-3 Mini 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
   { id: 'ibm/granite-3.3-2b-instruct', name: 'Granite 3.3 2B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'microsoft/phi-3.5-moe-instruct', name: 'Phi-3.5 MoE', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
   { id: 'ibm/granite-3.0-8b-instruct', name: 'Granite 3.0 8B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
   { id: 'ibm/granite-3.0-2b-instruct', name: 'Granite 3.0 2B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
   { id: 'z-ai/glm4.7', name: 'GLM4.7', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
-  { id: 'qwen/qwen2.5-72b-instruct', name: 'Qwen 2.5 72B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
-  { id: 'qwen/qwen2.5-32b-instruct', name: 'Qwen 2.5 32B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
-  { id: 'qwen/qwen2.5-14b-instruct', name: 'Qwen 2.5 14B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
-  { id: 'qwen/qwen2.5-7b-instruct', name: 'Qwen 2.5 7B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
-  { id: 'qwen/qwen2.5-coder-32b-instruct', name: 'Qwen 2.5 Coder 32B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
   { id: '01-ai/yi-large', name: 'Yi Large', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
 
   // ==========================================
@@ -193,7 +192,14 @@ export function buildSystemPrompt(
 - The user plays themselves. React naturally in character as ${character.name}.
 - Use vivid but efficient descriptions. Show emotions through actions, dialogue, and thoughts.
 - Drive the story forward with new developments, not repetitive dialogue.
-- Do NOT explain your choices or include any system/instruction text in your response.`;
+- Do NOT explain your choices or include any system/instruction text in your response.
+
+[Output Formatting - FOLLOW THIS EXACTLY]
+- Use **double asterisks** for BOLD text (actions, emphasis)
+- Use *lowercase words* for actions (like *smiles*, *nods*, *laughs*, *sighs*)
+- Use "double quotes" for spoken dialogue
+- NEVER use 'single quotes' for dialogue - only use "double quotes"
+- Example: *She smiles* "Hello there!" *He nods*`;
   parts.push(rpInstructions);
 
   if (summary?.trim()) {

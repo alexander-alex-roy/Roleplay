@@ -1177,23 +1177,23 @@ function CopyIcon({ className }: { className?: string }) {
 function formatMessageContent(content: string): React.ReactNode {
   if (!content) return null;
 
-  const tokens: Array<{ type: 'bold' | 'italic' | 'action' | 'dialogue' | 'text'; content: string }> = [];
+  const tokens: Array<{ type: 'bold' | 'action' | 'dialogue' | 'text'; content: string }> = [];
   let remaining = content;
 
   while (remaining.length > 0) {
-    // Match *actions* - single asterisks around text (not **bold**)
-    const actionMatch = remaining.match(/^\*([^*]+)\*/);
-    if (actionMatch) {
-      tokens.push({ type: 'action', content: actionMatch[1] });
-      remaining = remaining.slice(actionMatch[0].length);
-      continue;
-    }
-
     // Match **bold**
-    const boldMatch = remaining.match(/^\*\*([^*]+)\*\*/);
+    const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
     if (boldMatch) {
       tokens.push({ type: 'bold', content: boldMatch[1] });
       remaining = remaining.slice(boldMatch[0].length);
+      continue;
+    }
+
+    // Match *action* - roleplay actions like *smiles*, *nods*
+    const actionMatch = remaining.match(/^\*([a-z][^*]+)\*/);
+    if (actionMatch) {
+      tokens.push({ type: 'action', content: actionMatch[1] });
+      remaining = remaining.slice(actionMatch[0].length);
       continue;
     }
 
@@ -1205,7 +1205,7 @@ function formatMessageContent(content: string): React.ReactNode {
       continue;
     }
 
-    // Match 'dialogue' - single quotes (both styles)
+    // Match 'dialogue' - single quotes at start only
     const singleQuoteMatch = remaining.match(/^'([^']+)'/);
     if (singleQuoteMatch) {
       tokens.push({ type: 'dialogue', content: singleQuoteMatch[1] });
@@ -1239,7 +1239,7 @@ function formatMessageContent(content: string): React.ReactNode {
   }
 
   return tokens.map((token, index) => {
-    if (token.content.length === 0) return null;
+    if (token.content.length === 0) return <span key={index}></span>;
 
     switch (token.type) {
       case 'bold':
@@ -1434,24 +1434,39 @@ function ChatInput() {
                           
                           if (response.ok) {
                             const data = await response.json();
-                            let base64Data = null;
+                            console.log('Image response:', JSON.stringify(data));
+                            let base64Data: string | null = null;
+                            
+                            // Check various response formats
                             if (data.image) {
                               base64Data = data.image.startsWith('data:')
                                 ? data.image
                                 : `data:image/jpeg;base64,${data.image}`;
-                            } else if (data.artifacts && data.artifacts[0]?.base64) {
-                              base64Data = data.artifacts[0].base64.startsWith('data:')
-                                ? data.artifacts[0].base64
-                                : `data:image/jpeg;base64,${data.artifacts[0].base64}`;
+                            } else if (data.artifacts && data.artifacts.length > 0) {
+                              const artifact = data.artifacts[0];
+                              console.log('Artifact keys:', Object.keys(artifact));
+                              // Try base64, image, or encode the artifact differently
+                              const rawBase64 = artifact.base64 || artifact.image;
+                              if (rawBase64) {
+                                base64Data = rawBase64.startsWith('data:')
+                                  ? rawBase64
+                                  : `data:image/jpeg;base64,${rawBase64}`;
+                              }
                             } else if (data.images && data.images[0]) {
                               base64Data = data.images[0].startsWith('data:')
                                 ? data.images[0]
                                 : `data:image/jpeg;base64,${data.images[0]}`;
                             }
+                            
                             if (base64Data) {
                               await store.addImageMessage(base64Data, imageModel);
                             } else {
-                              console.error('No image data in response. Keys:', Object.keys(data));
+                              const finishReason = data.artifacts?.[0]?.finishReason || 'unknown';
+                              if (finishReason === 'CONTENT_FILTERED') {
+                                console.error('Image blocked by content filter. Try a different prompt.');
+                              } else {
+                                console.error('No image data in response. Full data:', JSON.stringify(data));
+                              }
                             }
                           } else {
                             const errBody = await response.text();

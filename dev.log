@@ -2,7 +2,52 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.100.49:3000
 - Environments: .env
-✓ Ready in 408ms
+✓ Ready in 454ms
 
- GET / 200 in 392ms (next.js: 174ms, application-code: 217ms)
-✓ Compiled in 139ms
+ GET / 200 in 567ms (next.js: 245ms, application-code: 322ms)
+[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
+
+[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
+
+[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
+
+ GET / 200 in 130ms (next.js: 14ms, application-code: 116ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
+
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 113ms (next.js: 12ms, application-code: 101ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Avatar generation failed: Error: Image generation failed (500): Internal Server Error
+    at onClick (src/app/page.tsx:2691:35)
+  2689 |                           if (!response.ok) {
+  2690 |                             const errBody = await response.text();
+> 2691 |                             throw new Error(`Image generation failed (${response.status}...
+       |                                   ^
+  2692 |                           }
+  2693 |                           const response_body = await response.json();
+  2694 |                           let base64Data = null;
+✓ Compiled in 729ms
+✓ Compiled in 201ms
+✓ Compiled in 175ms
+✓ Compiled in 191ms
+✓ Compiled in 132ms
+ GET / 200 in 194ms (next.js: 32ms, application-code: 162ms)
+[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
+✓ Compiled in 211ms
+[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] Full data: {
+  artifacts: [ { base64: [32m''[39m, finishReason: [32m'CONTENT_FILTERED'[39m, seed: [33m91549[39m } ]
+} 
+✓ Compiled in 185ms
+✓ Compiled in 173ms
+✓ Compiled in 179ms
+[browser] No image data in response. Full data: {"artifacts":[{"base64":"","finishReason":"CONTENT_FILTERED","seed":62473}]} 
+✓ Compiled in 220ms
+[browser] Image blocked by content filter. Try a different prompt. 
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 142ms (next.js: 30ms, application-code: 112ms)
+✓ Compiled in 93ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
