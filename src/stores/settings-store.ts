@@ -37,9 +37,13 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   updateSetting: async (key, value) => {
+    // Update state immediately for instant UI feedback
+    set((state) => ({ 
+      settings: { ...state.settings, [key]: value } 
+    }));
+    // Then persist to DB in background
     const newSettings = { ...get().settings, [key]: value };
     await settingsDB.save(newSettings);
-    set({ settings: newSettings });
   },
 
   setProvider: async (config: ProviderConfig) => {

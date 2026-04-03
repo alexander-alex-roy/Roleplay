@@ -201,6 +201,7 @@ export interface ChatMessageMetadata {
   provider?: AIProvider;
   summary?: string;
   memoryExtracted?: boolean;
+  image?: string;
 }
 
 export interface Chat {

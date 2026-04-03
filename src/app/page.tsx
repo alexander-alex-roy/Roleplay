@@ -49,6 +49,7 @@ export default function RoleplayChat() {
   const isMobile = useIsMobile();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const contextMenu = useContextMenuStore();
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   // Mobile optimizations
   useMobileOptimizations();
@@ -106,9 +107,9 @@ export default function RoleplayChat() {
       {/* Main Chat Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {store.activeCharacter && store.activeChat ? (
-          <ChatView isMobile={isMobile} onOpenMobileNav={() => setMobileNavOpen(true)} />
+          <ChatView isMobile={isMobile} onOpenMobileNav={() => setMobileNavOpen(true)} lightboxImage={lightboxImage} setLightboxImage={setLightboxImage} />
         ) : store.activeCharacter ? (
-          <EmptyChatView isMobile={isMobile} onOpenMobileNav={() => setMobileNavOpen(true)} />
+          <EmptyChatView isMobile={isMobile} onOpenMobileNav={() => setMobileNavOpen(true)} lightboxImage={lightboxImage} setLightboxImage={setLightboxImage} />
         ) : (
           <WelcomeView isMobile={isMobile} onOpenMobileNav={() => setMobileNavOpen(true)} />
         )}
@@ -128,6 +129,27 @@ export default function RoleplayChat() {
 
       {/* Global Context Menu */}
       <ContextMenu state={{ visible: contextMenu.visible, x: contextMenu.x, y: contextMenu.y, items: contextMenu.items }} />
+
+      {/* Image Lightbox */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white hover:text-gray-300 p-2"
+            onClick={() => setLightboxImage(null)}
+          >
+            <X className="w-8 h-8" />
+          </button>
+          <img
+            src={lightboxImage}
+            alt="Full size"
+            className="max-w-full max-h-full object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -472,7 +494,7 @@ function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenM
 // ============================================================
 // EMPTY CHAT VIEW - Character selected, no chat started
 // ============================================================
-function EmptyChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobileNav: () => void }) {
+function EmptyChatView({ isMobile, onOpenMobileNav, lightboxImage, setLightboxImage }: { isMobile: boolean; onOpenMobileNav: () => void; lightboxImage: string | null; setLightboxImage: (img: string | null) => void }) {
   const store = useChatStore();
   if (!store.activeCharacter) return null;
 
@@ -484,8 +506,12 @@ function EmptyChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpe
           <Button variant="ghost" size="icon" className="h-9 w-9" onClick={onOpenMobileNav}>
             <Menu className="w-5 h-5" />
           </Button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-            <Bot className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center overflow-hidden">
+            {store.activeCharacter.avatar ? (
+              <img src={store.activeCharacter.avatar} alt={store.activeCharacter.name} className="w-full h-full object-cover" />
+            ) : (
+              <Bot className="w-4 h-4" />
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-sm truncate">{store.activeCharacter.name}</h2>
@@ -497,8 +523,15 @@ function EmptyChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpe
       )}
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div className="text-center space-y-4 max-w-md">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center mx-auto">
-            <Bot className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
+          <div
+            className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center mx-auto overflow-hidden cursor-zoom-in"
+            onClick={() => store.activeCharacter?.avatar && setLightboxImage(store.activeCharacter.avatar!)}
+          >
+            {store.activeCharacter.avatar ? (
+              <img src={store.activeCharacter.avatar} alt={store.activeCharacter.name} className="w-full h-full object-cover" />
+            ) : (
+              <Bot className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
+            )}
           </div>
           <h2 className="text-xl sm:text-2xl font-bold">{store.activeCharacter.name}</h2>
           {store.activeCharacter.description && (
@@ -692,8 +725,12 @@ function CharacterItem({ character }: { character: Character }) {
       onTouchStart={handleTouchStart}
       style={{ minWidth: 0 }}
     >
-      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0">
-        <Bot className="w-4 h-4" />
+      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        {character.avatar ? (
+          <img src={character.avatar} alt={character.name} className="w-full h-full object-cover" />
+        ) : (
+          <Bot className="w-4 h-4" />
+        )}
       </div>
       <div className="min-w-0 flex-1 overflow-hidden">
         <p className="text-sm font-medium truncate">{character.name}</p>
@@ -816,7 +853,7 @@ function ChatHistorySidebar() {
 // ============================================================
 // CHAT VIEW
 // ============================================================
-function ChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobileNav: () => void }) {
+function ChatView({ isMobile, onOpenMobileNav, lightboxImage, setLightboxImage }: { isMobile: boolean; onOpenMobileNav: () => void; lightboxImage: string | null; setLightboxImage: (img: string | null) => void }) {
   const store = useChatStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -860,8 +897,12 @@ function ChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobi
             <ChevronRight className="w-4 h-4" />
           </Button>
         )}
-        <div className={`rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center ${isMobile ? 'w-8 h-8' : 'w-8 h-8'}`}>
-          <Bot className="w-4 h-4" />
+        <div className={`rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center overflow-hidden ${isMobile ? 'w-8 h-8' : 'w-8 h-8'}`}>
+          {activeCharacter.avatar ? (
+            <img src={activeCharacter.avatar} alt={activeCharacter.name} className="w-full h-full object-cover" />
+          ) : (
+            <Bot className="w-4 h-4" />
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <h2 className={`font-semibold truncate ${isMobile ? 'text-sm' : 'text-sm'}`}>{activeCharacter.name}</h2>
@@ -947,7 +988,16 @@ function ChatView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobi
             </div>
           )}
           {messages.map(msg => (
-            <MessageBubble key={msg.id} message={msg} />
+            <MessageBubble key={msg.id} message={{
+              id: msg.id,
+              role: msg.role,
+              content: msg.content,
+              isStreaming: msg.isStreaming,
+              timestamp: msg.timestamp,
+              image: msg.metadata?.image,
+              lightboxImage,
+              setLightboxImage,
+            }} />
           ))}
           <div ref={messagesEndRef} />
         </div>
@@ -968,6 +1018,9 @@ interface MessageData {
   content: string;
   isStreaming?: boolean;
   timestamp: number;
+  image?: string;
+  lightboxImage?: string | null;
+  setLightboxImage?: (img: string | null) => void;
 }
 
 function MessageBubble({ message }: { message: MessageData }) {
@@ -1046,10 +1099,27 @@ function MessageBubble({ message }: { message: MessageData }) {
       >
         {!isUser && store.activeCharacter && (
           <div className="flex items-center gap-1.5 mb-1 ml-1">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-              <Bot className="w-3 h-3" />
+            <div
+              className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center overflow-hidden cursor-zoom-in"
+              onClick={() => store.activeCharacter?.avatar && message.setLightboxImage?.(store.activeCharacter.avatar!)}
+            >
+              {store.activeCharacter.avatar ? (
+                <img src={store.activeCharacter.avatar} alt={store.activeCharacter.name} className="w-full h-full object-cover" />
+              ) : (
+                <Bot className="w-3 h-3" />
+              )}
             </div>
             <span className="text-xs font-medium text-muted-foreground">{store.activeCharacter.name}</span>
+          </div>
+        )}
+        {message.image && (
+          <div className="mt-2 rounded-lg overflow-hidden max-w-full">
+            <img
+              src={message.image}
+              alt="Generated scene"
+              className="max-w-[300px] w-full h-auto rounded-lg cursor-zoom-in"
+              onClick={() => message.setLightboxImage?.(message.image!)}
+            />
           </div>
         )}
         <div
@@ -1059,7 +1129,7 @@ function MessageBubble({ message }: { message: MessageData }) {
               : 'bg-muted rounded-tl-sm'
           }`}
         >
-          {message.content ? (
+          {message.content && message.content.trim() !== '[Generated Image]' ? (
             formatMessageContent(message.content)
           ) : message.isStreaming ? (
             <span className="animate-pulse">▊</span>
@@ -1107,40 +1177,87 @@ function CopyIcon({ className }: { className?: string }) {
   );
 }
 
-// Format message content with styling for *text* (actions/narration) and "text" (dialogue)
+// Format message content with styling for markdown-like syntax
 function formatMessageContent(content: string): React.ReactNode {
   if (!content) return null;
-  
-  // Split by *...* for actions and "..." for dialogue, handling edge cases
-  const parts = content.split(/(\*[^\*]+\*|"[^"]+"|'[^']+')/g);
-  
-  return parts.map((part, index) => {
-    if (!part) return null;
+
+  const tokens: Array<{ type: 'bold' | 'italic' | 'doubleQuote' | 'singleQuote' | 'text'; content: string }> = [];
+  let remaining = content;
+
+  while (remaining.length > 0) {
+    // Try to match **bold** first
+    const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
+    if (boldMatch) {
+      tokens.push({ type: 'bold', content: boldMatch[1] });
+      remaining = remaining.slice(boldMatch[0].length);
+      continue;
+    }
+
+    // Try to match *italic* (non-greedy, so it stops at first closing *)
+    const italicMatch = remaining.match(/^\*(.+?)\*/);
+    if (italicMatch) {
+      tokens.push({ type: 'italic', content: italicMatch[1] });
+      remaining = remaining.slice(italicMatch[0].length);
+      continue;
+    }
+
+    // Try to match "double quotes" - only if they wrap content (not apostrophes in words)
+    const doubleQuoteMatch = remaining.match(/^"(.*?)"/);
+    if (doubleQuoteMatch) {
+      tokens.push({ type: 'doubleQuote', content: doubleQuoteMatch[1] });
+      remaining = remaining.slice(doubleQuoteMatch[0].length);
+      continue;
+    }
+
+    // Try to match 'single quotes' - only if they're wrapping words (followed by space or end)
+    // This avoids matching contractions like "it's" or "how's"
+    const singleQuoteMatch = remaining.match(/^'(\S+)'(\s|$)/);
+    if (singleQuoteMatch) {
+      tokens.push({ type: 'singleQuote', content: singleQuoteMatch[1] });
+      remaining = remaining.slice(singleQuoteMatch[0].length);
+      continue;
+    }
+
+    // Find the next special character
+    const nextSpecial = remaining.search(/[*"]/);
+    const nextSingleQuote = remaining.indexOf("'");
     
-    if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
-      // Action/narration text between asterisks
-      return (
-        <span key={index} className="italic text-muted-foreground">
-          {part.slice(1, -1)}
-        </span>
-      );
-    } else if (part.startsWith('"') && part.endsWith('"') && part.length > 2) {
-      // Dialogue in double quotes
-      return (
-        <span key={index} className="font-medium">
-          &ldquo;{part.slice(1, -1)}&rdquo;
-        </span>
-      );
-    } else if (part.startsWith("'") && part.endsWith("'") && part.length > 2) {
-      // Dialogue in single quotes
-      return (
-        <span key={index} className="font-medium">
-          &lsquo;{part.slice(1, -1)}&rsquo;
-        </span>
-      );
+    if (nextSingleQuote !== -1 && (nextSpecial === -1 || nextSingleQuote < nextSpecial)) {
+      // Single quote found before asterisk/double quote - slice up to it
+      if (nextSingleQuote > 0) {
+        tokens.push({ type: 'text', content: remaining.slice(0, nextSingleQuote) });
+        remaining = remaining.slice(nextSingleQuote);
+      } else {
+        // Single quote at start, treat as text if not a match
+        tokens.push({ type: 'text', content: remaining[0] });
+        remaining = remaining.slice(1);
+      }
+    } else if (nextSpecial === -1) {
+      tokens.push({ type: 'text', content: remaining });
+      remaining = '';
+    } else if (nextSpecial === 0) {
+      tokens.push({ type: 'text', content: remaining[0] });
+      remaining = remaining.slice(1);
     } else {
-      // Regular text - escape HTML
-      return <span key={index}>{part}</span>;
+      tokens.push({ type: 'text', content: remaining.slice(0, nextSpecial) });
+      remaining = remaining.slice(nextSpecial);
+    }
+  }
+
+  return tokens.map((token, index) => {
+    if (token.content.length === 0) return null;
+
+    switch (token.type) {
+      case 'bold':
+        return <span key={index} className="font-bold">{token.content}</span>;
+      case 'italic':
+        return <span key={index} className="italic text-muted-foreground">{token.content}</span>;
+      case 'doubleQuote':
+        return <span key={index} className="text-primary">&ldquo;{token.content}&rdquo;</span>;
+      case 'singleQuote':
+        return <span key={index} className="text-primary">&lsquo;{token.content}&rsquo;</span>;
+      default:
+        return <span key={index}>{token.content}</span>;
     }
   });
 }
@@ -1150,7 +1267,9 @@ function formatMessageContent(content: string): React.ReactNode {
 // ============================================================
 function ChatInput() {
   const store = useChatStore();
+  const settingsStore = useSettingsStore();
   const [text, setText] = useState('');
+  const [generatingImage, setGeneratingImage] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const settings = useSettingsStore(s => s.settings);
   const activeChatId = store.activeChat?.id;
@@ -1264,6 +1383,76 @@ function ChatInput() {
                 <TooltipContent>Regenerate last response</TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            {settings.activeProvider === 'nvidia' && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={async () => {
+                        if (!store.activeCharacter || generatingImage) return;
+                        const nvidiaConfig = settings.providers.find(p => p.provider === 'nvidia');
+                        if (!nvidiaConfig?.apiKey) return;
+                        
+                        setGeneratingImage(true);
+                        try {
+                          const recentMessages = store.messages.slice(-10);
+                          const contextPrompt = recentMessages.map(m => 
+                            m.role === 'user' ? `User: ${m.content}` : `${store.activeCharacter?.name || 'Character'}: ${m.content}`
+                          ).join('\n');
+                          
+                          const visualDetails = [
+                            store.activeCharacter.description,
+                            store.activeCharacter.personality,
+                            store.activeCharacter.behavior,
+                            store.activeCharacter.creatorNotes,
+                          ].filter(Boolean).join('. ');
+                          
+                          const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai/stabilityai/stable-diffusion-3-medium', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              prompt: `cinematic scene featuring ${store.activeCharacter.name}, ${visualDetails}, dramatic moment, photorealistic, highly detailed, atmospheric lighting, depth of field, 16:9 aspect ratio, scene context: ${contextPrompt.slice(-300)}`,
+                              cfg_scale: 7,
+                              aspect_ratio: "16:9",
+                              seed: Math.floor(Math.random() * 1000000),
+                              steps: 60,
+                              negative_prompt: "cartoon, anime, illustration, drawing, painting, 3d render, deformed, distorted, low quality, blurry, text, watermark, signature",
+                              apiKey: nvidiaConfig.apiKey,
+                            }),
+                          });
+                          
+                          if (response.ok) {
+                            const data = await response.json();
+                            if (data.image) {
+                              const base64Data = data.image.startsWith('data:') 
+                                ? data.image 
+                                : `data:image/jpeg;base64,${data.image}`;
+                              await store.addImageMessage(base64Data);
+                            }
+                          }
+                        } catch (e) {
+                          console.error('Image generation failed:', e);
+                        } finally {
+                          setGeneratingImage(false);
+                        }
+                      }}
+                      disabled={generatingImage || store.isStreaming || !store.activeCharacter}
+                      aria-label="Generate scene image"
+                    >
+                      {generatingImage ? (
+                        <RefreshCw className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-3 h-3" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Generate scene image</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -2386,12 +2575,76 @@ function CharacterEditorInner() {
               </div>
               <div>
                 <Label className="text-sm">Avatar URL</Label>
-                <Input
-                  value={form.avatar || ''}
-                  onChange={(e) => updateForm('avatar', e.target.value)}
-                  placeholder="https://..."
-                  className="mt-1"
-                />
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    value={form.avatar || ''}
+                    onChange={(e) => updateForm('avatar', e.target.value)}
+                    placeholder="https://..."
+                    className="flex-1"
+                  />
+                  {settingsStore.settings.activeProvider === 'nvidia' && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        if (!form.name) return;
+                        const nvidiaConfig = settingsStore.settings.providers.find(p => p.provider === 'nvidia');
+                        if (!nvidiaConfig?.apiKey) return;
+                        setGenerating(true);
+                        try {
+                          const characterDetails = [
+                            form.description || '',
+                            form.personality || '',
+                            form.scenario || '',
+                          ].filter(Boolean).join(', ');
+                          
+                          const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai/stabilityai/stable-diffusion-3-medium', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              prompt: ` photorealistic portrait of ${form.name}, ${characterDetails || 'character'}, detailed face, natural lighting, high quality, 8k, realistic, professional photography${form.personality ? `, ${form.personality}` : ''}`,
+                              cfg_scale: 7,
+                              aspect_ratio: "1:1",
+                              seed: Math.floor(Math.random() * 1000000),
+                              steps: 60,
+                              negative_prompt: "cartoon, anime, illustration, drawing, painting, 3d render, deformed, distorted, disfigured, mutation, mutated, ugly, bad anatomy, bad proportions, blurry, low quality, watermark, text",
+                              apiKey: nvidiaConfig.apiKey,
+                            }),
+                          });
+                          if (response.status !== 200) {
+                            const errBody = await response.text();
+                            throw new Error(`invocation failed with status ${response.status} ${errBody}`);
+                          }
+                          const response_body = await response.json();
+                          console.log('Image generation response:', response_body);
+                          console.log('Image length:', response_body.image?.length);
+                          console.log('Response keys:', Object.keys(response_body));
+                          if (response_body.image) {
+                            const base64Data = response_body.image.startsWith('data:') 
+                              ? response_body.image 
+                              : `data:image/jpeg;base64,${response_body.image}`;
+                            updateForm('avatar', base64Data);
+                          } else if (response_body.images && response_body.images[0]) {
+                            const base64Data = response_body.images[0].startsWith('data:') 
+                              ? response_body.images[0] 
+                              : `data:image/jpeg;base64,${response_body.images[0]}`;
+                            updateForm('avatar', base64Data);
+                          }
+                        } catch (e) {
+                          console.error('Avatar generation failed:', e);
+                        } finally {
+                          setGenerating(false);
+                        }
+                      }}
+                      disabled={generating || !form.name}
+                    >
+                      {generating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    </Button>
+                  )}
+                </div>
               </div>
               <div>
                 <Label className="text-sm">Description *</Label>
@@ -2692,8 +2945,12 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
                   onClick={() => { store.selectCharacter(char); onOpenChange(false); }}
                   style={{ minWidth: 0 }}
                 >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4" />
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {char.avatar ? (
+                      <img src={char.avatar} alt={char.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Bot className="w-4 h-4" />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1 overflow-hidden">
                     <p className="text-sm font-medium truncate">{char.name}</p>

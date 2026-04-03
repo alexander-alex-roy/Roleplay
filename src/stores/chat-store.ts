@@ -56,6 +56,7 @@ interface ChatState {
   deleteMessage: (id: string) => Promise<void>;
   stopStreaming: () => void;
   regenerateMessage: () => Promise<void>;
+  addImageMessage: (imageDataUrl: string) => Promise<void>;
 
   // Memory actions
   loadMemories: (characterId: string) => Promise<void>;
@@ -124,10 +125,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   saveCharacter: async (character: Character) => {
+    const { activeCharacter } = get();
     await characterDB.save(character);
     const characters = await characterDB.getAll();
     characters.sort((a, b) => b.updatedAt - a.updatedAt);
-    set({ characters });
+    const isActiveCharacter = activeCharacter?.id === character.id;
+    set({ 
+      characters,
+      ...(isActiveCharacter ? { activeCharacter: character } : {}),
+    });
   },
 
   deleteCharacter: async (id: string) => {
@@ -585,6 +591,35 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ messages: trimmedMessages });
 
     await get().sendMessage(lastUserMsg.content);
+  },
+
+  addImageMessage: async (imageDataUrl: string) => {
+    const { activeCharacter, activeChat } = get();
+    if (!activeCharacter || !activeChat) return;
+
+    const now = Date.now();
+    const imageMsg: ChatMessage = {
+      id: genMsgId(),
+      role: 'assistant',
+      content: '[Generated Image]',
+      timestamp: now,
+      characterId: activeCharacter.id,
+      chatId: activeChat.id,
+      metadata: { 
+        image: imageDataUrl,
+        model: 'stable-diffusion-3-medium',
+        provider: 'nvidia'
+      },
+    };
+    
+    await messageDB.save(imageMsg);
+    const allMessages = [...get().messages, imageMsg];
+    set({ messages: allMessages });
+    
+    // Update chat message count
+    const updatedChat = { ...activeChat, messageCount: allMessages.length, updatedAt: now };
+    await chatDB.save(updatedChat);
+    set({ activeChat: updatedChat });
   },
 
   // ---- Memory Actions ----
