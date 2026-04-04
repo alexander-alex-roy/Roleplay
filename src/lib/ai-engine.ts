@@ -71,46 +71,113 @@ export const AI_MODELS: AIModel[] = [
   { id: 'openrouter-auto', name: 'OpenRouter (Auto)', provider: 'openrouter', maxContextTokens: 200000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.001, costPer1kOutput: 0.003 },
 
   // ==========================================
-  // NVIDIA NIM - Best for roleplay: Nemotron series, then Llama 3.1
+  // NVIDIA NIM - Tier 1: God Tier (70B+)
   // ==========================================
-  { id: 'nvidia/llama-3.1-nemotron-ultra-253b-instruct', name: 'Nemotron Ultra 253B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
-  { id: 'nvidia/llama-3.1-nemotron-70b-instruct', name: 'Llama 3.1 Nemotron 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
-  { id: 'nvidia/llama-3.3-nemotron-super-49b', name: 'Llama 3.3 Nemotron Super 49B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
-  { id: 'meta/llama-3.1-70b-instruct', name: 'Llama 3.1 70B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
-  { id: 'meta/llama-3.1-405b-instruct', name: 'Llama 3.1 405B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
-  { id: 'meta/llama-3.1-8b-instruct', name: 'Llama 3.1 8B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-  { id: 'deepseek-ai/deepseek-r1', name: 'DeepSeek R1', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0015, costPer1kOutput: 0.002 },
-  { id: 'deepseek-ai/deepseek-r1-distill-llama-70b', name: 'DeepSeek R1 Distill 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00059, costPer1kOutput: 0.00079 },
-  { id: 'deepseek-ai/deepseek-r1-distill-qwen-32b', name: 'DeepSeek R1 Distill Qwen 32B', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00039, costPer1kOutput: 0.00039 },
-  { id: 'deepseek-ai/deepseek-r1-distill-qwen-14b', name: 'DeepSeek R1 Distill Qwen 14B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00024, costPer1kOutput: 0.00024 },
-  { id: 'deepseek-ai/deepseek-r1-distill-qwen-7b', name: 'DeepSeek R1 Distill Qwen 7B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-  { id: 'mistralai/mistral-large-instruct-v1', name: 'Mistral Large', provider: 'nvidia', maxContextTokens: 32000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'mistralai/mistral-large-3-675b-instruct-2512', name: 'Mistral Large 3 675B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'qwen/qwen3.5-397b-a17b', name: 'Qwen3.5 397B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'nvidia/llama-3.1-nemotron-ultra-253b-v1', name: 'Nemotron Ultra 253B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'meta/llama-3.1-405b-instruct', name: 'Llama 3.1 405B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'deepseek-ai/deepseek-v3.2', name: 'DeepSeek V3.2', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0015, costPer1kOutput: 0.002 },
+  { id: 'deepseek-ai/deepseek-v3.1', name: 'DeepSeek V3.1', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0015, costPer1kOutput: 0.002 },
+  { id: 'meta/llama-3.3-70b-instruct', name: 'Llama 3.3 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
+  { id: 'meta/llama-3.1-70b-instruct', name: 'Llama 3.1 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
+  { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
+  { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'nvidia', maxContextTokens: 200000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
+  { id: 'stockmark/stockmark-2-100b-instruct', name: 'Stockmark 2 100B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
+  { id: 'institute-of-science-tokyo/llama-3.1-swallow-70b-instruct-v0.1', name: 'Llama Swallow 70B (JP)', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
+  { id: 'tokyotech-llm/llama-3-swallow-70b-instruct-v0.1', name: 'Llama Swallow 70B (TT)', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
+  { id: 'yentinglin/llama-3-taiwan-70b-instruct', name: 'Llama Taiwan 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
+
+  // ==========================================
+  // NVIDIA NIM - Tier 2: High-End MoE (40B-90B)
+  // ==========================================
+  { id: 'qwen/qwen3-coder-480b-a35b-instruct', name: 'Qwen3 Coder 480B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'meta/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
+  { id: 'nvidia/llama-3.3-nemotron-super-49b-v1.5', name: 'Nemotron Super 49B v1.5', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
+  { id: 'nvidia/llama-3.3-nemotron-super-49b-v1', name: 'Nemotron Super 49B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
   { id: 'mistralai/mistral-medium-3-instruct', name: 'Mistral Medium 3', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
-  { id: 'mistralai/mixtral-8x22b-instruct-v0.1', name: 'Mixtral 8x22B Instruct', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
-  { id: 'meta/llama3-70b-instruct', name: 'Llama 3 70B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0006, costPer1kOutput: 0.0006 },
-  { id: 'nvidia/nemotron-4-340b-instruct', name: 'Nemotron 4 340B Instruct', provider: 'nvidia', maxContextTokens: 4096, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
-  { id: 'mistralai/pixtral-large-2507', name: 'Pixtral Large', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.004, costPer1kOutput: 0.012 },
-  { id: 'qwen/qwen2.5-72b-instruct', name: 'Qwen 2.5 72B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
-  { id: 'qwen/qwen2.5-32b-instruct', name: 'Qwen 2.5 32B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
-  { id: 'mistralai/mixtral-8x7b-instruct-v0.1', name: 'Mixtral 8x7B Instruct', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00024, costPer1kOutput: 0.00024 },
-  { id: 'google/gemma-2-27b-it', name: 'Gemma 2 27B IT', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-  { id: 'qwen/qwen2.5-14b-instruct', name: 'Qwen 2.5 14B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
-  { id: 'meta/llama3-8b-instruct', name: 'Llama 3 8B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
-  { id: 'mistralai/mistral-nemo-instruct-2407', name: 'Mistral NeMo', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-  { id: 'mistralai/codestral-22b-instruct-v0.1', name: 'Codestral 22B', provider: 'nvidia', maxContextTokens: 256000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0009 },
-  { id: 'qwen/qwen2.5-coder-32b-instruct', name: 'Qwen 2.5 Coder 32B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
-  { id: 'qwen/qwen2.5-7b-instruct', name: 'Qwen 2.5 7B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
-  { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B IT', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
+  { id: 'mistralai/mistral-small-4-119b-2603', name: 'Mistral Small 4 119B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
+  { id: 'mistralai/mixtral-8x22b-instruct-v0.1', name: 'Mixtral 8x22B', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
+  { id: 'google/gemma-4-31b-it', name: 'Gemma 4 31B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
+  { id: 'google/gemma-3-27b-it', name: 'Gemma 3 27B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'mistralai/devstral-2-123b-instruct-2512', name: 'Devstral 2 123B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
+  { id: 'qwen/qwen3.5-122b-a10b', name: 'Qwen3.5 122B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
+  { id: 'moonshotai/kimi-k2-instruct-0905', name: 'Kimi K2 Instruct 0905', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
+  { id: 'moonshotai/kimi-k2-instruct', name: 'Kimi K2 Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
+  { id: 'mistralai/mistral-small-3.1-24b-instruct-2503', name: 'Mistral Small 3.1 24B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'mistralai/mistral-small-24b-instruct', name: 'Mistral Small 24B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+
+  // ==========================================
+  // NVIDIA NIM - Tier 3: Workhorses (8B-15B)
+  // ==========================================
+  { id: 'mistralai/mixtral-8x7b-instruct-v0.1', name: 'Mixtral 8x7B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00024, costPer1kOutput: 0.00024 },
+  { id: 'mistralai/magistral-small-2506', name: 'Magistral Small', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'microsoft/phi-4-multimodal-instruct', name: 'Phi-4 Multimodal', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'google/gemma-3-12b-it', name: 'Gemma 3 12B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
+  { id: 'google/gemma-2-27b-it', name: 'Gemma 2 27B', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'meta/llama-3.1-8b-instruct', name: 'Llama 3.1 8B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'meta/llama3-8b-instruct', name: 'Llama 3 8B', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
+  { id: 'meta/llama-3.2-3b-instruct', name: 'Llama 3.2 3B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
+  { id: 'meta/llama-3.2-1b-instruct', name: 'Llama 3.2 1B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'qwen/qwen2.5-coder-32b-instruct', name: 'Qwen Coder 32B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
+  { id: 'qwen/qwen3-next-80b-a3b-instruct', name: 'Qwen3 Next 80B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
+  { id: 'qwen/qwen3-next-80b-a3b-thinking', name: 'Qwen3 Next 80B Thinking', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0005 },
+  { id: 'moonshotai/kimi-k2-thinking', name: 'Kimi K2 Thinking', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
+  { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
+  { id: 'google/gemma-3-4b-it', name: 'Gemma 3 4B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'upstage/solar-10.7b-instruct', name: 'Solar 10.7B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'nvidia/nvidia-nemotron-nano-9b-v2', name: 'Nemotron Nano 9B v2', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'nvidia/llama-3.1-nemotron-nano-8b-v1', name: 'Nemotron Nano 8B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
   { id: 'microsoft/phi-3-medium-128k-instruct', name: 'Phi-3 Medium 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
-  { id: 'ibm/granite-3.3-8b-instruct', name: 'Granite 3.3 8B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
+  { id: 'microsoft/phi-3-medium-4k-instruct', name: 'Phi-3 Medium 4K', provider: 'nvidia', maxContextTokens: 4096, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'microsoft/phi-3-small-128k-instruct', name: 'Phi-3 Small 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'microsoft/phi-3-small-8k-instruct', name: 'Phi-3 Small 8K', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
   { id: 'microsoft/phi-3.5-mini-instruct', name: 'Phi-3.5 Mini', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'microsoft/phi-4-mini-flash-reasoning', name: 'Phi-4 Mini Flash Reasoning', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'qwen/qwen2.5-7b-instruct', name: 'Qwen 2.5 7B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'qwen/qwen2-7b-instruct', name: 'Qwen 2 7B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'qwen/qwen2.5-coder-7b-instruct', name: 'Qwen Coder 7B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'deepseek-ai/deepseek-r1-distill-llama-8b', name: 'DeepSeek R1 Llama 8B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'minimaxai/minimax-m2.5', name: 'MiniMax M2.5', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'nvidia/nemotron-3-super-120b-a12b', name: 'Nemotron 3 Super 120B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
+  { id: 'nvidia/nemotron-3-nano-30b-a3b', name: 'Nemotron 3 Nano 30B', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
+  { id: 'nvidia/nemotron-nano-12b-v2-vl', name: 'Nemotron Nano 12B VL', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+
+  // ==========================================
+  // NVIDIA NIM - Tier 4: Niche/Vision/Older
+  // ==========================================
+  { id: 'abacusai/dracarys-llama-3.1-70b-instruct', name: 'Dracarys Llama 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
+  { id: 'meta/llama-3.2-90b-vision-instruct', name: 'Llama 3.2 90B Vision', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
+  { id: 'meta/llama-3.2-11b-vision-instruct', name: 'Llama 3.2 11B Vision', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'nvidia/llama-3.1-nemotron-nano-vl-8b-v1', name: 'Nemotron Nano VL 8B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
+  { id: 'microsoft/phi-3.5-vision-instruct', name: 'Phi-3.5 Vision', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'ai21labs/jamba-1.5-mini-instruct', name: 'Jamba 1.5 Mini', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'baichuan-inc/baichuan2-13b-chat', name: 'Baichuan2 13B (CN)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
+  { id: 'bytedance/seed-oss-36b-instruct', name: 'Seed OSS 36B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0003 },
+  { id: 'thudm/chatglm3-6b', name: 'ChatGLM3 6B (CN)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'z-ai/glm4.7', name: 'GLM4.7 (CN)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
+  { id: 'sarvamai/sarvam-m', name: 'Sarvam-M (Indian)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'nvidia/nemotron-4-mini-hindi-4b-instruct', name: 'Nemotron Hindi 4B', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'rakuten/rakutenai-7b-chat', name: 'RakutenAI 7B Chat (JP)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'rakuten/rakutenai-7b-instruct', name: 'RakutenAI 7B Instruct (JP)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'speakleash/bielik-11b-v2.6-instruct', name: 'Bielik 11B v2.6 (PL)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'speakleash/bielik-11b-v2.3-instruct', name: 'Bielik 11B v2.3 (PL)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'igenius/italia_10b_instruct_16k', name: 'Italia 10B (IT)', provider: 'nvidia', maxContextTokens: 16384, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
+  { id: 'utter-project/eurollm-9b-instruct', name: 'EuroLLM 9B (EU)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'gotocompany/gemma-2-9b-cpt-sahabatai-instruct', name: 'Gemma 2 9B CPT (ID)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
+  { id: 'opengpt-x/teuken-7b-instruct-commercial-v0.4', name: 'Teuken 7B v0.4 (EU)', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'marin/marin-8b-instruct', name: 'Marin 8B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'mediatek/breeze-7b-instruct', name: 'Breeze 7B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
+  { id: 'stepfun-ai/step-3.5-flash', name: 'Step 3.5 Flash', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'tiiuae/falcon3-7b-instruct', name: 'Falcon 3 7B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00008, costPer1kOutput: 0.00008 },
+  { id: 'google/gemma-7b', name: 'Gemma 7B', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
+  { id: 'google/gemma-3-1b-it', name: 'Gemma 3 1B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'google/gemma-3n-e4b-it', name: 'Gemma 3N E4B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'google/gemma-3n-e2b-it', name: 'Gemma 3N E2B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'institute-of-science-tokyo/llama-3.1-swallow-8b-instruct-v0.1', name: 'Llama Swallow 8B (JP)', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
   { id: 'microsoft/phi-3-mini-128k-instruct', name: 'Phi-3 Mini 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
-  { id: 'ibm/granite-3.3-2b-instruct', name: 'Granite 3.3 2B Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
-  { id: 'microsoft/phi-3.5-moe-instruct', name: 'Phi-3.5 MoE', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
-  { id: 'ibm/granite-3.0-8b-instruct', name: 'Granite 3.0 8B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00012, costPer1kOutput: 0.00012 },
-  { id: 'ibm/granite-3.0-2b-instruct', name: 'Granite 3.0 2B Instruct', provider: 'nvidia', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
-  { id: 'z-ai/glm4.7', name: 'GLM4.7', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
-  { id: '01-ai/yi-large', name: 'Yi Large', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
+  { id: 'microsoft/phi-3-mini-4k-instruct', name: 'Phi-3 Mini 4K', provider: 'nvidia', maxContextTokens: 4096, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
+  { id: 'nvidia/llama3-chatqa-1.5-8b', name: 'Llama3 ChatQA 8B', provider: 'nvidia', maxContextTokens: 16384, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
 
   // ==========================================
   // Local LLMs (Ollama, LM Studio, llama.cpp, etc.)
@@ -129,92 +196,89 @@ export function getModelInfo(modelId: string): AIModel | undefined {
 // ---- Message type ----
 export type ChatMessage = { role: string; content: string };
 
-// ---- Build System Prompt ----
-// BUG FIX: The original used a raw string literal `'- Stay in character as ${character.name}...'`
-// (single-quoted), so `${character.name}` was never interpolated. Fixed by using a template
-// literal and passing the character name as a parameter, then doing the replace at the end.
+// ============================================================
+// Build System Prompt
+// ============================================================
+// Design goals:
+//   1. Token-efficient — only emit sections that have content
+//   2. Immersive roleplay framing that works across all models
+//   3. Concrete formatting rules stated once, not repeated
+//   4. Memory + summary injected at the end (closest to the new turn = highest attention)
+// ============================================================
 export function buildSystemPrompt(
   character: Character,
   settings: AppSettings,
   memories: string[],
   summary: string,
 ): string {
-  const parts: string[] = [];
+  const sections: string[] = [];
 
+  // ── Optional operator-level overrides ───────────────────────
   if (settings.jailbreakPrompt?.trim()) {
-    parts.push(settings.jailbreakPrompt.trim());
+    sections.push(settings.jailbreakPrompt.trim());
   }
-
   if (settings.customSystemPrompt?.trim()) {
-    parts.push(settings.customSystemPrompt.trim());
+    sections.push(settings.customSystemPrompt.trim());
   }
 
-  const userPersona = settings.userPersona;
-  const userLines = [
-    '[Your Identity (The User)]',
-    userPersona.name && userPersona.name.trim() !== '' && userPersona.name !== 'You' ? `Name: ${userPersona.name}` : 'Name: You',
-    userPersona.description ? `Description: ${userPersona.description}` : '',
-    userPersona.personality ? `Personality: ${userPersona.personality}` : '',
-    userPersona.speechPatterns ? `Speech Style: ${userPersona.speechPatterns}` : '',
-  ].filter(Boolean);
-  if (userLines.length > 1) {
-    parts.push(userLines.join('\n'));
-  }
+  // ── User persona (only emit lines that exist) ────────────────
+  const persona = settings.userPersona;
+  const hasPersonaName = persona?.name?.trim() && persona.name.trim() !== 'You';
+  const userLines: string[] = ['[User]'];
+  if (hasPersonaName) userLines.push(`Name: ${persona.name.trim()}`);
+  if (persona?.description?.trim()) userLines.push(`Description: ${persona.description.trim()}`);
+  if (persona?.personality?.trim()) userLines.push(`Personality: ${persona.personality.trim()}`);
+  if (persona?.speechPatterns?.trim()) userLines.push(`Speech style: ${persona.speechPatterns.trim()}`);
+  // Only include the user block if there's at least one field beyond the header
+  if (userLines.length > 1) sections.push(userLines.join('\n'));
 
-  const charLines = [
-    `[Character: ${character.name}]`,
-    character.description ? `Description: ${character.description}` : '',
-    character.personality ? `Personality: ${character.personality}` : '',
-    character.speechPatterns ? `Speech Patterns: ${character.speechPatterns}` : '',
-    character.knowledge ? `Knowledge: ${character.knowledge}` : '',
-    character.relationship ? `Relationship to User: ${character.relationship}` : '',
-    character.likes ? `Likes: ${character.likes}` : '',
-    character.dislikes ? `Dislikes: ${character.dislikes}` : '',
-    character.behavior ? `Behavioral Guidelines: ${character.behavior}` : '',
-    character.scenario ? `\nScenario: ${character.scenario}` : '',
-  ].filter(Boolean);
-  parts.push(charLines.join('\n'));
+  // ── Character card ───────────────────────────────────────────
+  const charLines: string[] = [`[Character: ${character.name}]`];
+  if (character.description?.trim()) charLines.push(`Appearance/background: ${character.description.trim()}`);
+  if (character.personality?.trim()) charLines.push(`Personality: ${character.personality.trim()}`);
+  if (character.speechPatterns?.trim()) charLines.push(`Speech patterns: ${character.speechPatterns.trim()}`);
+  if (character.knowledge?.trim()) charLines.push(`Knowledge/skills: ${character.knowledge.trim()}`);
+  if (character.relationship?.trim()) charLines.push(`Relationship to user: ${character.relationship.trim()}`);
+  if (character.likes?.trim()) charLines.push(`Likes: ${character.likes.trim()}`);
+  if (character.dislikes?.trim()) charLines.push(`Dislikes: ${character.dislikes.trim()}`);
+  if (character.behavior?.trim()) charLines.push(`Behavioral notes: ${character.behavior.trim()}`);
+  if (character.scenario?.trim()) charLines.push(`\nScenario: ${character.scenario.trim()}`);
+  sections.push(charLines.join('\n'));
 
+  // ── Example dialogue ─────────────────────────────────────────
   if (character.exampleMessages?.trim()) {
-    parts.push(`\nExample dialogue:\n${character.exampleMessages.trim()}`);
+    sections.push(`[Example dialogue]\n${character.exampleMessages.trim()}`);
   }
 
-  // FIX: Was a single-quoted string — ${character.name} was literal text, never replaced.
-  // Now correctly uses a template literal.
-  const rpInstructions = `\n[Roleplay Guidelines - CRITICAL]
-- Stay in character as ${character.name}. NEVER break character or speak as AI.
-- Be ${character.name} with their own personality, speech patterns, and behaviors.
-- ALWAYS remember and respect the user's name, description, and personality provided above.
-- NEVER repeat yourself, rephrase the same ideas, or echo what you or the user just said.
-- Keep responses NATURAL and CONCISE (1-3 paragraphs max).
-- NEVER include any reasoning, thinking process, analysis, or meta-commentary.
-- NEVER write things like "Based on...", "Reasoning:", "As an AI...", "I should..."
-- The user plays themselves. React naturally in character as ${character.name}.
-- Use vivid but efficient descriptions. Show emotions through actions, dialogue, and thoughts.
-- Drive the story forward with new developments, not repetitive dialogue.
-- Do NOT explain your choices or include any system/instruction text in your response.
+  // ── Core roleplay instructions ────────────────────────────────
+  // Kept tight: no redundancy, no restating the same rule two ways.
+  // Positive framing ("do X") preferred over negative ("don't do Y") where possible.
+  sections.push(`[Roleplay rules]
+You ARE ${character.name}. Embody them completely — their voice, mannerisms, desires, flaws.
+• Stay in character at all times. Never reference being an AI or break the fourth wall.
+• Remember the user's persona details above and address them naturally in character.
+• Advance the story: introduce new beats, reveal emotion through action, avoid restating what was just said.
+• Write 1–3 paragraphs per response. Be vivid and purposeful, never padded.
+• No meta-commentary, reasoning traces, or out-of-character notes.
 
-[Output Formatting - FOLLOW THIS EXACTLY]
-- Use **double asterisks** for BOLD text (actions, emphasis)
-- Use *lowercase words* for actions (like *smiles*, *nods*, *laughs*, *sighs*)
-- Use "double quotes" for spoken dialogue
-- NEVER use 'single quotes' for dialogue - only use "double quotes"
-- Example: *She smiles* "Hello there!" *He nods*`;
-  parts.push(rpInstructions);
+[Formatting]
+• *italics* for physical actions and internal feelings
+• "double quotes" for spoken dialogue
+• **bold** for emphasis or dramatic beats
+• Never use single quotes for speech`);
 
+  // ── Conversation summary (context anchor) ────────────────────
   if (summary?.trim()) {
-    parts.push(`\n[Conversation Summary - Remember this context]\n${summary.trim()}`);
+    sections.push(`[Story so far]\n${summary.trim()}`);
   }
 
-  if (memories.length > 0) {
-    // FIX: Filter out empty/whitespace-only memory entries before joining
-    const validMemories = memories.filter(m => m?.trim());
-    if (validMemories.length > 0) {
-      parts.push(`\n[Important Memories to Remember]\n${validMemories.join('\n')}`);
-    }
+  // ── Memories (injected last for highest model attention) ──────
+  const validMemories = (memories ?? []).map(m => m?.trim()).filter(Boolean);
+  if (validMemories.length > 0) {
+    sections.push(`[Key memories]\n${validMemories.join('\n')}`);
   }
 
-  return parts.join('\n\n');
+  return sections.join('\n\n');
 }
 
 // ---- Streaming ----
@@ -235,13 +299,10 @@ export async function streamChatResponse(
   signal?: AbortSignal,
   callbacks?: StreamCallbacks,
 ): Promise<string> {
-  // FIX: Guard against aborted signal before doing anything
   if (signal?.aborted) return '';
 
-  // FIX: Validate messages array — must be non-empty
-  if (!messages || messages.length === 0) {
-    const err = 'No messages provided to streamChatResponse.';
-    callbacks?.onError(err);
+  if (!messages?.length) {
+    callbacks?.onError('No messages provided to streamChatResponse.');
     return '';
   }
 
@@ -250,15 +311,17 @@ export async function streamChatResponse(
   );
 
   if (!providerConfig) {
-    const err = `No API key configured for ${settings.activeProvider}. Please add your API key in Settings.`;
-    callbacks?.onError(err);
+    callbacks?.onError(
+      `No active provider config found for "${settings.activeProvider}". Add your API key in Settings.`,
+    );
     return '';
   }
 
-  // FIX: 'local' provider doesn't require an API key — skip the key check for it
   const requiresKey = settings.activeProvider !== 'local';
-  if (requiresKey && (!providerConfig.apiKey || providerConfig.apiKey.trim() === '')) {
-    callbacks?.onError(`API key for ${settings.activeProvider} is empty. Add your API key in Settings.`);
+  if (requiresKey && !providerConfig.apiKey?.trim()) {
+    callbacks?.onError(
+      `API key for ${settings.activeProvider} is empty. Add your API key in Settings.`,
+    );
     return '';
   }
 
@@ -303,33 +366,8 @@ export async function streamChatResponse(
     if (signal?.aborted) return '';
 
     if (!response.ok) {
-      let errorText = '';
-      try {
-        const errData = await response.json();
-        errorText =
-          errData?.error?.message ||
-          errData?.error?.code ||
-          errData?.message ||
-          JSON.stringify(errData);
-      } catch {
-        try {
-          errorText = (await response.text()) || `HTTP ${response.status}`;
-        } catch {
-          errorText = `HTTP ${response.status}`;
-        }
-      }
-
-      let hint = '';
-      if (response.status === 401 || response.status === 403) {
-        hint = getAuthErrorHint(provider);
-      } else if (response.status === 404) {
-        hint = '\n\nCheck the model ID in Settings.';
-      } else if (response.status === 429) {
-        hint = '\n\nRate limited. Wait a moment and try again.';
-      } else if (response.status >= 500) {
-        hint = '\n\nServer error on the provider side. Try again in a moment.';
-      }
-
+      const errorText = await parseErrorResponse(response);
+      const hint = buildErrorHint(provider, response.status);
       callbacks?.onError(`${provider} error (${response.status}): ${errorText}${hint}`);
       return '';
     }
@@ -337,43 +375,61 @@ export async function streamChatResponse(
     if (settings.streamingEnabled && callbacks) {
       await parseSSEStream(response, provider, signal, callbacks);
       return '';
-    } else {
-      const data = await response.json();
-      const text = extractTextFromResponse(data, provider);
-      callbacks?.onToken(text);
-      callbacks?.onDone(text);
-      return text;
     }
+
+    const data = await response.json();
+    const text = extractTextFromResponse(data, provider);
+    callbacks?.onToken(text);
+    callbacks?.onDone(text);
+    return text;
   } catch (error) {
-    if (signal?.aborted || (error instanceof Error && error.name === 'AbortError')) {
-      return '';
-    }
-    const message = error instanceof Error ? error.message : 'Unknown network error.';
-    callbacks?.onError(message);
+    if (signal?.aborted || (error instanceof Error && error.name === 'AbortError')) return '';
+    callbacks?.onError(error instanceof Error ? error.message : 'Unknown network error.');
     return '';
   }
 }
 
+// ---- Error helpers ----
+
+async function parseErrorResponse(response: Response): Promise<string> {
+  try {
+    const errData = await response.json();
+    return (
+      errData?.error?.message ||
+      errData?.error?.code ||
+      errData?.message ||
+      JSON.stringify(errData)
+    );
+  } catch {
+    try { return (await response.text()) || `HTTP ${response.status}`; }
+    catch { return `HTTP ${response.status}`; }
+  }
+}
+
+function buildErrorHint(provider: string, status: number): string {
+  if (status === 401 || status === 403) return getAuthErrorHint(provider);
+  if (status === 404) return '\n\nCheck the model ID in Settings.';
+  if (status === 429) return '\n\nRate limited — wait a moment and retry.';
+  if (status >= 500) return '\n\nServer error on the provider side. Try again shortly.';
+  return '';
+}
+
 function getAuthErrorHint(provider: string): string {
   const hints: Record<string, string> = {
-    groq: '\n\n💡 Check your API key starts with "gsk_". Get it from https://console.groq.com/keys',
-    anthropic: '\n\n💡 Check your Anthropic API key from https://console.anthropic.com/',
-    google: '\n\n💡 Check your Google API key from https://aistudio.google.com/apikey',
-    openai: '\n\n💡 Check your OpenAI API key from https://platform.openai.com/api-keys',
-    nvidia: '\n\n💡 Check your NVIDIA API key from https://build.nvidia.com/',
-    mistral: '\n\n💡 Check your Mistral API key from https://console.mistral.ai/',
-    local: '\n\n💡 Make sure your local LLM server is running (Ollama, LM Studio, etc.)',
+    groq: '\n\n💡 Key should start with "gsk_" — get one at https://console.groq.com/keys',
+    anthropic: '\n\n💡 Get your key at https://console.anthropic.com/',
+    google: '\n\n💡 Get your key at https://aistudio.google.com/apikey',
+    openai: '\n\n💡 Get your key at https://platform.openai.com/api-keys',
+    nvidia: '\n\n💡 Get your key at https://build.nvidia.com/',
+    mistral: '\n\n💡 Get your key at https://console.mistral.ai/',
+    local: '\n\n💡 Make sure your local server is running (Ollama, LM Studio, etc.)',
   };
-  return hints[provider] ?? '\n\n💡 Check your API key is valid.';
+  return hints[provider] ?? '\n\n💡 Check that your API key is valid.';
 }
 
 // ---- Request builders ----
 
-function buildGroqRequest(
-  settings: AppSettings,
-  apiKey: string,
-  messages: ChatMessage[],
-): Request {
+function buildGroqRequest(settings: AppSettings, apiKey: string, messages: ChatMessage[]): Request {
   const body: Record<string, unknown> = {
     model: settings.activeModel,
     messages,
@@ -381,9 +437,8 @@ function buildGroqRequest(
     max_tokens: settings.maxTokens ?? 1024,
     top_p: settings.topP ?? 0.9,
     stream: settings.streamingEnabled,
-    // NOTE: Groq does NOT support frequency_penalty / presence_penalty — intentionally omitted.
+    // Groq does NOT support frequency_penalty / presence_penalty
   };
-
   return new Request('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
@@ -398,15 +453,13 @@ function buildOpenAIRequest(
   apiKey: string,
   messages: ChatMessage[],
 ): Request {
-  const url =
-    baseUrl ||
-    (provider === 'openrouter' ? 'https://openrouter.ai/api/v1' : 'https://api.openai.com/v1');
+  const fallback = provider === 'openrouter' ? 'https://openrouter.ai/api/v1' : 'https://api.openai.com/v1';
+  const base = (baseUrl || fallback).replace(/\/$/, '');
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${apiKey}`,
   };
-
   if (provider === 'openrouter') {
     headers['HTTP-Referer'] = 'https://roleplay-chat.app';
     headers['X-Title'] = 'RolePlay Chat';
@@ -420,9 +473,6 @@ function buildOpenAIRequest(
     top_p: settings.topP ?? 0.9,
     stream: settings.streamingEnabled,
   };
-
-  // FIX: Ensure URL ends with correct path, avoiding double-slash
-  const base = url.endsWith('/') ? url.slice(0, -1) : url;
   return new Request(`${base}/chat/completions`, { method: 'POST', headers, body: JSON.stringify(body) });
 }
 
@@ -432,32 +482,30 @@ function buildAnthropicRequest(
   apiKey: string,
   messages: ChatMessage[],
 ): Request {
-  const url = baseUrl || 'https://api.anthropic.com/v1/messages';
+  const url = (baseUrl || 'https://api.anthropic.com/v1/messages').replace(/\/$/, '');
 
   const systemMsg = messages.find(m => m.role === 'system');
-  const nonSystemMsgs = messages.filter(m => m.role !== 'system');
+  const nonSystem = messages.filter(m => m.role !== 'system');
 
-  // Map roles; treat anything non-assistant as 'user'
-  const chatMessages = nonSystemMsgs.map(m => ({
+  // Map to user/assistant; default unknown roles to 'user'
+  const chatMessages = nonSystem.map(m => ({
     role: m.role === 'assistant' ? 'assistant' as const : 'user' as const,
     content: m.content,
   }));
 
-  // FIX: Anthropic requires the first message to be from 'user'.
-  // If it starts with 'assistant', prepend a minimal user turn.
+  // Anthropic requires first message = user
   if (chatMessages.length > 0 && chatMessages[0].role === 'assistant') {
     chatMessages.unshift({ role: 'user', content: '(Continue)' });
   }
 
-  // FIX: Anthropic also disallows consecutive messages of the same role.
-  // Merge any consecutive same-role messages to avoid API errors.
-  const mergedMessages: { role: 'user' | 'assistant'; content: string }[] = [];
+  // Merge consecutive same-role messages
+  const merged: { role: 'user' | 'assistant'; content: string }[] = [];
   for (const msg of chatMessages) {
-    const last = mergedMessages[mergedMessages.length - 1];
-    if (last && last.role === msg.role) {
+    const last = merged[merged.length - 1];
+    if (last?.role === msg.role) {
       last.content += '\n\n' + msg.content;
     } else {
-      mergedMessages.push({ ...msg });
+      merged.push({ ...msg });
     }
   }
 
@@ -466,9 +514,8 @@ function buildAnthropicRequest(
     max_tokens: settings.maxTokens ?? 4096,
     temperature: settings.temperature ?? 0.8,
     stream: settings.streamingEnabled,
-    messages: mergedMessages,
+    messages: merged,
   };
-
   if (systemMsg?.content) body.system = systemMsg.content;
 
   return new Request(url, {
@@ -491,10 +538,10 @@ function buildGoogleRequest(
   const base = (baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
 
   const systemMsg = messages.find(m => m.role === 'system');
-  const nonSystemMsgs = messages.filter(m => m.role !== 'system');
+  const nonSystem = messages.filter(m => m.role !== 'system');
 
-  // FIX: Google requires alternating user/model turns. Merge consecutive same-role messages.
-  const rawContents = nonSystemMsgs.map(m => ({
+  // Map and merge consecutive same-role turns (Google requires strict alternation)
+  const rawContents = nonSystem.map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],
   }));
@@ -502,15 +549,14 @@ function buildGoogleRequest(
   const contents: { role: string; parts: { text: string }[] }[] = [];
   for (const item of rawContents) {
     const last = contents[contents.length - 1];
-    if (last && last.role === item.role) {
-      // Merge into previous turn by appending text to the first part
+    if (last?.role === item.role) {
       last.parts[0].text += '\n\n' + item.parts[0].text;
     } else {
       contents.push({ role: item.role, parts: [{ text: item.parts[0].text }] });
     }
   }
 
-  // FIX: Google also requires the first content to be from 'user'
+  // Google requires first content to be 'user'
   if (contents.length > 0 && contents[0].role !== 'user') {
     contents.unshift({ role: 'user', parts: [{ text: '(Continue)' }] });
   }
@@ -523,7 +569,6 @@ function buildGoogleRequest(
       topP: settings.topP ?? 0.9,
     },
   };
-
   if (systemMsg?.content) {
     body.systemInstruction = { parts: [{ text: systemMsg.content }] };
   }
@@ -534,11 +579,7 @@ function buildGoogleRequest(
 
   return new Request(
     `${base}/models/${encodedModel}:${endpoint}?key=${encodeURIComponent(apiKey)}${altSse}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    },
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) },
   );
 }
 
@@ -549,7 +590,6 @@ function buildMistralRequest(
   messages: ChatMessage[],
 ): Request {
   const base = (baseUrl || 'https://api.mistral.ai/v1').replace(/\/$/, '');
-
   const body: Record<string, unknown> = {
     model: settings.activeModel,
     messages,
@@ -559,7 +599,6 @@ function buildMistralRequest(
     random_seed: Math.floor(Math.random() * 1_000_000),
     stream: settings.streamingEnabled,
   };
-
   return new Request(`${base}/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
@@ -574,7 +613,6 @@ function buildNvidiaRequest(
   messages: ChatMessage[],
 ): Request {
   const url = baseUrl || 'https://roleplay.jameskaren.workers.dev/';
-
   const body: Record<string, unknown> = {
     model: settings.activeModel,
     messages,
@@ -584,7 +622,6 @@ function buildNvidiaRequest(
     stream: settings.streamingEnabled,
     apiKey,
   };
-
   return new Request(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -598,17 +635,14 @@ function buildLocalRequest(
   messages: ChatMessage[],
 ): Request {
   const base = (baseUrl || 'http://localhost:11434/v1').replace(/\/$/, '');
-  const model = settings.activeModel || 'llama3.2';
-
   const body: Record<string, unknown> = {
-    model,
+    model: settings.activeModel || 'llama3.2',
     messages,
     temperature: settings.temperature ?? 0.8,
     max_tokens: settings.maxTokens ?? 2048,
     top_p: settings.topP ?? 0.9,
     stream: settings.streamingEnabled,
   };
-
   return new Request(`${base}/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -625,7 +659,7 @@ async function parseSSEStream(
 ): Promise<void> {
   const reader = response.body?.getReader();
   if (!reader) {
-    callbacks?.onError('No response stream received');
+    callbacks?.onError('No response stream received.');
     return;
   }
 
@@ -634,8 +668,7 @@ async function parseSSEStream(
   let buffer = '';
   let done = false;
 
-  // Abort handler: cancel the reader when the signal fires
-  const abortHandler = () => { reader.cancel().catch(() => {}); };
+  const abortHandler = () => { reader.cancel().catch(() => { }); };
   signal?.addEventListener('abort', abortHandler);
 
   try {
@@ -648,7 +681,6 @@ async function parseSSEStream(
 
       buffer += decoder.decode(result.value, { stream: true });
 
-      // Split on newlines; keep the last (potentially incomplete) chunk in the buffer
       const lines = buffer.split('\n');
       buffer = lines.pop() ?? '';
 
@@ -656,40 +688,25 @@ async function parseSSEStream(
         if (signal?.aborted) break;
 
         const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith(':')) continue; // skip empty / SSE comments
-        if (trimmed.startsWith('event:')) continue;        // skip named event lines
+        if (!trimmed || trimmed.startsWith(':') || trimmed.startsWith('event:')) continue;
         if (!trimmed.startsWith('data:')) continue;
 
-        // Safely strip the "data:" / "data: " prefix
         const dataStr = trimmed.startsWith('data: ') ? trimmed.slice(6) : trimmed.slice(5);
-
-        if (dataStr === '[DONE]') {
-          callbacks?.onDone(fullText);
-          return;
-        }
+        if (dataStr === '[DONE]') { callbacks?.onDone(fullText); return; }
 
         let parsed: Record<string, unknown>;
-        try {
-          parsed = JSON.parse(dataStr);
-        } catch {
-          // Malformed chunk — skip silently
-          continue;
-        }
+        try { parsed = JSON.parse(dataStr); }
+        catch { continue; }
 
         const token = extractTokenFromChunk(parsed, provider);
-        if (token) {
-          fullText += token;
-          callbacks?.onToken(token);
-        }
+        if (token) { fullText += token; callbacks?.onToken(token); }
 
-        const reasoning = extractReasoningFromChunk(parsed, provider);
-        if (reasoning) {
-          callbacks?.onThinking?.(reasoning);
-        }
+        const reasoning = extractReasoningFromChunk(parsed);
+        if (reasoning) callbacks?.onThinking?.(reasoning);
       }
     }
 
-    // Process any data remaining in the buffer after the stream ends
+    // Flush remaining buffer
     const remaining = buffer.trim();
     if (remaining && !signal?.aborted) {
       const dataStr = remaining.startsWith('data: ')
@@ -697,13 +714,12 @@ async function parseSSEStream(
         : remaining.startsWith('data:')
           ? remaining.slice(5)
           : null;
-
       if (dataStr && dataStr !== '[DONE]') {
         try {
           const parsed = JSON.parse(dataStr);
           const token = extractTokenFromChunk(parsed, provider);
           if (token) { fullText += token; callbacks?.onToken(token); }
-          const reasoning = extractReasoningFromChunk(parsed, provider);
+          const reasoning = extractReasoningFromChunk(parsed);
           if (reasoning) callbacks?.onThinking?.(reasoning);
         } catch { /* malformed — skip */ }
       }
@@ -712,43 +728,31 @@ async function parseSSEStream(
     callbacks?.onDone(fullText);
   } catch (error) {
     if (signal?.aborted || (error instanceof Error && error.name === 'AbortError')) {
-      // Stream was intentionally cancelled — call onDone with whatever we have
       if (fullText) callbacks?.onDone(fullText);
       return;
     }
-    const message = error instanceof Error ? error.message : 'Stream reading error';
-    callbacks?.onError(message);
+    callbacks?.onError(error instanceof Error ? error.message : 'Stream reading error.');
   } finally {
     signal?.removeEventListener('abort', abortHandler);
-    // Always release the reader lock
     try { reader.releaseLock(); } catch { /* already released */ }
   }
 }
 
 /**
  * Extract reasoning/thinking content from a streaming chunk.
- *
- * Supports:
- * - OpenAI-compatible `reasoning_content` in delta (NVIDIA NIM, DeepSeek, some OpenRouter)
- * - Anthropic `thinking_delta` blocks
+ * Supports OpenAI-style reasoning_content and Anthropic thinking_delta.
  */
-function extractReasoningFromChunk(chunk: Record<string, unknown>, _provider: string): string {
-  // OpenAI-compatible reasoning delta
+function extractReasoningFromChunk(chunk: Record<string, unknown>): string {
+  // OpenAI-compatible reasoning delta (NVIDIA NIM, DeepSeek, some OpenRouter models)
   if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
-    const delta = (chunk.choices[0] as Record<string, unknown>)?.delta as
-      | Record<string, unknown>
-      | undefined;
-    if (delta && typeof delta.reasoning_content === 'string' && delta.reasoning_content) {
+    const delta = (chunk.choices[0] as Record<string, unknown>)?.delta as Record<string, unknown> | undefined;
+    if (typeof delta?.reasoning_content === 'string' && delta.reasoning_content) {
       return delta.reasoning_content;
     }
   }
 
   // Anthropic thinking_delta
-  if (
-    chunk.type === 'content_block_delta' &&
-    typeof chunk.delta === 'object' &&
-    chunk.delta !== null
-  ) {
+  if (chunk.type === 'content_block_delta' && chunk.delta !== null && typeof chunk.delta === 'object') {
     const delta = chunk.delta as Record<string, unknown>;
     if (delta.type === 'thinking_delta' && typeof delta.thinking === 'string') {
       return delta.thinking;
@@ -758,32 +762,23 @@ function extractReasoningFromChunk(chunk: Record<string, unknown>, _provider: st
   return '';
 }
 
-// ---- Extract a text token from a single SSE chunk ----
+/** Extract a text token from a single SSE chunk across all supported provider formats. */
 function extractTokenFromChunk(chunk: Record<string, unknown>, _provider: string): string {
-  // OpenAI-compatible (Groq, OpenAI, Mistral, OpenRouter, NVIDIA, Custom, Local)
+  // OpenAI-compatible (Groq, OpenAI, Mistral, OpenRouter, NVIDIA, custom, local)
   if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
-    const delta = (chunk.choices[0] as Record<string, unknown>)?.delta as
-      | Record<string, unknown>
-      | undefined;
-    if (delta && typeof delta.content === 'string') return delta.content;
-    // content can be null at the end of a stream — return '' rather than 'null'
-    return '';
+    const delta = (chunk.choices[0] as Record<string, unknown>)?.delta as Record<string, unknown> | undefined;
+    return typeof delta?.content === 'string' ? delta.content : '';
   }
 
   // Anthropic Messages API — text_delta
   if (chunk.type === 'content_block_delta') {
     const delta = chunk.delta as Record<string, unknown> | undefined;
-    if (delta?.type === 'text_delta' && typeof delta.text === 'string') {
-      return delta.text;
-    }
-    return '';
+    return delta?.type === 'text_delta' && typeof delta.text === 'string' ? delta.text : '';
   }
 
   // Google Gemini SSE
   if (Array.isArray(chunk.candidates) && chunk.candidates.length > 0) {
-    const content = (chunk.candidates[0] as Record<string, unknown>)?.content as
-      | Record<string, unknown>
-      | undefined;
+    const content = (chunk.candidates[0] as Record<string, unknown>)?.content as Record<string, unknown> | undefined;
     if (content && Array.isArray(content.parts) && content.parts.length > 0) {
       const text = (content.parts[0] as { text?: string }).text;
       return typeof text === 'string' ? text : '';
@@ -794,15 +789,12 @@ function extractTokenFromChunk(chunk: Record<string, unknown>, _provider: string
   return '';
 }
 
-// ---- Extract full text from a non-streaming JSON response ----
+/** Extract full text from a non-streaming JSON response across all supported provider formats. */
 function extractTextFromResponse(data: Record<string, unknown>, _provider: string): string {
   // OpenAI-compatible
   if (Array.isArray(data.choices) && data.choices.length > 0) {
-    const message = (data.choices[0] as Record<string, unknown>)?.message as
-      | Record<string, unknown>
-      | undefined;
-    if (message && typeof message.content === 'string') return message.content;
-    return '';
+    const message = (data.choices[0] as Record<string, unknown>)?.message as Record<string, unknown> | undefined;
+    return typeof message?.content === 'string' ? message.content : '';
   }
 
   // Anthropic
@@ -815,59 +807,43 @@ function extractTextFromResponse(data: Record<string, unknown>, _provider: strin
 
   // Google
   if (Array.isArray(data.candidates) && data.candidates.length > 0) {
-    const content = (data.candidates[0] as Record<string, unknown>)?.content as
-      | Record<string, unknown>
-      | undefined;
+    const content = (data.candidates[0] as Record<string, unknown>)?.content as Record<string, unknown> | undefined;
     if (content && Array.isArray(content.parts)) {
-      return (content.parts as Array<{ text?: string }>)
-        .map(p => p.text ?? '')
-        .join('');
+      return (content.parts as Array<{ text?: string }>).map(p => p.text ?? '').join('');
     }
   }
 
   return '';
 }
 
-// ---- Token estimation ----
+// ============================================================
+// Token estimation
+// ============================================================
 
-/**
- * Fast token estimator. Handles CJK, whitespace, and ASCII text.
- * (Original logic preserved; fixed missing word-boundary accounting.)
- */
+/** Fast token estimator — handles CJK, emoji/Unicode, and Latin text. */
 export function estimateTokens(text: string): number {
   if (!text) return 0;
-  let tokens = 0;
-  // FIX: The original counted whitespace chars as 0 but never counted the word they terminated.
-  // A simpler and more accurate approach: count CJK at 1.5, split ASCII on whitespace.
-  const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
-  const cjkMatches = text.match(cjkRegex);
-  const cjkCount = cjkMatches ? cjkMatches.length : 0;
 
-  // Strip CJK from text for word counting
+  const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
+  const cjkCount = (text.match(cjkRegex) ?? []).length;
+
   const withoutCJK = text.replace(cjkRegex, ' ');
   const wordCount = withoutCJK.trim() ? withoutCJK.trim().split(/\s+/).length : 0;
 
-  // Rough GPT-style approximation: ~0.75 tokens per English word, 1.5 per CJK char
-  tokens = Math.ceil(wordCount * 0.75 + cjkCount * 1.5);
-  return tokens;
+  // ~0.75 tokens/English word, ~1.5 tokens/CJK character
+  return Math.ceil(wordCount * 0.75 + cjkCount * 1.5);
 }
 
-/**
- * Enhanced token estimator — handles CJK, emoji/Unicode symbols, and Latin text.
- * Kept aligned with the original's intent but with corrected math.
- */
+/** Extended estimator that also weights emoji/non-ASCII symbols separately. */
 export function estimateTokensEnhanced(text: string): number {
   if (!text) return 0;
 
   const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
-  const cjkMatches = text.match(cjkRegex);
-  const cjkCount = cjkMatches ? cjkMatches.length : 0;
+  const cjkCount = (text.match(cjkRegex) ?? []).length;
 
-  // Emoji and non-ASCII, non-CJK, non-space characters
   const unicodeRegex = /[^\s\w\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
   const unicodeCount = (text.match(unicodeRegex) ?? []).length;
 
-  // ASCII word count (strip CJK and unicode symbols first)
   const stripped = text.replace(cjkRegex, '').replace(unicodeRegex, '');
   const wordCount = stripped.trim() ? stripped.trim().split(/\s+/).length : 0;
 
@@ -875,8 +851,8 @@ export function estimateTokensEnhanced(text: string): number {
 }
 
 export function estimateMessageTokens(messages: ChatMessage[]): number {
-  // FIX: Guard against empty/null messages array
   if (!messages?.length) return 0;
+  // +4 per message accounts for role/turn overhead in most tokenizers
   return messages.reduce((sum, m) => sum + estimateTokens(m.content ?? '') + 4, 0);
 }
 
@@ -884,30 +860,30 @@ export function estimateMessageTokens(messages: ChatMessage[]): number {
 // Character Generation
 // ============================================================
 
-const CHARACTER_GENERATION_PROMPT = `Generate a roleplay character. Output ONLY valid JSON, nothing else. No markdown, no explanation.
+// Improved: more concise prompt (fewer output tokens consumed on the instruction side),
+// richer first-message guidance, and clearer JSON schema description.
+const CHARACTER_GENERATION_PROMPT = `You are a creative writer specializing in immersive roleplay characters. Output ONLY valid JSON — no markdown fences, no explanation.
 
-JSON format:
+Schema:
 {
-  "name": "Unique Character Name",
-  "description": "Physical appearance and background. 2 sentences.",
-  "personality": "Traits and behavior. 2 sentences.",
-  "knowledge": "What the character knows: skills, history, secrets. 2-3 sentences.",
-  "scenario": "Setting and situation. 1-2 sentences.",
-  "firstMessage": "Immersive greeting with actions in asterisks. Meet user first time.",
-  "speechPatterns": "How they talk. 1-2 sentences.",
-  "likes": "What they enjoy. 1-2 sentences.",
-  "dislikes": "What they dislike. 1-2 sentences.",
-  "behavior": "Roleplay guidelines. 1-2 sentences.",
-  "tags": ["tag1", "tag2", "tag3", "tag4"]
+  "name": "Distinctive, memorable name",
+  "description": "2 sentences: vivid physical appearance + brief background",
+  "personality": "2 sentences: core traits, internal contradictions, what drives them",
+  "knowledge": "2–3 sentences: skills, expertise, formative experiences",
+  "scenario": "1–2 sentences: where they are, what's happening right now",
+  "firstMessage": "3–5 sentences in character voice. Start mid-scene with *action*. Reveal personality through behavior, not exposition. End with something that invites the user to respond.",
+  "speechPatterns": "1–2 sentences: cadence, vocabulary, verbal tics, accent cues",
+  "likes": "1–2 sentences: specific, unexpected passions",
+  "dislikes": "1–2 sentences: genuine aversions that cause friction",
+  "behavior": "1–2 sentences: how they behave under pressure, what boundaries they have",
+  "tags": ["tag1","tag2","tag3","tag4","tag5"]
 }
 
 Rules:
-- Name memorable and unique
-- Description gives clear visual image
-- First message immersive, 2-4 sentences, uses *actions*
-- Tags lowercase, 4-5 tags
-- Creative but realistic
-- JSON only, no text outside`;
+- Characters must have a flaw or contradiction — perfection is boring
+- First message must feel like the story has already started
+- Tags: lowercase, genre/archetype/mood, 4–6 total
+- JSON only`;
 
 export interface GeneratedCharacter {
   name: string;
@@ -935,26 +911,19 @@ export async function generateCharacter(
   const providerConfig = settings.providers?.find(
     p => p.provider === settings.activeProvider && p.enabled,
   );
-
   if (!providerConfig) {
-    throw new Error(
-      `No API key configured for ${settings.activeProvider}. Please add an API key in Settings.`,
-    );
+    throw new Error(`No API key configured for ${settings.activeProvider}. Add one in Settings.`);
   }
 
   const { userPrompt, characterType } = options;
 
   let systemPrompt = CHARACTER_GENERATION_PROMPT;
-  if (characterType?.trim()) {
-    systemPrompt += `\n\nCharacter type/style to focus on: ${characterType.trim()}`;
-  }
-  if (userPrompt?.trim()) {
-    systemPrompt += `\n\nUser's request: "${userPrompt.trim()}"`;
-  }
+  if (characterType?.trim()) systemPrompt += `\n\nFocus: ${characterType.trim()}`;
+  if (userPrompt?.trim()) systemPrompt += `\n\nUser request: "${userPrompt.trim()}"`;
 
   const messages: ChatMessage[] = [
     { role: 'system', content: systemPrompt },
-    { role: 'user', content: userPrompt?.trim() || 'Generate a unique and interesting character.' },
+    { role: 'user', content: userPrompt?.trim() || 'Generate a unique, compelling character.' },
   ];
 
   let fullText = '';
@@ -962,34 +931,23 @@ export async function generateCharacter(
 
   await streamChatResponse(settings, messages, undefined, {
     onToken: token => { fullText += token; },
-    onDone: () => {},
+    onDone: () => { },
     onError: error => { streamError = error; },
   });
 
-  // FIX: The original threw inside onError which bubbled as an unhandled rejection.
-  // Now we check after the await and throw cleanly.
-  if (streamError) {
-    throw new Error(`Character generation failed: ${streamError}`);
-  }
+  if (streamError) throw new Error(`Character generation failed: ${streamError}`);
+  if (!fullText.trim()) throw new Error('Character generation returned an empty response. Please try again.');
 
-  if (!fullText.trim()) {
-    throw new Error('Character generation returned an empty response. Please try again.');
-  }
-
-  // Parse the JSON response
-  let jsonStr = fullText.trim();
-
-  // Strip markdown code fences if the model wrapped its output
-  jsonStr = jsonStr
+  // Strip markdown fences if the model added them
+  let jsonStr = fullText.trim()
     .replace(/^```json\s*/i, '')
     .replace(/^```\s*/i, '')
     .replace(/\s*```\s*$/i, '')
     .trim();
 
-  // Extract the first JSON object from the response
   const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    throw new Error('Could not parse character data: No valid JSON object found in response.');
+    throw new Error('Could not parse character data: no valid JSON object in response.');
   }
 
   let parsed: Record<string, unknown>;
@@ -997,64 +955,76 @@ export async function generateCharacter(
     parsed = JSON.parse(jsonMatch[0]);
   } catch (e) {
     throw new Error(
-      `Failed to parse generated character JSON: ${e instanceof Error ? e.message : 'Unknown error'}. Please try again.`,
+      `Failed to parse character JSON: ${e instanceof Error ? e.message : 'Unknown error'}. Try again.`,
     );
   }
 
-  // Validate and normalize — ensure all fields are present with safe defaults
-  const character: GeneratedCharacter = {
-    name: typeof parsed.name === 'string' && parsed.name.trim() ? parsed.name.trim() : 'Unnamed Character',
-    description: typeof parsed.description === 'string' ? parsed.description : '',
-    personality: typeof parsed.personality === 'string' ? parsed.personality : '',
-    knowledge: typeof parsed.knowledge === 'string' ? parsed.knowledge : '',
-    scenario: typeof parsed.scenario === 'string' ? parsed.scenario : '',
-    firstMessage: typeof parsed.firstMessage === 'string' ? parsed.firstMessage : '',
-    speechPatterns: typeof parsed.speechPatterns === 'string' ? parsed.speechPatterns : '',
-    likes: typeof parsed.likes === 'string' ? parsed.likes : '',
-    dislikes: typeof parsed.dislikes === 'string' ? parsed.dislikes : '',
-    behavior: typeof parsed.behavior === 'string' ? parsed.behavior : '',
-    // FIX: Filter out non-string tags and cap at 8
+  const str = (key: string): string =>
+    typeof parsed[key] === 'string' ? (parsed[key] as string) : '';
+
+  return {
+    name: str('name').trim() || 'Unnamed Character',
+    description: str('description'),
+    personality: str('personality'),
+    knowledge: str('knowledge'),
+    scenario: str('scenario'),
+    firstMessage: str('firstMessage'),
+    speechPatterns: str('speechPatterns'),
+    likes: str('likes'),
+    dislikes: str('dislikes'),
+    behavior: str('behavior'),
     tags: Array.isArray(parsed.tags)
       ? (parsed.tags as unknown[]).filter((t): t is string => typeof t === 'string').slice(0, 8)
       : [],
   };
-
-  return character;
 }
 
-// ---- Prompt Enhancement for Image Generation ----
+// ============================================================
+// Image Prompt Enhancement
+// ============================================================
+
 export async function enhanceImagePrompt(
   settings: AppSettings,
   userPrompt: string,
   context?: string,
 ): Promise<string> {
-  const contextStr = context ? `\nContext: ${context}` : '';
-  const enhancePrompt = `You are an expert at creating detailed prompts for AI image generation. 
-Given the user's prompt, create an enhanced, detailed prompt that will produce a better image.
-${contextStr}
+  // Tight prompt — we only need 1–3 sentences back, so keep instructions minimal
+  const contextClause = context ? ` Scene context: ${context}.` : '';
+  const prompt =
+    `Rewrite the following image prompt to be more detailed and visually specific for an AI image generator.${contextClause} Add lighting, mood, composition, and quality keywords. Keep it to 1–3 sentences. Output the enhanced prompt only, no explanation.\n\nOriginal: "${userPrompt}"`;
 
-User's prompt: "${userPrompt}"
-
-Create a detailed image generation prompt that:
-1. Expands on the user's description with specific visual details
-2. Adds appropriate lighting, composition, and style keywords
-3. Keeps the core subject/topic from the user's prompt
-4. Adds quality keywords like "high detail", "8k", "professional"
-5. Is 1-3 sentences max
-
-Respond with ONLY the enhanced prompt, nothing else.`;
-
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     let result = '';
     streamChatResponse(
       settings,
-      [{ role: 'user', content: enhancePrompt }] as any,
+      [{ role: 'user', content: prompt }],
       undefined,
       {
-        onToken: (token) => { result += token; },
+        onToken: token => { result += token; },
         onDone: () => { resolve(result.trim() || userPrompt); },
         onError: () => { resolve(userPrompt); },
-      }
+      },
+    );
+  });
+}
+
+export async function enhanceTextPrompt(
+  settings: AppSettings,
+  text: string,
+): Promise<string> {
+  const prompt = `Enhance this text prompt for AI image generation. Make it more detailed and descriptive while keeping the original meaning. Output only the enhanced prompt, nothing else.\n\nOriginal: "${text}"`;
+
+  return new Promise(resolve => {
+    let result = '';
+    streamChatResponse(
+      settings,
+      [{ role: 'user', content: prompt }],
+      undefined,
+      {
+        onToken: token => { result += token; },
+        onDone: () => { resolve(result.trim() || text); },
+        onError: () => { resolve(text); },
+      },
     );
   });
 }

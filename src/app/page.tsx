@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import Image from 'next/image';
 import { useChatStore } from '@/stores/chat-store';
 import { useSettingsStore } from '@/stores/settings-store';
-import { getModelsForProvider, generateCharacter, enhanceImagePrompt } from '@/lib/ai-engine';
+import { getModelsForProvider, generateCharacter, enhanceImagePrompt, enhanceTextPrompt } from '@/lib/ai-engine';
 import type { Character, AIProvider, UserPersona, CharacterTemplate } from '@/lib/types';
 import { CHARACTER_TEMPLATES } from '@/lib/types';
 import { exportAllData, importAllData, clearAllData } from '@/lib/db';
@@ -2351,7 +2351,10 @@ function SettingsDialog() {
                     <Separator />
 
                     <div>
-                      <Label className="text-sm">Jailbreak / Pre-Prompt</Label>
+                      <Label className="text-sm flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-primary" />
+                        Jailbreak / Pre-Prompt
+                      </Label>
                       <p className="text-xs text-muted-foreground mb-1">Creative freedom prompt (prepended to system prompt)</p>
                       <Textarea
                         value={settings.jailbreakPrompt || ''}
@@ -2363,7 +2366,10 @@ function SettingsDialog() {
                     </div>
 
                     <div>
-                      <Label className="text-sm">Custom System Prompt</Label>
+                      <Label className="text-sm flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-primary" />
+                        Custom System Prompt
+                      </Label>
                       <p className="text-xs text-muted-foreground mb-1">Additional instructions for the AI</p>
                       <Textarea
                         value={settings.customSystemPrompt || ''}
@@ -2584,6 +2590,7 @@ function CharacterEditorInner() {
   const [activeField, setActiveField] = useState(isEditing ? 'identity' : 'templates');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [enhancingPrompt, setEnhancingPrompt] = useState(false);
   const [generationPrompt, setGenerationPrompt] = useState('');
   const [generationError, setGenerationError] = useState<string | null>(null);
 
@@ -2924,14 +2931,56 @@ function CharacterEditorInner() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mb-1">Check to use your custom prompt instead of auto-generated one</p>
-                <Textarea
-                  value={form.customAvatarPrompt || ''}
-                  onChange={(e) => updateForm('customAvatarPrompt', e.target.value)}
-                  placeholder="Custom prompt for AI image generation (e.g., anime style portrait, cyberpunk character...)"
-                  className="min-h-[80px]"
-                  maxLength={1000}
-                  disabled={!form.useCustomAvatarPrompt}
-                />
+                <div className="relative">
+                  <Textarea
+                    value={form.customAvatarPrompt || ''}
+                    onChange={(e) => updateForm('customAvatarPrompt', e.target.value)}
+                    placeholder="Custom prompt for AI image generation (e.g., anime style portrait, cyberpunk character...)"
+                    className="min-h-[80px] pr-20"
+                    maxLength={1000}
+                    disabled={!form.useCustomAvatarPrompt}
+                  />
+                  <div className="absolute right-2 bottom-2">
+                    {form.useCustomAvatarPrompt && form.customAvatarPrompt && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8"
+                              disabled={enhancingPrompt}
+                              onClick={async () => {
+                                if (!form.customAvatarPrompt?.trim()) return;
+                                setEnhancingPrompt(true);
+                                try {
+                                  const enhanced = await enhanceTextPrompt(
+                                    settingsStore.settings,
+                                    form.customAvatarPrompt,
+                                  );
+                                  updateForm('customAvatarPrompt', enhanced);
+                                  toast({ title: 'Prompt enhanced!' });
+                                } catch {
+                                  toast({ title: 'Failed to enhance prompt', variant: 'destructive' });
+                                } finally {
+                                  setEnhancingPrompt(false);
+                                }
+                              }}
+                            >
+                              {enhancingPrompt ? (
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Sparkles className="w-4 h-4 text-primary" />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Enhance prompt</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                </div>
                 {form.lastUsedPrompt && (
                   <div className="mt-2 p-2 bg-muted rounded text-xs">
                     <p className="font-medium mb-1">Last used prompt:</p>
@@ -3109,7 +3158,10 @@ function CharacterEditorInner() {
                 />
               </div>
               <div>
-                <Label className="text-sm">Custom System Prompt (Override)</Label>
+                <Label className="text-sm flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  Custom System Prompt (Override)
+                </Label>
                 <p className="text-xs text-muted-foreground mb-1">Replaces auto-generated system prompt entirely</p>
                 <Textarea
                   value={form.systemPrompt || ''}
