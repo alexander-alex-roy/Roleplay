@@ -79,7 +79,7 @@ export async function extractMemories(
   if (conversableMessages.length < 2) return [];
 
   const conversationText = conversableMessages
-    .map(m => `${m.role === 'user' ? 'User' : character.name}: ${m.content ?? ''}`)
+    .map(m => `${m.role === 'user' ? (settings.userPersona.name || 'You') : character.name}: ${m.content ?? ''}`)
     .join('\n');
 
   // FIX: Limit how many existing memories we send to the model — sending hundreds would
@@ -229,11 +229,14 @@ export async function retrieveRelevantMemories(
   characterId: string,
   recentMessages: ChatMessage[],
   maxMemories: number,
+  chatId?: string,
 ): Promise<MemoryEntry[]> {
   // FIX: Guard against invalid maxMemories values
   const limit = Math.max(1, Math.floor(maxMemories ?? 10));
 
-  const allMemories = await memoryDB.getByCharacterId(characterId);
+  const allMemories = chatId
+    ? await memoryDB.getByChatId(chatId)
+    : await memoryDB.getByCharacterId(characterId);
   if (allMemories.length === 0) return [];
 
   const now = Date.now();
@@ -446,7 +449,7 @@ export async function generateSceneSummary(
 
   const transcript = messages
     .filter(m => m.role === 'user' || m.role === 'assistant')
-    .map(m => `${m.role === 'user' ? 'User' : character.name}: ${m.content ?? ''}`)
+    .map(m => `${m.role === 'user' ? (settings.userPersona.name || 'You') : character.name}: ${m.content ?? ''}`)
     .join('\n');
 
   if (!transcript.trim()) return '';

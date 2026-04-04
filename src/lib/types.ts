@@ -97,6 +97,9 @@ export interface Character {
   likes?: string;
   dislikes?: string;
   behavior?: string;
+  customAvatarPrompt?: string;
+  useCustomAvatarPrompt?: boolean;
+  lastUsedPrompt?: string;
 }
 
 // ---- Character Templates ----
@@ -295,6 +298,7 @@ export interface AppSettings {
 
   // NVIDIA Image Generation
   nvidiaImageModel: string;
+  enhanceImagePrompts: boolean;
 
   // Onboarding
   showSetupWizard: boolean;
@@ -335,6 +339,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
 
   userPersona: DEFAULT_USER_PERSONA,
   nvidiaImageModel: 'stable-diffusion-3-medium',
+  enhanceImagePrompts: false,
   showSetupWizard: true,
 };
 

@@ -59,7 +59,7 @@ interface ChatState {
   addImageMessage: (imageDataUrl: string, model?: string) => Promise<void>;
 
   // Memory actions
-  loadMemories: (characterId: string) => Promise<void>;
+  loadMemories: (chatId: string) => Promise<void>;
   deleteMemory: (id: string) => Promise<void>;
 
   // UI actions
@@ -169,6 +169,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       activeChat: null,
       contextSummary: '',
       memoryPanelOpen: false,
+      memories: [],
     });
     await get().loadChats(character.id);
   },
@@ -287,7 +288,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   selectChat: async (chat: Chat) => {
-    set({ activeChat: chat, contextSummary: '' });
+    set({ activeChat: chat, contextSummary: '', memories: [] });
     await get().loadMessages(chat.id);
   },
 
@@ -325,9 +326,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
       // object instead so each save is isolated.
       const updatedChat: Chat = { ...chat, messageCount: 1, updatedAt: Date.now() };
       await chatDB.save(updatedChat);
-      set({ activeChat: updatedChat, messages: initialMessages });
+      set({ activeChat: updatedChat, messages: initialMessages, memories: [] });
     } else {
-      set({ activeChat: chat, messages: initialMessages });
+      set({ activeChat: chat, messages: initialMessages, memories: [] });
     }
 
     await get().loadChats(character.id);
@@ -336,11 +337,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
   deleteChat: async (id: string) => {
     const { activeChat } = get();
 
-    // Run message and chat deletion in parallel
-    await Promise.all([messageDB.deleteByChatId(id), chatDB.delete(id)]);
+    // Run message, chat, and memory deletion in parallel
+    await Promise.all([messageDB.deleteByChatId(id), chatDB.delete(id), memoryDB.deleteByChatId(id)]);
 
     if (activeChat?.id === id) {
-      set({ activeChat: null, messages: [], contextSummary: '' });
+      set({ activeChat: null, messages: [], contextSummary: '', memories: [] });
     }
 
     const { activeCharacter } = get();
@@ -397,6 +398,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         activeCharacter,
         settings,
         get().contextSummary,
+        activeChat.id,
       );
       set({ contextSummary: result.contextWindow.summary });
       apiMessages = result.messages;
@@ -625,8 +627,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   // ---- Memory Actions ----
 
-  loadMemories: async (characterId: string) => {
-    const memories = await memoryDB.getByCharacterId(characterId);
+  loadMemories: async (chatId: string) => {
+    const memories = await memoryDB.getByChatId(chatId);
     memories.sort((a, b) => b.importance - a.importance);
     set({ memories });
   },
@@ -646,9 +648,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setMemoryPanelOpen: (open: boolean) => {
     set({ memoryPanelOpen: open });
     if (open) {
-      const { activeCharacter } = get();
-      if (activeCharacter) {
-        get().loadMemories(activeCharacter.id).catch(err => {
+      const { activeChat } = get();
+      if (activeChat) {
+        get().loadMemories(activeChat.id).catch(err => {
           console.error('[store] loadMemories failed:', err);
         });
       }

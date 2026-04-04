@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import { useChatStore } from '@/stores/chat-store';
 import { useSettingsStore } from '@/stores/settings-store';
-import { getModelsForProvider, generateCharacter } from '@/lib/ai-engine';
+import { getModelsForProvider, generateCharacter, enhanceImagePrompt } from '@/lib/ai-engine';
 import type { Character, AIProvider, UserPersona, CharacterTemplate } from '@/lib/types';
 import { CHARACTER_TEMPLATES } from '@/lib/types';
 import { exportAllData, importAllData, clearAllData } from '@/lib/db';
@@ -15,6 +16,8 @@ import {
 } from 'lucide-react';
 import { useIsMobile, useMobileOptimizations } from '@/hooks/use-mobile';
 import { useContextMenuStore, ContextMenu, type ContextMenuItem } from '@/hooks/use-context-menu';
+import { useToast } from '@/hooks/use-toast';
+import { useConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,6 +31,9 @@ import { Slider } from '@/components/ui/slider';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
@@ -50,6 +56,7 @@ export default function RoleplayChat() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const contextMenu = useContextMenuStore();
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const { showConfirm, showAlert } = useConfirmDialog();
 
   // Mobile optimizations
   useMobileOptimizations();
@@ -77,7 +84,6 @@ export default function RoleplayChat() {
       store.loadCharacters();
       settingsStore.loadSettings();
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!mounted) {
@@ -164,17 +170,11 @@ function SetupWizard() {
   const [userName, setUserName] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<CharacterTemplate | null>(null);
   const [charName, setCharName] = useState('');
-  const [showWizard, setShowWizard] = useState(false);
 
   const showSetupWizard = settingsStore.settings.showSetupWizard;
+  const showWizard = settingsStore.isLoaded && showSetupWizard;
 
-  useEffect(() => {
-    if (settingsStore.isLoaded && showSetupWizard) {
-      setShowWizard(true);
-    }
-  }, [settingsStore.isLoaded, showSetupWizard]);
-
-  if (!showWizard || !settingsStore.isLoaded) return null;
+  if (!showWizard) return null;
 
   const handleComplete = async () => {
     if (userName.trim()) {
@@ -200,7 +200,6 @@ function SetupWizard() {
     }
 
     await settingsStore.dismissSetupWizard();
-    setShowWizard(false);
   };
 
   const steps = [
@@ -655,6 +654,7 @@ function CharacterItem({ character }: { character: Character }) {
   const contextMenu = useContextMenuStore();
   const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchCountRef = useRef<number>(0);
+  const { showConfirm } = useConfirmDialog();
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -689,14 +689,20 @@ function CharacterItem({ character }: { character: Character }) {
         label: 'Delete',
         icon: <Trash2 className="w-4 h-4" />,
         destructive: true,
-        onClick: () => {
-          if (confirm(`Delete "${character.name}"? This cannot be undone.`)) {
+        onClick: async () => {
+          const confirmed = await showConfirm({
+            title: `Delete "${character.name}"?`,
+            description: 'This cannot be undone.',
+            confirmText: 'Delete',
+            destructive: true,
+          });
+          if (confirmed) {
             store.deleteCharacter(character.id);
           }
         },
       },
     ]);
-  }, [character, contextMenu, store]);
+  }, [character, contextMenu, store, showConfirm]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     // Don't trigger on buttons
@@ -767,9 +773,15 @@ function CharacterItem({ character }: { character: Character }) {
           variant="ghost"
           size="icon"
           className="h-6 w-6 text-muted-foreground hover:text-destructive"
-          onClick={(e) => {
+          onClick={async (e) => {
             e.stopPropagation();
-            if (confirm(`Delete "${character.name}"? This cannot be undone.`)) {
+            const confirmed = await showConfirm({
+              title: `Delete "${character.name}"?`,
+              description: 'This cannot be undone.',
+              confirmText: 'Delete',
+              destructive: true,
+            });
+            if (confirmed) {
               store.deleteCharacter(character.id);
             }
           }}
@@ -786,6 +798,7 @@ function CharacterItem({ character }: { character: Character }) {
 // ============================================================
 function ChatHistorySidebar() {
   const store = useChatStore();
+  const { showConfirm } = useConfirmDialog();
 
   if (!store.activeCharacter) return null;
 
@@ -835,9 +848,15 @@ function ChatHistorySidebar() {
                 variant="ghost"
                 size="icon"
                 className="h-5 w-5 flex-shrink-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  if (confirm('Delete this chat?')) {
+                  const confirmed = await showConfirm({
+                    title: 'Delete this chat?',
+                    description: 'This cannot be undone.',
+                    confirmText: 'Delete',
+                    destructive: true,
+                  });
+                  if (confirmed) {
                     store.deleteChat(chat.id);
                   }
                 }}
@@ -857,6 +876,7 @@ function ChatHistorySidebar() {
 // ============================================================
 function ChatView({ isMobile, onOpenMobileNav, lightboxImage, setLightboxImage }: { isMobile: boolean; onOpenMobileNav: () => void; lightboxImage: string | null; setLightboxImage: (img: string | null) => void }) {
   const store = useChatStore();
+  const { showConfirm } = useConfirmDialog();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isAutoScrollRef = useRef(true);
@@ -938,8 +958,14 @@ function ChatView({ isMobile, onOpenMobileNav, lightboxImage, setLightboxImage }
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" onClick={() => {
-                      if (confirm('Delete this chat?')) {
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" onClick={async () => {
+                      const confirmed = await showConfirm({
+                        title: 'Delete this chat?',
+                        description: 'This cannot be undone.',
+                        confirmText: 'Delete',
+                        destructive: true,
+                      });
+                      if (confirmed) {
                         store.deleteChat(activeChat.id);
                       }
                     }}>
@@ -1028,6 +1054,7 @@ interface MessageData {
 function MessageBubble({ message }: { message: MessageData }) {
   const store = useChatStore();
   const contextMenu = useContextMenuStore();
+  const { showConfirm } = useConfirmDialog();
   const isUser = message.role === 'user';
   const lastTouchTimeRef = useRef<number>(0);
 
@@ -1065,8 +1092,14 @@ function MessageBubble({ message }: { message: MessageData }) {
     }
 
     items.push(
-      { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, destructive: true, onClick: () => {
-          if (confirm('Delete this message?')) {
+      { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, destructive: true, onClick: async () => {
+          const confirmed = await showConfirm({
+            title: 'Delete this message?',
+            description: 'This cannot be undone.',
+            confirmText: 'Delete',
+            destructive: true,
+          });
+          if (confirmed) {
             store.deleteMessage(message.id);
           }
         },
@@ -1074,7 +1107,7 @@ function MessageBubble({ message }: { message: MessageData }) {
     );
 
     contextMenu.show(e, items);
-  }, [message.content, message.id, message.isStreaming, isUser, contextMenu, store]);
+  }, [message.content, message.id, message.isStreaming, isUser, contextMenu, store, showConfirm]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     const now = Date.now();
@@ -1261,11 +1294,14 @@ function formatMessageContent(content: string): React.ReactNode {
 function ChatInput() {
   const store = useChatStore();
   const settingsStore = useSettingsStore();
+  const { toast } = useToast();
+  const { showConfirm } = useConfirmDialog();
   const [text, setText] = useState('');
   const [generatingImage, setGeneratingImage] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const settings = useSettingsStore(s => s.settings);
   const activeChatId = store.activeChat?.id;
+  const models = useMemo(() => getModelsForProvider(settings.activeProvider), [settings.activeProvider]);
 
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
@@ -1351,11 +1387,46 @@ function ChatInput() {
         </div>
         <div className="flex items-center justify-between mt-1.5 px-1">
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-              {settings.activeModel || 'No model'}
-            </Badge>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 cursor-pointer hover:bg-accent transition-colors">
+                  {settings.activeModel || 'No model'}
+                </Badge>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="max-h-64 w-56">
+                <DropdownMenuLabel className="text-xs">Switch Model</DropdownMenuLabel>
+                {models.map(m => (
+                  <DropdownMenuItem
+                    key={m.id}
+                    onClick={() => settingsStore.setActiveModel(m.id)}
+                    className="text-xs py-1"
+                  >
+                    <span className="truncate">{m.name}</span>
+                    {m.id === settings.activeModel && (
+                      <span className="ml-auto text-muted-foreground text-[10px]">✓</span>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                {settings.activeProvider === 'custom' || settings.activeProvider === 'local' ? (
+                  <DropdownMenuSeparator />
+                ) : null}
+                {settings.activeProvider === 'custom' || settings.activeProvider === 'local' ? (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      const model = prompt('Enter custom model ID:');
+                      if (model?.trim()) {
+                        settingsStore.setActiveModel(model.trim());
+                      }
+                    }}
+                    className="text-xs py-1 text-muted-foreground italic"
+                  >
+                    + Custom model...
+                  </DropdownMenuItem>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
             {store.messages.length > 0 && (
-              <span>{store.messages.length} messages</span>
+              <span>{store.messages.length} <span className="hidden sm:inline">messages</span><span className="sm:hidden">msgs</span></span>
             )}
           </div>
           <div className="flex items-center gap-1">
@@ -1410,12 +1481,25 @@ function ChatInput() {
                           };
                           const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
                           
-                          const basePrompt = `cinematic portrait of ${charName}, ${charDesc.slice(0, 150)}, ${charPersonality.slice(0, 80)}, natural lighting, atmospheric, depth of field, 16:9`;
-                          let finalPrompt = basePrompt;
+                          let basePrompt = `cinematic portrait of ${charName}, ${charDesc.slice(0, 150)}, ${charPersonality.slice(0, 80)}, natural lighting, atmospheric, depth of field, 16:9`;
                           if (sceneContext) {
-                            finalPrompt += `, scene: ${sceneContext}`;
+                            basePrompt += `, scene: ${sceneContext}`;
                           }
-                          finalPrompt = finalPrompt.slice(0, 800);
+                          
+                          let finalPrompt = basePrompt.slice(0, 800);
+                          if (settings.enhanceImagePrompts) {
+                            try {
+                              finalPrompt = await enhanceImagePrompt(
+                                settingsStore.settings,
+                                finalPrompt,
+                                `Character: ${charName}. Scene context: ${sceneContext || 'No specific scene'}. Image model: ${imageModel}. This is for a scene/background image.`,
+                              );
+                              finalPrompt = finalPrompt.slice(0, 800);
+                            } catch (e) {
+                              console.error('Prompt enhancement failed, using base prompt:', e);
+                              finalPrompt = basePrompt.slice(0, 800);
+                            }
+                          }
                           
                           const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
                             method: 'POST',
@@ -1434,7 +1518,18 @@ function ChatInput() {
                           
                           if (response.ok) {
                             const data = await response.json();
-                            console.log('Image response:', JSON.stringify(data));
+                            const finishReason = data.artifacts?.[0]?.finishReason || data.artifacts?.[0]?.finish_reason;
+                            
+                            if (finishReason === 'CONTENT_FILTERED') {
+                              toast({
+                                variant: 'destructive',
+                                title: 'Image generation failed',
+                                description: 'Content filtered by NVIDIA. Try a different description or model.',
+                              });
+                              setGeneratingImage(false);
+                              return;
+                            }
+                            
                             let base64Data: string | null = null;
                             
                             // Check various response formats
@@ -1444,7 +1539,6 @@ function ChatInput() {
                                 : `data:image/jpeg;base64,${data.image}`;
                             } else if (data.artifacts && data.artifacts.length > 0) {
                               const artifact = data.artifacts[0];
-                              console.log('Artifact keys:', Object.keys(artifact));
                               // Try base64, image, or encode the artifact differently
                               const rawBase64 = artifact.base64 || artifact.image;
                               if (rawBase64) {
@@ -1460,13 +1554,6 @@ function ChatInput() {
                             
                             if (base64Data) {
                               await store.addImageMessage(base64Data, imageModel);
-                            } else {
-                              const finishReason = data.artifacts?.[0]?.finishReason || 'unknown';
-                              if (finishReason === 'CONTENT_FILTERED') {
-                                console.error('Image blocked by content filter. Try a different prompt.');
-                              } else {
-                                console.error('No image data in response. Full data:', JSON.stringify(data));
-                              }
                             }
                           } else {
                             const errBody = await response.text();
@@ -1499,10 +1586,18 @@ function ChatInput() {
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 text-destructive"
-                    onClick={() => {
+                    onClick={async () => {
                       const lastMsg = store.messages[store.messages.length - 1];
-                      if (lastMsg && confirm('Delete the last message?')) {
-                        store.deleteMessage(lastMsg.id);
+                      if (lastMsg) {
+                        const confirmed = await showConfirm({
+                          title: 'Delete the last message?',
+                          description: 'This cannot be undone.',
+                          confirmText: 'Delete',
+                          destructive: true,
+                        });
+                        if (confirmed) {
+                          store.deleteMessage(lastMsg.id);
+                        }
                       }
                     }}
                     disabled={store.isStreaming || store.messages.length === 0}
@@ -1527,6 +1622,7 @@ function ChatInput() {
 function SettingsDialog() {
   const store = useChatStore();
   const settingsStore = useSettingsStore();
+  const { showConfirm, showAlert } = useConfirmDialog();
   const settings = settingsStore.settings;
   const [activeTab, setActiveTab] = useState<'providers' | 'model' | 'persona' | 'memory' | 'context' | 'ui' | 'data'>('providers');
   const [showKeys, setShowKeys] = useState(false);
@@ -1601,7 +1697,7 @@ function SettingsDialog() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export failed:', err);
-      alert('Failed to export data');
+      showAlert({ title: 'Export Failed', description: 'Failed to export data. Please try again.', variant: 'error' });
     }
   };
 
@@ -1615,14 +1711,20 @@ function SettingsDialog() {
       settingsStore.loadSettings();
     } catch (err) {
       console.error('Import failed:', err);
-      alert('Failed to import data. Please check the file format.');
+      showAlert({ title: 'Import Failed', description: 'Failed to import data. Please check the file format.', variant: 'error' });
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   const handleClearData = async () => {
-    if (confirm('Are you sure? This will delete ALL characters, chats, messages, and memories permanently.')) {
+    const confirmed = await showConfirm({
+      title: 'Clear All Data?',
+      description: 'This will delete ALL characters, chats, messages, and memories permanently. This cannot be undone.',
+      confirmText: 'Clear All',
+      destructive: true,
+    });
+    if (confirmed) {
       try {
         await clearAllData();
         store.loadCharacters();
@@ -2057,6 +2159,16 @@ function SettingsDialog() {
                             </SelectItem>
                           </SelectContent>
                         </Select>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="text-sm">Enhance Prompts</Label>
+                            <p className="text-xs text-muted-foreground">Use AI to improve prompts before generating images</p>
+                          </div>
+                          <Switch
+                            checked={settings.enhanceImagePrompts}
+                            onCheckedChange={(v) => settingsStore.updateSetting('enhanceImagePrompts', v)}
+                          />
+                        </div>
                       </div>
                     </>
                   )}
@@ -2389,6 +2501,8 @@ function CharacterEditorDialog() {
 function CharacterEditorInner() {
   const store = useChatStore();
   const settingsStore = useSettingsStore();
+  const { toast } = useToast();
+  const { showConfirm } = useConfirmDialog();
   const initialCharacter = store.editingCharacter;
   const isEditing = !!initialCharacter;
 
@@ -2409,6 +2523,9 @@ function CharacterEditorInner() {
     likes: initialCharacter?.likes || '',
     dislikes: initialCharacter?.dislikes || '',
     behavior: initialCharacter?.behavior || '',
+    customAvatarPrompt: initialCharacter?.customAvatarPrompt || '',
+    useCustomAvatarPrompt: initialCharacter?.useCustomAvatarPrompt || false,
+    lastUsedPrompt: initialCharacter?.lastUsedPrompt || '',
   }));
 
   const [tagInput, setTagInput] = useState('');
@@ -2437,6 +2554,9 @@ function CharacterEditorInner() {
       likes: form.likes || undefined,
       dislikes: form.dislikes || undefined,
       behavior: form.behavior || undefined,
+      customAvatarPrompt: form.customAvatarPrompt || undefined,
+      useCustomAvatarPrompt: form.useCustomAvatarPrompt || undefined,
+      lastUsedPrompt: form.lastUsedPrompt || undefined,
     };
 
     store.saveCharacter(character);
@@ -2612,9 +2732,14 @@ function CharacterEditorInner() {
                 {CHARACTER_TEMPLATES.map((template) => (
                   <button
                     key={template.id}
-                    onClick={() => {
+                    onClick={async () => {
                       if (isEditing && form.name) {
-                        if (confirm('This will replace your current character fields. Continue?')) {
+                        const confirmed = await showConfirm({
+                          title: 'Apply Template?',
+                          description: 'This will replace your current character fields. Continue?',
+                          confirmText: 'Apply',
+                        });
+                        if (confirmed) {
                           applyTemplate(template);
                         }
                       } else {
@@ -2679,25 +2804,46 @@ function CharacterEditorInner() {
                         if (!nvidiaConfig?.apiKey) return;
                         setGenerating(true);
                         try {
-                          const charName = form.name || 'character';
-                          const charDesc = form.description || '';
-                          const charPersonality = form.personality || '';
-                          
-                          const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
-                          
-                          const modelDefaults: Record<string, { steps: number; cfg_scale: number }> = {
-                            'stabilityai/stable-diffusion-3-medium': { steps: 50, cfg_scale: 5 },
-                            'stabilityai/stable-diffusion-xl': { steps: 25, cfg_scale: 5 },
-                            'black-forest-labs/flux.1-dev': { steps: 50, cfg_scale: 5 },
-                            'black-forest-labs/flux.1-schnell': { steps: 4, cfg_scale: 0 },
-                            'black-forest-labs/flux.2-klein-4b': { steps: 4, cfg_scale: 1 },
-                          };
-                          const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
-                          
-                          const avatarPrompt = `portrait of ${charName}, ${charDesc.slice(0, 180)}, ${charPersonality.slice(0, 100)}, natural lighting, soft shadows, high detail, 8k, professional photo, headshot`;
-                          const finalPrompt = imageModel.includes('flux') ? avatarPrompt.slice(0, 790) : avatarPrompt;
-                          
-                          const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
+                        const charName = form.name || 'character';
+                        const charDesc = form.description || '';
+                        const charPersonality = form.personality || '';
+                        const customPrompt = form.customAvatarPrompt;
+                        const useCustom = form.useCustomAvatarPrompt;
+                        
+                        const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
+                        
+                        const modelDefaults: Record<string, { steps: number; cfg_scale: number }> = {
+                          'stabilityai/stable-diffusion-3-medium': { steps: 50, cfg_scale: 5 },
+                          'stabilityai/stable-diffusion-xl': { steps: 25, cfg_scale: 5 },
+                          'black-forest-labs/flux.1-dev': { steps: 50, cfg_scale: 5 },
+                          'black-forest-labs/flux.1-schnell': { steps: 4, cfg_scale: 0 },
+                          'black-forest-labs/flux.2-klein-4b': { steps: 4, cfg_scale: 1 },
+                        };
+                        const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
+                        
+                        let basePrompt = '';
+                        if (useCustom && customPrompt && customPrompt.trim()) {
+                          basePrompt = customPrompt.trim();
+                        } else {
+                          basePrompt = `portrait of ${charName}, ${charDesc.slice(0, 180)}, ${charPersonality.slice(0, 100)}, natural lighting, soft shadows, high detail, 8k, professional photo, headshot`;
+                        }
+                        
+                        let finalPrompt = basePrompt;
+                        if (settingsStore.settings.enhanceImagePrompts && !useCustom) {
+                          try {
+                            finalPrompt = await enhanceImagePrompt(
+                              settingsStore.settings,
+                              basePrompt,
+                              `Character: ${charName}. Description: ${charDesc.slice(0, 200)}. Personality: ${charPersonality.slice(0, 150)}. Image model: ${imageModel}. This is for a portrait/avatar image.`,
+                            );
+                          } catch (e) {
+                            console.error('Prompt enhancement failed, using base prompt:', e);
+                          }
+                        }
+                        
+                        finalPrompt = imageModel.includes('flux') ? finalPrompt.slice(0, 790) : finalPrompt;
+                        
+                        const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
                             method: 'POST',
                             headers: {
                               'Content-Type': 'application/json',
@@ -2718,7 +2864,14 @@ function CharacterEditorInner() {
                             throw new Error(`Image generation failed (${response.status}): ${errBody.slice(0, 200)}`);
                           }
                           const response_body = await response.json();
+                          const finishReason = response_body.artifacts?.[0]?.finishReason || response_body.artifacts?.[0]?.finish_reason;
+                          if (finishReason === 'CONTENT_FILTERED') {
+                            throw new Error('CONTENT_FILTERED');
+                          }
                           let base64Data = null;
+                          if (finishReason === 'CONTENT_FILTERED') {
+                            throw new Error('CONTENT_FILTERED');
+                          }
                           if (response_body.image) {
                             base64Data = response_body.image.startsWith('data:')
                               ? response_body.image
@@ -2734,11 +2887,23 @@ function CharacterEditorInner() {
                           }
                           if (base64Data) {
                             updateForm('avatar', base64Data);
+                            updateForm('lastUsedPrompt', finalPrompt);
                           } else {
                             throw new Error('No image data in response. Keys: ' + Object.keys(response_body).join(', '));
                           }
                         } catch (e) {
-                          console.error('Avatar generation failed:', e);
+                          const errorMsg = e instanceof Error ? e.message : 'Unknown error';
+                          let userMsg = 'Failed to generate avatar. Try a different prompt.';
+                          
+                          if (errorMsg.includes('CONTENT_FILTERED')) {
+                            userMsg = 'Content filtered by NVIDIA. Try a different description or model.';
+                          }
+                          
+                          toast({
+                            variant: 'destructive',
+                            title: 'Image generation failed',
+                            description: userMsg,
+                          });
                         } finally {
                           setGenerating(false);
                         }
@@ -2749,6 +2914,30 @@ function CharacterEditorInner() {
                     </Button>
                   )}
                 </div>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <Label className="text-sm">Custom Avatar Prompt</Label>
+                  <Checkbox
+                    checked={form.useCustomAvatarPrompt || false}
+                    onCheckedChange={(v) => updateForm('useCustomAvatarPrompt', !!v)}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mb-1">Check to use your custom prompt instead of auto-generated one</p>
+                <Textarea
+                  value={form.customAvatarPrompt || ''}
+                  onChange={(e) => updateForm('customAvatarPrompt', e.target.value)}
+                  placeholder="Custom prompt for AI image generation (e.g., anime style portrait, cyberpunk character...)"
+                  className="min-h-[80px]"
+                  maxLength={1000}
+                  disabled={!form.useCustomAvatarPrompt}
+                />
+                {form.lastUsedPrompt && (
+                  <div className="mt-2 p-2 bg-muted rounded text-xs">
+                    <p className="font-medium mb-1">Last used prompt:</p>
+                    <p className="text-muted-foreground">{form.lastUsedPrompt}</p>
+                  </div>
+                )}
               </div>
               <div>
                 <Label className="text-sm">Description *</Label>
@@ -2951,8 +3140,14 @@ function CharacterEditorInner() {
           <Button
             variant="destructive"
             size="sm"
-            onClick={() => {
-              if (confirm(`Delete "${initialCharacter.name}"? This cannot be undone.`)) {
+            onClick={async () => {
+              const confirmed = await showConfirm({
+                title: `Delete "${initialCharacter.name}"?`,
+                description: 'This cannot be undone.',
+                confirmText: 'Delete',
+                destructive: true,
+              });
+              if (confirmed) {
                 store.deleteCharacter(initialCharacter.id);
                 store.setCharacterEditorOpen(false);
               }
@@ -2977,6 +3172,7 @@ function CharacterEditorInner() {
 // ============================================================
 function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const store = useChatStore();
+  const { showConfirm } = useConfirmDialog();
   const [search, setSearch] = useState('');
   const [showFavorites, setShowFavorites] = useState(false);
 
@@ -3081,9 +3277,15 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
-                        if (confirm(`Delete "${char.name}"?`)) {
+                        const confirmed = await showConfirm({
+                          title: `Delete "${char.name}"?`,
+                          description: 'This cannot be undone.',
+                          confirmText: 'Delete',
+                          destructive: true,
+                        });
+                        if (confirmed) {
                           store.deleteCharacter(char.id);
                         }
                       }}
@@ -3127,9 +3329,15 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7 flex-shrink-0 text-muted-foreground hover:text-destructive"
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
-                        if (confirm('Delete this chat?')) {
+                        const confirmed = await showConfirm({
+                          title: 'Delete this chat?',
+                          description: 'This cannot be undone.',
+                          confirmText: 'Delete',
+                          destructive: true,
+                        });
+                        if (confirmed) {
                           store.deleteChat(chat.id);
                         }
                       }}

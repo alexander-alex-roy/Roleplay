@@ -2,52 +2,1372 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.100.49:3000
 - Environments: .env
-✓ Ready in 454ms
+✓ Ready in 238ms
 
- GET / 200 in 567ms (next.js: 245ms, application-code: 322ms)
-[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
-
-[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
-
-[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
-
- GET / 200 in 130ms (next.js: 14ms, application-code: 116ms)
+ GET / 200 in 365ms (next.js: 154ms, application-code: 211ms)
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 71ms
+✓ Compiled in 81ms
+✓ Compiled in 95ms
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
-
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
- GET / 200 in 113ms (next.js: 12ms, application-code: 101ms)
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Avatar generation failed: Error: Image generation failed (500): Internal Server Error
-    at onClick (src/app/page.tsx:2691:35)
-  2689 |                           if (!response.ok) {
-  2690 |                             const errBody = await response.text();
-> 2691 |                             throw new Error(`Image generation failed (${response.status}...
+✓ Compiled in 186ms
+[browser] Avatar generation failed: Error: No image data in response. Keys: artifacts
+    at onClick (src/app/page.tsx:2739:35)
+  2737 |                             updateForm('avatar', base64Data);
+  2738 |                           } else {
+> 2739 |                             throw new Error('No image data in response. Keys: ' + Object...
        |                                   ^
-  2692 |                           }
-  2693 |                           const response_body = await response.json();
-  2694 |                           let base64Data = null;
-✓ Compiled in 729ms
-✓ Compiled in 201ms
-✓ Compiled in 175ms
-✓ Compiled in 191ms
-✓ Compiled in 132ms
- GET / 200 in 194ms (next.js: 32ms, application-code: 162ms)
-[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] 
-✓ Compiled in 211ms
-[browser] No image data in response. Keys: [ [32m'artifacts'[39m ] Full data: {
-  artifacts: [ { base64: [32m''[39m, finishReason: [32m'CONTENT_FILTERED'[39m, seed: [33m91549[39m } ]
-} 
-✓ Compiled in 185ms
+  2740 |                           }
+  2741 |                         } catch (e) {
+  2742 |                           console.error('Avatar generation failed:', e);
+✓ Compiled in 92ms
+[browser] Avatar generation failed: Error: No image data in response. Keys: artifacts
+    at onClick (src/app/page.tsx:2740:35)
+  2738 |                             updateForm('avatar', base64Data);
+  2739 |                           } else {
+> 2740 |                             throw new Error('No image data in response. Keys: ' + Object...
+       |                                   ^
+  2741 |                           }
+  2742 |                         } catch (e) {
+  2743 |                           console.error('Avatar generation failed:', e);
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 178ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 342ms
+[browser] Avatar generation failed: Error: No image data in response. Keys: artifacts
+    at onClick (src/app/page.tsx:2750:35)
+  2748 |                           if (!response.ok) {
+  2749 |                             const errBody = await response.text();
+> 2750 |                             throw new Error(`Image generation failed (${response.status}...
+       |                                   ^
+  2751 |                           }
+  2752 |                           const response_body = await response.json();
+  2753 |                           let base64Data = null;
+✓ Compiled in 137ms
+✓ Compiled in 139ms
+✓ Compiled in 131ms
+✓ Compiled in 275ms
+✓ Compiled in 136ms
+✓ Compiled in 139ms
+✓ Compiled in 112ms
+✓ Compiled in 130ms
+ GET / 200 in 109ms (next.js: 16ms, application-code: 93ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 163ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 106ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 149ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 157ms
+✓ Compiled in 84ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 91ms (next.js: 16ms, application-code: 75ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 105ms
+✓ Compiled in 95ms
+✓ Compiled in 104ms
+✓ Compiled in 97ms
+✓ Compiled in 144ms
+✓ Compiled in 141ms
+✓ Compiled in 145ms
+✓ Compiled in 176ms
+[browser] Uncaught ReferenceError: ConfirmDialog is not defined
+    at RoleplayChat (src/app/page.tsx:194:8)
+    at <unknown> (src/app/page.tsx:3459:10)
+    at onClick (src/app/page.tsx:1566:45)
+  192 |
+  193 |       {/* Custom Confirm Dialog */}
+> 194 |       <ConfirmDialog
+      |        ^
+  195 |         open={confirmDialog.open}
+  196 |         onOpenChange={(open) => setConfirmDialog(p => ({ ...p, open }))}
+  197 |         title={confirmDialog.title}
+ GET / 200 in 312ms (next.js: 117ms, application-code: 195ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 116ms
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+✓ Compiled in 244ms
+⨯ ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+ GET / 500 in 370ms (next.js: 155ms, application-code: 215ms)
+⨯ ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+⨯ ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  [90m33 |[0m   [33mDialog[0m, [33mDialogContent[0m, [33mDialogDescription[0m, [33mDialogHeader[0m, [33mDialogTitle[0m, [33mDialogTrigger[0m,
+  [90m34 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { [33mConfirmDialog[0m, [33mToastDialog[0m } [36mfrom[0m [32m'@/components/ui/confirm-dialog'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m {
+  [90m37 |[0m   [33mSheet[0m, [33mSheetContent[0m, [33mSheetHeader[0m, [33mSheetTitle[0m, [33mSheetTrigger[0m,
+  [90m38 |[0m } [36mfrom[0m [32m'@/components/ui/sheet'[0m;
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+ GET / 500 in 47ms (next.js: 33ms, application-code: 13ms)
+[browser] Uncaught Error: ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./src/app/page.tsx:35:1)
+    at <unknown> (Error: (./src/app/page.tsx:35:1)
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ConfirmDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:35:1
+Export ToastDialog doesn't exist in target module
+  33 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  34 | } from '@/components/ui/dialog';
+> 35 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import {
+  37 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  38 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:36:1
+Export ConfirmDialog doesn't exist in target module
+  34 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  35 | } from '@/components/ui/dialog';
+> 36 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  37 | import {
+  38 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  39 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:36:1
+Export ConfirmDialog doesn't exist in target module
+  34 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  35 | } from '@/components/ui/dialog';
+> 36 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  37 | import {
+  38 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  39 | } from '@/components/ui/sheet';
+
+The export ConfirmDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:36:1
+Export ToastDialog doesn't exist in target module
+  34 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  35 | } from '@/components/ui/dialog';
+> 36 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  37 | import {
+  38 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  39 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-client] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:36:1
+Export ToastDialog doesn't exist in target module
+  34 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  35 | } from '@/components/ui/dialog';
+> 36 | import { ConfirmDialog, ToastDialog } from '@/components/ui/confirm-dialog';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  37 | import {
+  38 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  39 | } from '@/components/ui/sheet';
+
+The export ToastDialog was not found in module [project]/src/components/ui/confirm-dialog.tsx [app-ssr] (ecmascript).
+Did you mean to import useConfirmDialog?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:36:10
+the name `useConfirmDialog` is defined multiple times
+  34 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  35 | } from '@/components/ui/dialog';
+> 36 | import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+     |          ^^^^^^^^^^^^^^^^
+  37 | import {
+  38 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  39 | } from '@/components/ui/sheet';
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:36:10
+the name `useConfirmDialog` is defined multiple times
+  34 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  35 | } from '@/components/ui/dialog';
+> 36 | import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+     |          ^^^^^^^^^^^^^^^^
+  37 | import {
+  38 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  39 | } from '@/components/ui/sheet';
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:36:10
+the name `useConfirmDialog` is defined multiple times
+  34 |   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  35 | } from '@/components/ui/dialog';
+> 36 | import { useConfirmDialog } from '@/components/ui/confirm-dialog';
+     |          ^^^^^^^^^^^^^^^^
+  37 | import {
+  38 |   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  39 | } from '@/components/ui/sheet';
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+✓ Compiled in 163ms
+ GET / 200 in 259ms (next.js: 74ms, application-code: 185ms)
+✓ Compiled in 131ms
 ✓ Compiled in 173ms
-✓ Compiled in 179ms
-[browser] No image data in response. Full data: {"artifacts":[{"base64":"","finishReason":"CONTENT_FILTERED","seed":62473}]} 
-✓ Compiled in 220ms
-[browser] Image blocked by content filter. Try a different prompt. 
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
- GET / 200 in 142ms (next.js: 30ms, application-code: 112ms)
 ✓ Compiled in 93ms
+✓ Compiled in 94ms
+✓ Compiled in 147ms
+✓ Compiled in 118ms
+✓ Compiled in 167ms
+✓ Compiled in 88ms
+✓ Compiled in 283ms
+✓ Compiled in 214ms
+✓ Compiled in 138ms
+✓ Compiled in 119ms
+✓ Compiled in 129ms
+✓ Compiled in 143ms
+✓ Compiled in 156ms
+✓ Compiled in 142ms
+✓ Compiled in 92ms
+✓ Compiled in 108ms
+✓ Compiled in 206ms
+✓ Compiled in 93ms
+✓ Compiled in 111ms
+⚠ Fast Refresh had to perform a full reload when ./src/components/ui/confirm-dialog.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 62ms
+ GET / 200 in 103ms (next.js: 12ms, application-code: 90ms)
+⚠ Fast Refresh had to perform a full reload when ./src/components/ui/confirm-dialog.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 80ms
+ GET / 200 in 52ms (next.js: 7ms, application-code: 45ms)
+⚠ Fast Refresh had to perform a full reload when ./src/components/ui/confirm-dialog.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 51ms
+ GET / 200 in 53ms (next.js: 4ms, application-code: 49ms)
+⚠ Fast Refresh had to perform a full reload when ./src/components/ui/confirm-dialog.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 61ms
+ GET / 200 in 42ms (next.js: 3ms, application-code: 39ms)
+✓ Compiled in 158ms
+✓ Compiled in 91ms
+✓ Compiled in 116ms
+✓ Compiled in 160ms
+✓ Compiled in 158ms
+✓ Compiled in 123ms
+✓ Compiled in 104ms
+ GET / 200 in 82ms (next.js: 9ms, application-code: 72ms)
+✓ Compiled in 149ms
+✓ Compiled in 532ms
+[browser] Uncaught ReferenceError: models is not defined
+    at ChatInput (src/app/page.tsx:1397:18)
+    at <unknown> (src/app/page.tsx:3506:10)
+    at ChatView (file:///home/e4crypt3d/Downloads/workspace-3c7b6408-0033-4e6f-a6f1-de99bec43879/.next/dev/static/chunks/src_0cnooiz._.js:7817:215)
+    at RoleplayChat (file:///home/e4crypt3d/Downloads/workspace-3c7b6408-0033-4e6f-a6f1-de99bec43879/.next/dev/static/chunks/src_0cnooiz._.js:5538:273)
+  1395 |               <DropdownMenuContent align="start" className="max-h-64 w-56">
+  1396 |                 <DropdownMenuLabel className="text-xs">Switch Model</DropdownMenuLabel>
+> 1397 |                 {models.map(m => (
+       |                  ^
+  1398 |                   <DropdownMenuItem
+  1399 |                     key={m.id}
+  1400 |                     onClick={() => settingsStore.setActiveModel(m.id)}
+ GET / 200 in 289ms (next.js: 101ms, application-code: 188ms)
+ GET / 200 in 289ms (next.js: 171ms, application-code: 119ms)
+ GET / 200 in 47ms (next.js: 7ms, application-code: 40ms)
+✓ Compiled in 146ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET / 200 in 320ms (next.js: 6ms, application-code: 314ms)
+✓ Compiled in 164ms
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 57ms
+✓ Compiled in 59ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 66ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog 
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 48ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 101ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 47ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 62ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 66ms
+✓ Compiled in 108ms
+✓ Compiled in 46ms
+✓ Compiled in 78ms
+✓ Compiled in 54ms
+✓ Compiled in 53ms
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 56ms (next.js: 7ms, application-code: 48ms)
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 184ms

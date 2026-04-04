@@ -1,0 +1,139 @@
+"use client"
+
+import { useState, useCallback, useRef, useMemo, createContext, useContext, ReactNode } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
+type DialogMode = "confirm" | "alert" | null
+
+interface ConfirmOptions {
+  title: string
+  description: string
+  confirmText?: string
+  cancelText?: string
+  destructive?: boolean
+}
+
+interface AlertOptions {
+  title: string
+  description: string
+  variant?: "default" | "success" | "error"
+}
+
+interface ConfirmDialogContextType {
+  showConfirm: (options: ConfirmOptions) => Promise<boolean>
+  showAlert: (options: AlertOptions) => Promise<void>
+}
+
+const ConfirmDialogContext = createContext<ConfirmDialogContextType | null>(null)
+
+export function useConfirmDialog() {
+  const context = useContext(ConfirmDialogContext)
+  if (!context) {
+    throw new Error("useConfirmDialog must be used within ConfirmDialogProvider")
+  }
+  return context
+}
+
+interface ConfirmDialogProviderProps {
+  children: ReactNode
+}
+
+export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) {
+  const [mode, setMode] = useState<DialogMode>(null)
+  const [confirmOptions, setConfirmOptions] = useState<ConfirmOptions>({ title: "", description: "" })
+  const [alertOptions, setAlertOptions] = useState<AlertOptions>({ title: "", description: "" })
+
+  const confirmResolveRef = useRef<((value: boolean) => void) | null>(null)
+  const alertResolveRef = useRef<(() => void) | null>(null)
+
+  const showConfirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
+    return new Promise((resolve) => {
+      confirmResolveRef.current = resolve
+      setConfirmOptions(options)
+      setMode("confirm")
+    })
+  }, [])
+
+  const showAlert = useCallback((options: AlertOptions): Promise<void> => {
+    return new Promise((resolve) => {
+      alertResolveRef.current = resolve
+      setAlertOptions(options)
+      setMode("alert")
+    })
+  }, [])
+
+  const handleOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      if (mode === "confirm" && confirmResolveRef.current) {
+        confirmResolveRef.current(false)
+        confirmResolveRef.current = null
+      } else if (mode === "alert" && alertResolveRef.current) {
+        alertResolveRef.current()
+        alertResolveRef.current = null
+      }
+      setMode(null)
+    }
+  }, [mode])
+
+  const handleConfirmAction = useCallback(() => {
+    if (confirmResolveRef.current) {
+      confirmResolveRef.current(true)
+      confirmResolveRef.current = null
+    }
+    setMode(null)
+  }, [])
+
+  const handleAlertAction = useCallback(() => {
+    if (alertResolveRef.current) {
+      alertResolveRef.current()
+      alertResolveRef.current = null
+    }
+    setMode(null)
+  }, [])
+
+  const isConfirm = mode === "confirm"
+  const variant = !isConfirm ? alertOptions.variant : undefined
+
+  const contextValue = useMemo(() => ({ showConfirm, showAlert }), [showConfirm, showAlert])
+
+  return (
+    <ConfirmDialogContext.Provider value={contextValue}>
+      {children}
+      
+      <AlertDialog open={mode !== null} onOpenChange={handleOpenChange}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className={variant === "error" ? "text-destructive" : variant === "success" ? "text-green-600" : ""}>
+              {isConfirm ? confirmOptions.title : alertOptions.title}
+            </AlertDialogTitle>
+            <AlertDialogDescription>{isConfirm ? confirmOptions.description : alertOptions.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            {isConfirm ? (
+              <>
+                <AlertDialogCancel>{confirmOptions.cancelText || "Cancel"}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleConfirmAction}
+                  className={confirmOptions.destructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : undefined}
+                >
+                  {confirmOptions.confirmText || "Confirm"}
+                </AlertDialogAction>
+              </>
+            ) : (
+              <AlertDialogAction onClick={handleAlertAction}>OK</AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </ConfirmDialogContext.Provider>
+  )
+}

@@ -218,6 +218,19 @@ export const memoryDB = {
     });
   },
   delete: (id: string) => del('memories', id),
+  deleteByChatId: async (chatId: string) => {
+    const mems = await getByIndex<MemoryEntry>('memories', 'chatId', chatId);
+    const db = await openDB();
+    return new Promise<void>((resolve, reject) => {
+      const tx = db.transaction('memories', 'readwrite');
+      const store = tx.objectStore('memories');
+      for (const mem of mems) {
+        store.delete(mem.id);
+      }
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
   deleteByCharacterId: async (characterId: string) => {
     const mems = await getByIndex<MemoryEntry>('memories', 'characterId', characterId);
     const db = await openDB();
@@ -263,6 +276,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   jailbreakPrompt: '',
   userPersona: { ...DEFAULT_USER_PERSONA },
   nvidiaImageModel: 'stable-diffusion-3-medium',
+  enhanceImagePrompts: false,
   showSetupWizard: true,
 };
 

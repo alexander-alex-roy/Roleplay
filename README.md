@@ -1,34 +1,89 @@
 # RolePlay Chat
 
-A private AI roleplay chat application with multi-provider support, memory integration, and character management.
+A private, client-side AI roleplay chat application. All data stays in your browser — no servers, no tracking, no accounts required.
 
 **Live Demo:** https://roleplay-6hg.pages.dev/
 
 ## Features
 
-- **Multi-Provider AI Support** - Connect to OpenAI, Anthropic, Google, Groq, Perplexity, Mistral, and custom endpoints
-- **Character Management** - Create, edit, import/export AI personas with rich metadata
-- **Chat History** - Organize conversations by character with full message history
-- **Memory System** - AI-powered memory extraction that learns from conversations
-- **Context Condensation** - Smart summarization to maintain long conversations within token limits
-- **Scene Image Generation** - Generate cinematic scene images using Stable Diffusion
-- **Lightweight & Private** - All data stored locally in your browser (IndexedDB)
+### AI Providers & Models
+- **Multi-provider support** — OpenAI, Anthropic, Google, Groq, Mistral, OpenRouter, NVIDIA NIM, local LLMs (Ollama, LM Studio, llama.cpp), and any custom OpenAI-compatible endpoint
+- **80+ pre-configured models** with context window info, streaming support, and vision capabilities
+- **Custom model IDs** — enter any model string not in the preset list
+- **Bring Your Own Key** — API keys stored locally in IndexedDB, never sent anywhere except the provider
+
+### Character Management
+- Create and edit AI personas with rich metadata (name, description, personality, scenario, speech patterns, knowledge, likes/dislikes, behavior)
+- **AI-assisted character generation** — generate characters via LLM
+- **Import/Export** using the CharacterCard V2 spec (`.json` / `.charx` files)
+- Favorites system, search, and tag filtering
+- Pre-built character templates (Fantasy Mage, Sci-Fi Android, Medieval Knight, Noir Detective, etc.)
+
+### Chat System
+- Multiple concurrent chats per character, auto-titled from first message
+- **Streaming responses** with real-time token display
+- **Message regeneration** — delete last user+assistant turn and retry
+- **Stop streaming** with abort controller
+- **Copy message text** to clipboard
+- **Delete individual messages**
+- Auto-scroll with user-scroll detection
+- Image lightbox for character avatars
+
+### Memory System
+- **Automatic memory extraction** — AI analyzes conversations and extracts facts, events, emotions, preferences, and instructions
+- **Per-chat memory isolation** — each chat maintains its own independent memory
+- **Relevance scoring** — keyword matching, recency decay, importance weighting, and access frequency
+- **Memory decay** — memories expire after 90 days; low-importance ones decay after 30 days
+- **Memory panel** — view, filter, and delete stored memories
+- Memory is automatically cleaned up when a chat is deleted
+
+### Context Condensation
+- Smart summarization to maintain long conversations within token limits
+- Keeps recent messages verbatim, summarizes older ones
+- Configurable context window size and summarization threshold
+- Per-message token estimation with CJK/Unicode awareness
+
+### Image Generation
+- **Scene image generation** via NVIDIA NIM (Stable Diffusion 3 Medium, SDXL, FLUX.1 Dev/Schnell/Klein)
+- **AI prompt enhancement** — LLM expands short prompts into detailed generation prompts
+- Inline image display with lightbox zoom
+
+### UI/UX
+- **Dark / Light / System theme** toggle
+- **Fully responsive** — mobile nav sheet, touch-friendly targets, gesture handling
+- **Custom context menus** — right-click and long-press on mobile
+- **Setup wizard** for first-time users
+- **Custom confirm dialogs** for destructive actions (no native `alert()`/`confirm()`)
+- Toast notifications
+- Collapsible sidebars (character list, chat history)
+- Markdown-like formatting in messages (bold, italic, quoted dialogue)
+- Quick model switcher from the chat input bar
+
+### Data Privacy
+- All data stored locally in **IndexedDB** (characters, chats, messages, memories, settings)
+- **Full data export/import** as JSON
+- **Clear all data** option
+- No server-side storage, no tracking, no analytics
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS with shadcn/ui components
-- **State Management:** Zustand
-- **Database:** IndexedDB (via Dexie.js)
-- **AI Providers:** OpenAI-compatible API endpoints
+| Category | Technology |
+|---|---|
+| **Framework** | Next.js 16 (App Router, static export) |
+| **Language** | TypeScript |
+| **Styling** | Tailwind CSS v4 + shadcn/ui |
+| **UI Primitives** | Radix UI (Dialog, Select, DropdownMenu, Tooltip, Sheet, AlertDialog, etc.) |
+| **State Management** | Zustand |
+| **Database** | IndexedDB (vanilla, no ORM) |
+| **Icons** | Lucide React |
+| **Theme** | next-themes |
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
+- npm
 - API keys for your preferred AI provider
 
 ### Installation
@@ -41,7 +96,7 @@ cd roleplay-chat
 # Install dependencies
 npm install
 
-# Run development server
+# Start development server
 npm run dev
 ```
 
@@ -51,19 +106,77 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ```bash
 npm run build
-npm start
 ```
+
+The output is a static site in the `out/` directory — deploy it to any static host (Cloudflare Pages, GitHub Pages, etc.).
+
+### Available Scripts
+
+| Script | Description |
+|---|---|
+| `npm run dev` | Start dev server on port 3000 (output teed to `dev.log`) |
+| `npm run build` | Build for production (static export) |
+| `npm run lint` | Run ESLint |
 
 ## Configuration
 
-1. Click the **Settings** button in the sidebar
+1. Open the app and complete the setup wizard (or open **Settings** from the sidebar)
 2. Add your API provider credentials (API key and endpoint URL)
 3. Select your preferred model
-4. Optionally configure your user persona
+4. Optionally configure your user persona — this name is used in memory transcripts and system prompts
+
+## Deployment
+
+### Cloudflare Pages (Recommended)
+
+The live demo runs on Cloudflare Pages. Push the `out/` directory after `npm run build`.
+
+### Cloudflare Worker Proxy
+
+A Cloudflare Worker (`cloudflare-worker.js`) is included to proxy requests to NVIDIA NIM APIs, handling CORS and routing for both chat completions and image generation. Deploy it alongside the static site.
+
+### Caddy Reverse Proxy
+
+A `Caddyfile` is included for local reverse proxy setups (port 81 → localhost:3000 with dynamic port forwarding support).
+
+## Project Structure
+
+```
+├── cloudflare-worker.js      # CF Worker proxy for NVIDIA NIM APIs
+├── wrangler.toml             # CF Workers config
+├── Caddyfile                 # Caddy reverse proxy config
+├── next.config.ts            # Next.js config (static export)
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx        # Root layout (fonts, theme, toaster)
+│   │   ├── page.tsx          # Main app component (single-page)
+│   │   └── globals.css       # Tailwind v4 + CSS variables
+│   ├── components/
+│   │   ├── ui/               # 30+ shadcn/ui components
+│   │   ├── theme-toggle.tsx
+│   │   └── custom-context-menu.tsx
+│   ├── hooks/
+│   │   ├── use-mobile.ts     # Breakpoint detection + gestures
+│   │   ├── use-toast.ts
+│   │   └── use-context-menu.tsx
+│   ├── lib/
+│   │   ├── ai-engine.ts      # Multi-provider AI engine (80+ models)
+│   │   ├── context.ts        # Context condensation system
+│   │   ├── memory.ts         # Memory extraction & retrieval
+│   │   ├── db.ts             # IndexedDB CRUD layer
+│   │   ├── types.ts          # TypeScript type definitions
+│   │   └── utils.ts          # cn() utility
+│   └── stores/
+│       ├── chat-store.ts     # Main Zustand store
+│       ├── settings-store.ts # Settings store
+│       └── context-menu-store.ts
+└── public/
+    └── logo.png              # App favicon
+```
 
 ## License
 
-This software is licensed under a **proprietary license** with the following restrictions:
+This software is licensed under a **proprietary license**. See the [LICENSE](LICENSE) file for full terms.
 
 ### Permitted Use
 
@@ -80,12 +193,6 @@ This software is licensed under a **proprietary license** with the following res
 - In any product or service that competes with this project
 - To build a competing SaaS or hosted service
 - For any illegal or unauthorized purposes
-
-### Intellectual Property
-
-Copyright (c) 2024 RolePlay Chat. All rights reserved.
-
-This software is the proprietary property of its authors. The source code is provided for inspection and educational purposes only. By accessing or using this software, you agree to be bound by the terms of this license.
 
 ---
 

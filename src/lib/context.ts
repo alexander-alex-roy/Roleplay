@@ -41,6 +41,7 @@ export async function buildContextWindow(
   character: Character,
   settings: AppSettings,
   existingSummary: string,
+  chatId?: string,
 ): Promise<{
   contextWindow: ContextWindow;
   messages: Array<{ role: string; content: string }>;
@@ -53,6 +54,7 @@ export async function buildContextWindow(
     character.id,
     recentMessages,
     settings.maxMemoriesPerQuery ?? 10,
+    chatId,
   );
   const memoryStrings = formatMemoriesForPrompt(relevantMemories);
 
@@ -217,7 +219,7 @@ async function summarizeConversation(
   // so the summarizer model only sees user/assistant turns.
   const transcript = messages
     .filter(m => m.role === 'user' || m.role === 'assistant')
-    .map(m => `${m.role === 'user' ? 'User' : character.name}: ${m.content ?? ''}`)
+    .map(m => `${m.role === 'user' ? (settings.userPersona.name || 'You') : character.name}: ${m.content ?? ''}`)
     .join('\n');
 
   // FIX: If filtering left us with nothing to summarize, bail early.

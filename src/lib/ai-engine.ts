@@ -1021,3 +1021,40 @@ export async function generateCharacter(
 
   return character;
 }
+
+// ---- Prompt Enhancement for Image Generation ----
+export async function enhanceImagePrompt(
+  settings: AppSettings,
+  userPrompt: string,
+  context?: string,
+): Promise<string> {
+  const contextStr = context ? `\nContext: ${context}` : '';
+  const enhancePrompt = `You are an expert at creating detailed prompts for AI image generation. 
+Given the user's prompt, create an enhanced, detailed prompt that will produce a better image.
+${contextStr}
+
+User's prompt: "${userPrompt}"
+
+Create a detailed image generation prompt that:
+1. Expands on the user's description with specific visual details
+2. Adds appropriate lighting, composition, and style keywords
+3. Keeps the core subject/topic from the user's prompt
+4. Adds quality keywords like "high detail", "8k", "professional"
+5. Is 1-3 sentences max
+
+Respond with ONLY the enhanced prompt, nothing else.`;
+
+  return new Promise((resolve) => {
+    let result = '';
+    streamChatResponse(
+      settings,
+      [{ role: 'user', content: enhancePrompt }] as any,
+      undefined,
+      {
+        onToken: (token) => { result += token; },
+        onDone: () => { resolve(result.trim() || userPrompt); },
+        onError: () => { resolve(userPrompt); },
+      }
+    );
+  });
+}
