@@ -1,64 +1,51 @@
 ▲ Next.js 16.2.2 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.100.49:3000
-✓ Ready in 323ms
+✓ Ready in 411ms
 
- GET / 200 in 410ms (next.js: 200ms, application-code: 211ms)
+ GET / 200 in 652ms (next.js: 260ms, application-code: 392ms)
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 122ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
- GET / 200 in 65ms (next.js: 12ms, application-code: 54ms)
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 217ms
-✓ Compiled in 166ms
-✓ Compiled in 103ms
-✓ Compiled in 63ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 140ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+ GET / 200 in 65ms (next.js: 6ms, application-code: 59ms)
+⚠ Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "192.168.100.49".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['192.168.100.49'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
- GET / 200 in 61ms (next.js: 3ms, application-code: 57ms)
+ GET / 200 in 59ms (next.js: 4ms, application-code: 55ms)
+✓ Compiled in 864ms
+✓ Compiled in 262ms
+✓ Compiled in 253ms
+✓ Compiled in 279ms
+✓ Compiled in 136ms
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 241ms
+✓ Compiled in 198ms
+✓ Compiled in 209ms
+ GET / 200 in 189ms (next.js: 32ms, application-code: 157ms)
+✓ Compiled in 234ms
+✓ Compiled in 163ms
+✓ Compiled in 133ms
+✓ Compiled in 134ms
+✓ Compiled in 226ms
+✓ Compiled in 202ms
+✓ Compiled in 196ms
+✓ Compiled in 127ms
+✓ Compiled in 228ms
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 235ms
-✓ Compiled in 112ms
- GET / 200 in 135ms (next.js: 26ms, application-code: 109ms)
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 879ms
- GET / 200 in 218ms (next.js: 139ms, application-code: 79ms)
- GET / 200 in 31ms (next.js: 5ms, application-code: 25ms)
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 210ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 191ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 210ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 219ms
-✓ Compiled in 141ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 164ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 291ms
-✓ Compiled in 747ms
+✓ Compiled in 544ms
+ GET / 200 in 242ms (next.js: 181ms, application-code: 61ms)
+ GET / 200 in 26ms (next.js: 4ms, application-code: 23ms)
+✓ Compiled in 311ms
+✓ Compiled in 190ms
 ✓ Compiled in 182ms
-✓ Compiled in 254ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 161ms
-✓ Compiled in 116ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 196ms
