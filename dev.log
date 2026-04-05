@@ -1,25 +1,11 @@
 ▲ Next.js 16.2.2 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.100.49:3000
-✓ Ready in 283ms
+✓ Ready in 459ms
 
-○ Compiling / ...
- GET / 200 in 3.7s (next.js: 3.4s, application-code: 211ms)
+ GET / 200 in 783ms (next.js: 330ms, application-code: 453ms)
+ GET / 200 in 143ms (next.js: 9ms, application-code: 133ms)
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+✓ Compiled in 159ms
+ GET / 200 in 164ms (next.js: 23ms, application-code: 141ms)
 [browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 189ms
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 59ms
-✓ Compiled in 119ms
-✓ Compiled in 111ms
-✓ Compiled in 164ms
- GET / 200 in 88ms (next.js: 10ms, application-code: 77ms)
-[browser] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-✓ Compiled in 132ms
-✓ Compiled in 174ms
-✓ Compiled in 102ms
-✓ Compiled in 173ms
-✓ Compiled in 110ms
-✓ Compiled in 100ms
-✓ Compiled in 107ms
-✓ Compiled in 50ms

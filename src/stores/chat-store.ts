@@ -90,6 +90,19 @@ function genCharId(): string {
 // FIX: Tracked at module level (not in Zustand state) so React re-renders never
 // create stale closure references to an old controller instance.
 let abortController: AbortController | null = null;
+let currentStreamRequestId: string | null = null;
+let lastSeenModelVersion = 0;
+
+useSettingsStore.subscribe((state) => {
+  if (state.modelVersion !== lastSeenModelVersion) {
+    lastSeenModelVersion = state.modelVersion;
+    if (abortController) {
+      abortController.abort();
+      abortController = null;
+    }
+    currentStreamRequestId = null;
+  }
+});
 
 // ---- Store ----
 
@@ -429,6 +442,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     // Abort any previous in-flight request (safety net — guarded by isStreaming above)
     abortController?.abort();
     abortController = new AbortController();
+    const streamRequestId = `stream_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    currentStreamRequestId = streamRequestId;
 
     // Capture a stable reference to the current character/chat for use in callbacks,
     // which may fire after the user has navigated away and state has changed.
@@ -438,6 +453,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     await streamChatResponse(settings, apiMessages, abortController.signal, {
       onToken: (token: string) => {
+        if (currentStreamRequestId !== streamRequestId) return; // Stale response
         fullText += token;
         set(state => ({
           messages: state.messages.map(m =>
@@ -447,7 +463,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
       },
 
       onDone: async () => {
+        if (currentStreamRequestId !== streamRequestId) return;
         abortController = null;
+        currentStreamRequestId = null;
 
         const completedMsg: ChatMessage = {
           ...assistantMsg,
@@ -511,7 +529,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
       },
 
       onError: (error: string) => {
+        if (currentStreamRequestId !== streamRequestId) return;
         abortController = null;
+        currentStreamRequestId = null;
         // FIX: Remove the placeholder message on error rather than replacing its
         // content with an error string — that prevents a broken assistant turn from
         // being persisted to the DB or included in future context windows.
@@ -530,6 +550,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       abortController.abort();
       abortController = null;
     }
+    currentStreamRequestId = null;
     set(state => ({
       isStreaming: false,
       streamingMessageId: null,
@@ -618,9 +639,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
     await messageDB.save(imageMsg);
     const allMessages = [...get().messages, imageMsg];
     set({ messages: allMessages });
-    
-    // Update chat message count
-    const updatedChat = { ...activeChat, messageCount: allMessages.length, updatedAt: now };
+
+    // Update chat message count (exclude system/memory messages)
+    const updatedChat = {
+      ...activeChat,
+      messageCount: allMessages.filter(m => m.role !== 'system' && m.role !== 'memory').length,
+      updatedAt: now,
+    };
     await chatDB.save(updatedChat);
     set({ activeChat: updatedChat });
   },

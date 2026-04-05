@@ -18,16 +18,35 @@ interface RPChatDB {
 }
 
 let dbInstance: IDBDatabase | null = null;
+let dbOpenPromise: Promise<IDBDatabase> | null = null;
 
 function openDB(): Promise<IDBDatabase> {
   if (dbInstance) return Promise.resolve(dbInstance);
+  
+  if (dbOpenPromise) return dbOpenPromise;
 
-  return new Promise((resolve, reject) => {
+  dbOpenPromise = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-    request.onerror = () => reject(request.error);
+    request.onerror = () => {
+      dbOpenPromise = null;
+      reject(request.error);
+    };
     request.onsuccess = () => {
       dbInstance = request.result;
+      dbOpenPromise = null;
+
+      // Detect when the DB is closed externally (e.g., from another tab or reload)
+      dbInstance.onclose = () => {
+        dbInstance = null;
+        dbOpenPromise = null;
+      };
+
+      request.result.onversionchange = () => {
+        request.result.close();
+        dbInstance = null;
+      };
+
       resolve(request.result);
     };
 
@@ -73,18 +92,32 @@ function openDB(): Promise<IDBDatabase> {
       }
     };
   });
+  
+  return dbOpenPromise;
 }
 
 // ---- Generic CRUD helpers ----
 async function getAll<T>(storeName: string): Promise<T[]> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
+  let db = await openDB();
+  try {
     const tx = db.transaction(storeName, 'readonly');
     const store = tx.objectStore(storeName);
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  } catch {
+    // If transaction fails (e.g., DB was closed), retry after reopen
+    db = await openDB();
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
 }
 
 async function getById<T>(storeName: string, id: string): Promise<T | undefined> {
@@ -182,14 +215,20 @@ export const messageDB = {
   },
   delete: (id: string) => del('messages', id),
   deleteByChatId: async (chatId: string) => {
-    const msgs = await getByIndex<ChatMessage>('messages', 'chatId', chatId);
     const db = await openDB();
     return new Promise<void>((resolve, reject) => {
       const tx = db.transaction('messages', 'readwrite');
       const store = tx.objectStore('messages');
-      for (const msg of msgs) {
-        store.delete(msg.id);
-      }
+      const index = store.index('chatId');
+      const request = index.openKeyCursor(IDBKeyRange.only(chatId));
+      
+      request.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest).result;
+        if (cursor) {
+          store.delete(cursor.primaryKey);
+          cursor.continue();
+        }
+      };
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });
@@ -219,27 +258,39 @@ export const memoryDB = {
   },
   delete: (id: string) => del('memories', id),
   deleteByChatId: async (chatId: string) => {
-    const mems = await getByIndex<MemoryEntry>('memories', 'chatId', chatId);
     const db = await openDB();
     return new Promise<void>((resolve, reject) => {
       const tx = db.transaction('memories', 'readwrite');
       const store = tx.objectStore('memories');
-      for (const mem of mems) {
-        store.delete(mem.id);
-      }
+      const index = store.index('chatId');
+      const request = index.openKeyCursor(IDBKeyRange.only(chatId));
+      
+      request.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest).result;
+        if (cursor) {
+          store.delete(cursor.primaryKey);
+          cursor.continue();
+        }
+      };
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });
   },
   deleteByCharacterId: async (characterId: string) => {
-    const mems = await getByIndex<MemoryEntry>('memories', 'characterId', characterId);
     const db = await openDB();
     return new Promise<void>((resolve, reject) => {
       const tx = db.transaction('memories', 'readwrite');
       const store = tx.objectStore('memories');
-      for (const mem of mems) {
-        store.delete(mem.id);
-      }
+      const index = store.index('characterId');
+      const request = index.openKeyCursor(IDBKeyRange.only(characterId));
+      
+      request.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest).result;
+        if (cursor) {
+          store.delete(cursor.primaryKey);
+          cursor.continue();
+        }
+      };
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });
@@ -322,37 +373,47 @@ export async function importAllData(json: string): Promise<void> {
     settings?: AppSettings;
   };
 
-  if (data.characters?.length) {
-    const db = await openDB();
-    const tx = db.transaction('characters', 'readwrite');
-    const store = tx.objectStore('characters');
-    for (const char of data.characters) store.put(char);
-    await new Promise<void>((resolve) => { tx.oncomplete = () => resolve(); });
-  }
-  if (data.chats?.length) {
-    const db = await openDB();
-    const tx = db.transaction('chats', 'readwrite');
-    const store = tx.objectStore('chats');
-    for (const chat of data.chats) store.put(chat);
-    await new Promise<void>((resolve) => { tx.oncomplete = () => resolve(); });
-  }
-  if (data.messages?.length) {
-    const db = await openDB();
-    const tx = db.transaction('messages', 'readwrite');
-    const store = tx.objectStore('messages');
-    for (const msg of data.messages) store.put(msg);
-    await new Promise<void>((resolve) => { tx.oncomplete = () => resolve(); });
-  }
-  if (data.memories?.length) {
-    const db = await openDB();
-    const tx = db.transaction('memories', 'readwrite');
-    const store = tx.objectStore('memories');
-    for (const mem of data.memories) store.put(mem);
-    await new Promise<void>((resolve) => { tx.oncomplete = () => resolve(); });
-  }
-  if (data.settings) {
-    await settingsDB.save(data.settings);
-  }
+  const db = await openDB();
+  const storeNames: string[] = [];
+  if (data.characters?.length) storeNames.push('characters');
+  if (data.chats?.length) storeNames.push('chats');
+  if (data.messages?.length) storeNames.push('messages');
+  if (data.memories?.length) storeNames.push('memories');
+  storeNames.push('settings');
+
+  return new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(storeNames, 'readwrite');
+    let hasError = false;
+
+    tx.onerror = () => {
+      hasError = true;
+      reject(tx.error);
+    };
+    tx.oncomplete = () => {
+      if (!hasError) resolve();
+    };
+
+    if (data.characters?.length) {
+      const store = tx.objectStore('characters');
+      for (const char of data.characters) store.put(char);
+    }
+    if (data.chats?.length) {
+      const store = tx.objectStore('chats');
+      for (const chat of data.chats) store.put(chat);
+    }
+    if (data.messages?.length) {
+      const store = tx.objectStore('messages');
+      for (const msg of data.messages) store.put(msg);
+    }
+    if (data.memories?.length) {
+      const store = tx.objectStore('memories');
+      for (const mem of data.memories) store.put(mem);
+    }
+    if (data.settings) {
+      const store = tx.objectStore('settings');
+      store.put({ ...data.settings, id: SETTINGS_ID });
+    }
+  });
 }
 
 // ---- Clear all data ----

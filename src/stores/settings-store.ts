@@ -9,6 +9,7 @@ import { settingsDB } from '@/lib/db';
 interface SettingsState {
   settings: AppSettings;
   isLoaded: boolean;
+  modelVersion: number;
   loadSettings: () => Promise<void>;
   saveSettings: (settings: AppSettings) => Promise<void>;
   updateSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => Promise<void>;
@@ -25,6 +26,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: settingsDB.getDefaults(),
   isLoaded: false,
+  modelVersion: 0,
 
   loadSettings: async () => {
     const settings = await settingsDB.get();
@@ -115,10 +117,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   setActiveModel: async (model: string) => {
-    const { settings } = get();
+    const { settings, modelVersion } = get();
     const newSettings = { ...settings, activeModel: model };
     await settingsDB.save(newSettings);
-    set({ settings: newSettings });
+    set({ settings: newSettings, modelVersion: modelVersion + 1 });
   },
 
   getActiveProviderConfig: () => {

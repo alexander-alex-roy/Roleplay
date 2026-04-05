@@ -983,15 +983,28 @@ export async function generateCharacter(
 // Image Prompt Enhancement
 // ============================================================
 
+interface EnhanceOptions {
+  /** Maximum characters for the final prompt (AI will be instructed to respect this) */
+  maxChars?: number;
+  /** Model name shown to the AI so it can tailor its output style */
+  model?: string;
+}
+
 export async function enhanceImagePrompt(
   settings: AppSettings,
   userPrompt: string,
   context?: string,
+  options?: EnhanceOptions,
 ): Promise<string> {
-  // Tight prompt — we only need 1–3 sentences back, so keep instructions minimal
   const contextClause = context ? ` Scene context: ${context}.` : '';
+  const limitClause = options?.maxChars
+    ? ` The final prompt MUST be ${options.maxChars} characters or fewer. Be concise — every word counts.`
+    : '';
+  const modelClause = options?.model
+    ? ` Target model: ${options.model}. Tailor terminology and style accordingly.`
+    : '';
   const prompt =
-    `Rewrite the following image prompt to be more detailed and visually specific for an AI image generator.${contextClause} Add lighting, mood, composition, and quality keywords. Keep it to 1–3 sentences. Output the enhanced prompt only, no explanation.\n\nOriginal: "${userPrompt}"`;
+    `Rewrite the following image prompt to be more detailed and visually specific for an AI image generator.${contextClause}${modelClause} Add lighting, mood, composition, and quality keywords.${limitClause} Output the enhanced prompt only, no explanation.\n\nOriginal: "${userPrompt}"`;
 
   return new Promise(resolve => {
     let result = '';
@@ -1011,8 +1024,15 @@ export async function enhanceImagePrompt(
 export async function enhanceTextPrompt(
   settings: AppSettings,
   text: string,
+  options?: EnhanceOptions,
 ): Promise<string> {
-  const prompt = `Enhance this text prompt for AI image generation. Make it more detailed and descriptive while keeping the original meaning. Output only the enhanced prompt, nothing else.\n\nOriginal: "${text}"`;
+  const limitClause = options?.maxChars
+    ? ` The result MUST be ${options.maxChars} characters or fewer. Be concise.`
+    : '';
+  const modelClause = options?.model
+    ? ` Target model: ${options.model}. Tailor terminology and style accordingly.`
+    : '';
+  const prompt = `Enhance this text prompt for AI image generation. Make it more detailed and descriptive while keeping the original meaning.${modelClause}${limitClause} Output only the enhanced prompt, nothing else.\n\nOriginal: "${text}"`;
 
   return new Promise(resolve => {
     let result = '';
@@ -1032,8 +1052,15 @@ export async function enhanceTextPrompt(
 export async function enhanceCustomAvatarPrompt(
   settings: AppSettings,
   text: string,
+  options?: EnhanceOptions,
 ): Promise<string> {
-  const prompt = `Make this avatar generation prompt more detailed and visually specific. Add lighting, style, composition, and quality keywords. Keep the original meaning. Output only the enhanced prompt.\n\nOriginal: "${text}"`;
+  const limitClause = options?.maxChars
+    ? ` The result MUST be ${options.maxChars} characters or fewer. Be concise — every word counts.`
+    : '';
+  const modelClause = options?.model
+    ? ` Target model: ${options.model}. Tailor terminology and style accordingly.`
+    : '';
+  const prompt = `Make this avatar generation prompt more detailed and visually specific. Add lighting, style, composition, and quality keywords.${modelClause}${limitClause} Keep the original meaning. Output only the enhanced prompt, nothing else.\n\nOriginal: "${text}"`;
 
   return new Promise(resolve => {
     let result = '';

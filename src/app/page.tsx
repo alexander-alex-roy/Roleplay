@@ -1210,82 +1210,131 @@ function CopyIcon({ className }: { className?: string }) {
 function formatMessageContent(content: string): React.ReactNode {
   if (!content) return null;
 
-  const tokens: Array<{ type: 'bold' | 'action' | 'dialogue' | 'text'; content: string }> = [];
+  const elements: React.ReactNode[] = [];
+  let keyCounter = 0;
+
+  // We parse the content sequentially, finding the next special token
+  // regardless of where it appears in the string.
   let remaining = content;
 
   while (remaining.length > 0) {
-    // Match **bold**
-    const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
-    if (boldMatch) {
-      tokens.push({ type: 'bold', content: boldMatch[1] });
-      remaining = remaining.slice(boldMatch[0].length);
-      continue;
+    // Find the earliest occurrence of any token starter
+    const boldIdx = remaining.indexOf('**');
+    const asteriskIdx = remaining.indexOf('*');
+    const doubleQuoteIdx = remaining.indexOf('"');
+    const singleQuoteIdx = remaining.indexOf("'");
+
+    // Build a list of candidate positions, filter out -1 (not found)
+    const candidates: [number, 'bold' | 'action' | 'dialogue' | 'singleDialogue'][] = [];
+    if (boldIdx !== -1) candidates.push([boldIdx, 'bold']);
+    // For action, we need a single `*` that is NOT part of `**`
+    // We'll handle this below by checking the character after `*`
+    if (doubleQuoteIdx !== -1) candidates.push([doubleQuoteIdx, 'dialogue']);
+    if (singleQuoteIdx !== -1) candidates.push([singleQuoteIdx, 'singleDialogue']);
+
+    // Also find single `*` that is not part of `**`
+    let actionIdx = -1;
+    if (asteriskIdx !== -1) {
+      // If it's `**`, skip unless the second `*` is also there (bold)
+      if (remaining.startsWith('**', asteriskIdx)) {
+        // This is a bold candidate, not action
+        // boldIdx already handles this
+      } else {
+        actionIdx = asteriskIdx;
+        candidates.push([actionIdx, 'action']);
+      }
     }
 
-    // Match *action* - roleplay actions like *smiles*, *nods*
-    const actionMatch = remaining.match(/^\*([a-z][^*]+)\*/);
-    if (actionMatch) {
-      tokens.push({ type: 'action', content: actionMatch[1] });
-      remaining = remaining.slice(actionMatch[0].length);
-      continue;
+    if (candidates.length === 0) {
+      // No more special tokens — push remaining as plain text
+      elements.push(<span key={keyCounter++}>{remaining}</span>);
+      break;
     }
 
-    // Match "dialogue" - double quotes
-    const dialogueMatch = remaining.match(/^"([^"]+)"/);
-    if (dialogueMatch) {
-      tokens.push({ type: 'dialogue', content: dialogueMatch[1] });
-      remaining = remaining.slice(dialogueMatch[0].length);
-      continue;
+    // Sort by index to find the earliest token
+    candidates.sort((a, b) => a[0] - b[0]);
+    const [matchIdx, tokenType] = candidates[0];
+
+    // Push any plain text before this token
+    if (matchIdx > 0) {
+      elements.push(<span key={keyCounter++}>{remaining.slice(0, matchIdx)}</span>);
     }
 
-    // Match 'dialogue' - single quotes at start only
-    const singleQuoteMatch = remaining.match(/^'([^']+)'/);
-    if (singleQuoteMatch) {
-      tokens.push({ type: 'dialogue', content: singleQuoteMatch[1] });
-      remaining = remaining.slice(singleQuoteMatch[0].length);
-      continue;
-    }
-
-    // Find next special character
-    const nextAsterisk = remaining.indexOf('*');
-    const nextDoubleQuote = remaining.indexOf('"');
-    const nextSingleQuote = remaining.indexOf("'");
-
-    let nextSpecial = nextAsterisk;
-    if (nextDoubleQuote !== -1 && (nextSpecial === -1 || nextDoubleQuote < nextSpecial)) {
-      nextSpecial = nextDoubleQuote;
-    }
-    if (nextSingleQuote !== -1 && (nextSpecial === -1 || nextSingleQuote < nextSpecial)) {
-      nextSpecial = nextSingleQuote;
-    }
-
-    if (nextSpecial === -1) {
-      tokens.push({ type: 'text', content: remaining });
-      remaining = '';
-    } else if (nextSpecial === 0) {
-      tokens.push({ type: 'text', content: remaining[0] });
-      remaining = remaining.slice(1);
-    } else {
-      tokens.push({ type: 'text', content: remaining.slice(0, nextSpecial) });
-      remaining = remaining.slice(nextSpecial);
+    if (tokenType === 'bold') {
+      // Find closing **
+      const closeIdx = remaining.indexOf('**', matchIdx + 2);
+      if (closeIdx !== -1) {
+        const inner = remaining.slice(matchIdx + 2, closeIdx);
+        if (inner.length > 0) {
+          elements.push(<span key={keyCounter++} className="font-bold">{inner}</span>);
+          remaining = remaining.slice(closeIdx + 2);
+        } else {
+          // Empty bold — treat as literal text
+          elements.push(<span key={keyCounter++}>**</span>);
+          remaining = remaining.slice(2);
+        }
+      } else {
+        // No closing ** — treat as literal
+        elements.push(<span key={keyCounter++}>**</span>);
+        remaining = remaining.slice(2);
+      }
+    } else if (tokenType === 'action') {
+      // Find closing * (but not **)
+      let closeIdx = -1;
+      for (let i = matchIdx + 1; i < remaining.length; i++) {
+        if (remaining[i] === '*' && (i + 1 >= remaining.length || remaining[i + 1] !== '*')) {
+          closeIdx = i;
+          break;
+        }
+      }
+      if (closeIdx !== -1 && closeIdx > matchIdx + 1) {
+        const inner = remaining.slice(matchIdx + 1, closeIdx);
+        if (inner.length > 0) {
+          elements.push(<span key={keyCounter++} className="italic text-muted-foreground">*{inner}*</span>);
+          remaining = remaining.slice(closeIdx + 1);
+        } else {
+          elements.push(<span key={keyCounter++}>*</span>);
+          remaining = remaining.slice(1);
+        }
+      } else {
+        // No closing * — treat as literal
+        elements.push(<span key={keyCounter++}>*</span>);
+        remaining = remaining.slice(1);
+      }
+    } else if (tokenType === 'dialogue') {
+      const closeIdx = remaining.indexOf('"', matchIdx + 1);
+      if (closeIdx !== -1) {
+        const inner = remaining.slice(matchIdx + 1, closeIdx);
+        if (inner.length > 0) {
+          elements.push(<span key={keyCounter++} className="text-foreground font-medium">&ldquo;{inner}&rdquo;</span>);
+          remaining = remaining.slice(closeIdx + 1);
+        } else {
+          elements.push(<span key={keyCounter++}>""</span>);
+          remaining = remaining.slice(2);
+        }
+      } else {
+        elements.push(<span key={keyCounter++}>"</span>);
+        remaining = remaining.slice(1);
+      }
+    } else if (tokenType === 'singleDialogue') {
+      const closeIdx = remaining.indexOf("'", matchIdx + 1);
+      if (closeIdx !== -1) {
+        const inner = remaining.slice(matchIdx + 1, closeIdx);
+        if (inner.length > 0) {
+          elements.push(<span key={keyCounter++} className="text-foreground font-medium">&lsquo;{inner}&rsquo;</span>);
+          remaining = remaining.slice(closeIdx + 1);
+        } else {
+          elements.push(<span key={keyCounter++}>''</span>);
+          remaining = remaining.slice(2);
+        }
+      } else {
+        elements.push(<span key={keyCounter++}>'</span>);
+        remaining = remaining.slice(1);
+      }
     }
   }
 
-  return tokens.map((token, index) => {
-    if (token.content.length === 0) return <span key={index}></span>;
-
-    switch (token.type) {
-      case 'bold':
-        return <span key={index} className="font-bold">{token.content}</span>;
-      case 'action':
-        return <span key={index} className="italic text-muted-foreground">*{token.content}*</span>;
-      case 'dialogue':
-        return <span key={index} className="text-foreground font-medium">&ldquo;{token.content}&rdquo;</span>;
-      case 'text':
-      default:
-        return <span key={index}>{token.content}</span>;
-    }
-  });
+  return elements;
 }
 
 // ============================================================
@@ -1485,19 +1534,27 @@ function ChatInput() {
                           if (sceneContext) {
                             basePrompt += `, scene: ${sceneContext}`;
                           }
-                          
-                          let finalPrompt = basePrompt.slice(0, 800);
+
+                          // Enforce per-model prompt limits to avoid truncation by the API
+                          const maxLen = imageModel.includes('flux') ? 790
+                            : imageModel.includes('stable-diffusion-3') ? 400
+                            : imageModel.includes('stable-diffusion-xl') ? 300
+                            : 400;
+
+                          let finalPrompt = basePrompt.slice(0, maxLen);
                           if (settings.enhanceImagePrompts) {
                             try {
                               finalPrompt = await enhanceImagePrompt(
                                 settingsStore.settings,
                                 finalPrompt,
-                                `Character: ${charName}. Scene context: ${sceneContext || 'No specific scene'}. Image model: ${imageModel}. This is for a scene/background image.`,
+                                `This is for a scene/background image.`,
+                                { model: imageModel.split('/').pop() || imageModel, maxChars: maxLen },
                               );
-                              finalPrompt = finalPrompt.slice(0, 800);
+                              // Safety truncation — AI should already respect the limit
+                              if (finalPrompt.length > maxLen) finalPrompt = finalPrompt.slice(0, maxLen);
                             } catch (e) {
                               console.error('Prompt enhancement failed, using base prompt:', e);
-                              finalPrompt = basePrompt.slice(0, 800);
+                              finalPrompt = basePrompt.slice(0, maxLen);
                             }
                           }
                           
@@ -2901,20 +2958,28 @@ function CharacterEditorInner() {
                           basePrompt = `portrait of ${charName}, ${charDesc.slice(0, 180)}, ${charPersonality.slice(0, 100)}, natural lighting, soft shadows, high detail, 8k, professional photo, headshot`;
                         }
                         
-                        let finalPrompt = basePrompt;
+                        // Enforce per-model prompt limits
+                        const maxLen = imageModel.includes('flux') ? 790
+                          : imageModel.includes('stable-diffusion-3') ? 400
+                          : imageModel.includes('stable-diffusion-xl') ? 300
+                          : 400;
+
+                        let finalPrompt = basePrompt.slice(0, maxLen);
                         if (settingsStore.settings.enhanceImagePrompts && !useCustom) {
                           try {
                             finalPrompt = await enhanceImagePrompt(
                               settingsStore.settings,
-                              basePrompt,
-                              `Character: ${charName}. Description: ${charDesc.slice(0, 200)}. Personality: ${charPersonality.slice(0, 150)}. Image model: ${imageModel}. This is for a portrait/avatar image.`,
+                              finalPrompt,
+                              `This is for a portrait/avatar image.`,
+                              { model: imageModel.split('/').pop() || imageModel, maxChars: maxLen },
                             );
+                            // Safety truncation — AI should already respect the limit
+                            if (finalPrompt.length > maxLen) finalPrompt = finalPrompt.slice(0, maxLen);
                           } catch (e) {
                             console.error('Prompt enhancement failed, using base prompt:', e);
+                            finalPrompt = basePrompt.slice(0, maxLen);
                           }
                         }
-                        
-                        finalPrompt = imageModel.includes('flux') ? finalPrompt.slice(0, 790) : finalPrompt;
                         
                         const response = await fetch('https://roleplay.jameskaren.workers.dev/v1/genai', {
                             method: 'POST',
@@ -3021,8 +3086,21 @@ function CharacterEditorInner() {
                               if (!currentPrompt.trim()) return;
                               setEnhancingPrompt(true);
                               try {
-                                const enhanced = await enhanceCustomAvatarPrompt(settingsStore.settings, currentPrompt);
-                                updateForm('customAvatarPrompt', enhanced);
+                                const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
+                                const maxLen = imageModel.includes('flux') ? 790
+                                  : imageModel.includes('stable-diffusion-3') ? 400
+                                  : imageModel.includes('stable-diffusion-xl') ? 300
+                                  : 400;
+                                const enhanced = await enhanceCustomAvatarPrompt(settingsStore.settings, currentPrompt, {
+                                  model: imageModel.split('/').pop() || imageModel,
+                                  maxChars: maxLen,
+                                });
+                                // Safety truncation — AI should already respect the limit
+                                const truncated = enhanced.length > maxLen ? enhanced.slice(0, maxLen) : enhanced;
+                                updateForm('customAvatarPrompt', truncated);
+                                if (truncated.length < enhanced.length) {
+                                  setGenerationError(`Prompt truncated from ${enhanced.length} to ${maxLen} chars to fit ${imageModel.split('/').pop()} limits`);
+                                }
                               } catch {
                                 // keep original on error
                               } finally {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef, useMemo, createContext, useContext, ReactNode } from "react"
+import { useState, useCallback, useRef, useMemo, useEffect, createContext, useContext, ReactNode } from "react"
 import {
   Dialog,
   DialogContent,
@@ -53,6 +53,12 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
 
   const confirmResolveRef = useRef<((value: boolean) => void) | null>(null)
   const alertResolveRef = useRef<(() => void) | null>(null)
+  const modeRef = useRef<DialogMode>(null)
+
+  // Keep modeRef in sync with current mode via effect (not during render)
+  useEffect(() => {
+    modeRef.current = mode
+  }, [mode])
 
   const showConfirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -72,16 +78,17 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
 
   const handleOpenChange = useCallback((open: boolean) => {
     if (!open) {
-      if (mode === "confirm" && confirmResolveRef.current) {
+      const currentMode = modeRef.current
+      if (currentMode === "confirm" && confirmResolveRef.current) {
         confirmResolveRef.current(false)
         confirmResolveRef.current = null
-      } else if (mode === "alert" && alertResolveRef.current) {
+      } else if (currentMode === "alert" && alertResolveRef.current) {
         alertResolveRef.current()
         alertResolveRef.current = null
       }
       setMode(null)
     }
-  }, [mode])
+  }, [])
 
   const handleConfirmAction = useCallback(() => {
     if (confirmResolveRef.current) {
