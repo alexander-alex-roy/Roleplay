@@ -54,7 +54,7 @@ function AlertDialogContent({
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed z-50 grid w-[calc(100%-1rem)] gap-4 rounded-lg border p-4 shadow-lg duration-200 sm:w-full sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:top-[50%] sm:left-[50%] sm:p-6",
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed z-50 grid w-[calc(100%-1rem)] max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-4 shadow-lg duration-200 top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] sm:w-full sm:max-w-lg sm:p-6",
           className
         )}
         {...props}

@@ -2,15 +2,14 @@
 
 import { useState, useCallback, useRef, useMemo, createContext, useContext, ReactNode } from "react"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 
 type DialogMode = "confirm" | "alert" | null
 
@@ -109,33 +108,33 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
     <ConfirmDialogContext.Provider value={contextValue}>
       {children}
       
-      <AlertDialog open={mode !== null} onOpenChange={handleOpenChange}>
-        <AlertDialogContent onOpenAutoFocus={(e) => {
-          e.preventDefault();
-        }}>
-          <AlertDialogHeader>
-            <AlertDialogTitle className={variant === "error" ? "text-destructive" : variant === "success" ? "text-green-600" : ""}>
+      <Dialog open={mode !== null} onOpenChange={handleOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className={variant === "error" ? "text-destructive" : variant === "success" ? "text-green-600" : ""}>
               {isConfirm ? confirmOptions.title : alertOptions.title}
-            </AlertDialogTitle>
-            <AlertDialogDescription>{isConfirm ? confirmOptions.description : alertOptions.description}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
+            </DialogTitle>
+            <DialogDescription>{isConfirm ? confirmOptions.description : alertOptions.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
             {isConfirm ? (
               <>
-                <AlertDialogCancel>{confirmOptions.cancelText || "Cancel"}</AlertDialogCancel>
-                <AlertDialogAction
+                <Button variant="outline" onClick={() => handleOpenChange(false)}>
+                  {confirmOptions.cancelText || "Cancel"}
+                </Button>
+                <Button
                   onClick={handleConfirmAction}
                   className={confirmOptions.destructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : undefined}
                 >
                   {confirmOptions.confirmText || "Confirm"}
-                </AlertDialogAction>
+                </Button>
               </>
             ) : (
-              <AlertDialogAction onClick={handleAlertAction}>OK</AlertDialogAction>
+              <Button onClick={handleAlertAction}>OK</Button>
             )}
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ConfirmDialogContext.Provider>
   )
 }

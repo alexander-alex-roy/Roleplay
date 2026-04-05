@@ -2062,9 +2062,9 @@ function SettingsDialog() {
                       <div className="flex justify-between text-xs">
                         <Label>Temperature: {settings.temperature.toFixed(2)}</Label>
                         <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Higher = more creative</span>
+                          <span className="text-muted-foreground hidden sm:inline">Higher = more creative</span>
                           {settings.temperature !== 0.7 && (
-                            <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => settingsStore.updateSetting('temperature', 0.7)} aria-label="Reset to default" title="Reset to 0.7">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => settingsStore.updateSetting('temperature', 0.7)} aria-label="Reset to default" title="Reset to 0.7">
                               <RotateCcw className="w-3 h-3" />
                             </Button>
                           )}
@@ -2082,9 +2082,9 @@ function SettingsDialog() {
                       <div className="flex justify-between text-xs">
                         <Label>Max Tokens: {settings.maxTokens}</Label>
                         <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Max response length</span>
+                          <span className="text-muted-foreground hidden sm:inline">Max response length</span>
                           {settings.maxTokens !== 512 && (
-                            <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => settingsStore.updateSetting('maxTokens', 512)} aria-label="Reset to default" title="Reset to 512">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => settingsStore.updateSetting('maxTokens', 512)} aria-label="Reset to default" title="Reset to 512">
                               <RotateCcw className="w-3 h-3" />
                             </Button>
                           )}
@@ -2102,7 +2102,7 @@ function SettingsDialog() {
                       <div className="flex justify-between text-xs">
                         <Label>Top P: {settings.topP.toFixed(2)}</Label>
                         {settings.topP !== 0.9 && (
-                          <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => settingsStore.updateSetting('topP', 0.9)} aria-label="Reset to default" title="Reset to 0.9">
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => settingsStore.updateSetting('topP', 0.9)} aria-label="Reset to default" title="Reset to 0.9">
                             <RotateCcw className="w-3 h-3" />
                           </Button>
                         )}
@@ -2119,9 +2119,9 @@ function SettingsDialog() {
                       <div className="flex justify-between text-xs">
                         <Label>Frequency Penalty: {settings.frequencyPenalty.toFixed(2)}</Label>
                         <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Reduce repetition</span>
+                          <span className="text-muted-foreground hidden sm:inline">Reduce repetition</span>
                           {settings.frequencyPenalty !== 0.1 && (
-                            <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => settingsStore.updateSetting('frequencyPenalty', 0.1)} aria-label="Reset to default" title="Reset to 0.1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => settingsStore.updateSetting('frequencyPenalty', 0.1)} aria-label="Reset to default" title="Reset to 0.1">
                               <RotateCcw className="w-3 h-3" />
                             </Button>
                           )}
@@ -2139,9 +2139,9 @@ function SettingsDialog() {
                       <div className="flex justify-between text-xs">
                         <Label>Presence Penalty: {settings.presencePenalty.toFixed(2)}</Label>
                         <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Encourage new topics</span>
+                          <span className="text-muted-foreground hidden sm:inline">Encourage new topics</span>
                           {settings.presencePenalty !== 0.1 && (
-                            <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => settingsStore.updateSetting('presencePenalty', 0.1)} aria-label="Reset to default" title="Reset to 0.1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => settingsStore.updateSetting('presencePenalty', 0.1)} aria-label="Reset to default" title="Reset to 0.1">
                               <RotateCcw className="w-3 h-3" />
                             </Button>
                           )}
@@ -2320,7 +2320,7 @@ function SettingsDialog() {
                       <div className="flex justify-between text-xs">
                         <Label>Max Memories Per Query: {settings.maxMemoriesPerQuery}</Label>
                         {settings.maxMemoriesPerQuery !== 10 && (
-                          <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => settingsStore.updateSetting('maxMemoriesPerQuery', 10)} aria-label="Reset to default" title="Reset to 10">
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => settingsStore.updateSetting('maxMemoriesPerQuery', 10)} aria-label="Reset to default" title="Reset to 10">
                             <RotateCcw className="w-3 h-3" />
                           </Button>
                         )}
@@ -2332,18 +2332,18 @@ function SettingsDialog() {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <Label>Min Importance: {settings.memoryImportanceThreshold}</Label>
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Only store memories above this</span>
-                          {settings.memoryImportanceThreshold !== 3 && (
-                            <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => settingsStore.updateSetting('memoryImportanceThreshold', 3)} aria-label="Reset to default" title="Reset to 3">
-                              <RotateCcw className="w-3 h-3" />
-                            </Button>
-                          )}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <Label>Min Importance: {settings.memoryImportanceThreshold}</Label>
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground hidden sm:inline">Only store memories above this</span>
+                            {settings.memoryImportanceThreshold !== 3 && (
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => settingsStore.updateSetting('memoryImportanceThreshold', 3)} aria-label="Reset to default" title="Reset to 3">
+                                <RotateCcw className="w-3 h-3" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                      </div>
                       <Slider
                         value={[settings.memoryImportanceThreshold]}
                         min={1} max={8} step={1}
@@ -2366,7 +2366,7 @@ function SettingsDialog() {
                       <div className="flex justify-between text-xs">
                         <Label>Summarize After: {settings.summarizeThreshold} messages</Label>
                         {settings.summarizeThreshold !== 6 && (
-                          <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => settingsStore.updateSetting('summarizeThreshold', 6)} aria-label="Reset to default" title="Reset to 6">
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => settingsStore.updateSetting('summarizeThreshold', 6)} aria-label="Reset to default" title="Reset to 6">
                             <RotateCcw className="w-3 h-3" />
                           </Button>
                         )}
@@ -2383,7 +2383,7 @@ function SettingsDialog() {
                       <div className="flex justify-between text-xs">
                         <Label>Keep Recent Messages: {settings.keepRecentCount}</Label>
                         {settings.keepRecentCount !== 6 && (
-                          <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => settingsStore.updateSetting('keepRecentCount', 6)} aria-label="Reset to default" title="Reset to 6">
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => settingsStore.updateSetting('keepRecentCount', 6)} aria-label="Reset to default" title="Reset to 6">
                             <RotateCcw className="w-3 h-3" />
                           </Button>
                         )}
