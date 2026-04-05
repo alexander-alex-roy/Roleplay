@@ -1028,3 +1028,24 @@ export async function enhanceTextPrompt(
     );
   });
 }
+
+export async function enhanceCustomAvatarPrompt(
+  settings: AppSettings,
+  text: string,
+): Promise<string> {
+  const prompt = `Make this avatar generation prompt more detailed and visually specific. Add lighting, style, composition, and quality keywords. Keep the original meaning. Output only the enhanced prompt.\n\nOriginal: "${text}"`;
+
+  return new Promise(resolve => {
+    let result = '';
+    streamChatResponse(
+      settings,
+      [{ role: 'user', content: prompt }],
+      undefined,
+      {
+        onToken: token => { result += token; },
+        onDone: () => { resolve(result.trim() || text); },
+        onError: () => { resolve(text); },
+      },
+    );
+  });
+}
