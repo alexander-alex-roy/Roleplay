@@ -110,7 +110,9 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
       {children}
       
       <AlertDialog open={mode !== null} onOpenChange={handleOpenChange}>
-        <AlertDialogContent>
+        <AlertDialogContent onOpenAutoFocus={(e) => {
+          e.preventDefault();
+        }}>
           <AlertDialogHeader>
             <AlertDialogTitle className={variant === "error" ? "text-destructive" : variant === "success" ? "text-green-600" : ""}>
               {isConfirm ? confirmOptions.title : alertOptions.title}
