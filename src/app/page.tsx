@@ -1212,123 +1212,41 @@ function formatMessageContent(content: string): React.ReactNode {
 
   const elements: React.ReactNode[] = [];
   let keyCounter = 0;
-
-  // We parse the content sequentially, finding the next special token
-  // regardless of where it appears in the string.
   let remaining = content;
 
   while (remaining.length > 0) {
-    // Find the earliest occurrence of any token starter
     const boldIdx = remaining.indexOf('**');
-    const asteriskIdx = remaining.indexOf('*');
     const doubleQuoteIdx = remaining.indexOf('"');
-    const singleQuoteIdx = remaining.indexOf("'");
 
-    // Build a list of candidate positions, filter out -1 (not found)
-    const candidates: [number, 'bold' | 'action' | 'dialogue' | 'singleDialogue'][] = [];
-    if (boldIdx !== -1) candidates.push([boldIdx, 'bold']);
-    // For action, we need a single `*` that is NOT part of `**`
-    // We'll handle this below by checking the character after `*`
-    if (doubleQuoteIdx !== -1) candidates.push([doubleQuoteIdx, 'dialogue']);
-    if (singleQuoteIdx !== -1) candidates.push([singleQuoteIdx, 'singleDialogue']);
-
-    // Also find single `*` that is not part of `**`
-    let actionIdx = -1;
-    if (asteriskIdx !== -1) {
-      // If it's `**`, skip unless the second `*` is also there (bold)
-      if (remaining.startsWith('**', asteriskIdx)) {
-        // This is a bold candidate, not action
-        // boldIdx already handles this
-      } else {
-        actionIdx = asteriskIdx;
-        candidates.push([actionIdx, 'action']);
-      }
-    }
-
-    if (candidates.length === 0) {
-      // No more special tokens — push remaining as plain text
+    if (boldIdx === -1 && doubleQuoteIdx === -1) {
       elements.push(<span key={keyCounter++}>{remaining}</span>);
       break;
     }
 
-    // Sort by index to find the earliest token
-    candidates.sort((a, b) => a[0] - b[0]);
-    const [matchIdx, tokenType] = candidates[0];
-
-    // Push any plain text before this token
-    if (matchIdx > 0) {
-      elements.push(<span key={keyCounter++}>{remaining.slice(0, matchIdx)}</span>);
-    }
-
-    if (tokenType === 'bold') {
-      // Find closing **
-      const closeIdx = remaining.indexOf('**', matchIdx + 2);
+    if (boldIdx !== -1 && (doubleQuoteIdx === -1 || boldIdx < doubleQuoteIdx)) {
+      if (boldIdx > 0) {
+        elements.push(<span key={keyCounter++}>{remaining.slice(0, boldIdx)}</span>);
+      }
+      const closeIdx = remaining.indexOf('**', boldIdx + 2);
       if (closeIdx !== -1) {
-        const inner = remaining.slice(matchIdx + 2, closeIdx);
-        if (inner.length > 0) {
-          elements.push(<span key={keyCounter++} className="font-bold">{inner}</span>);
-          remaining = remaining.slice(closeIdx + 2);
-        } else {
-          // Empty bold — treat as literal text
-          elements.push(<span key={keyCounter++}>**</span>);
-          remaining = remaining.slice(2);
-        }
+        const inner = remaining.slice(boldIdx + 2, closeIdx);
+        elements.push(<span key={keyCounter++} className="font-bold">{inner}</span>);
+        remaining = remaining.slice(closeIdx + 2);
       } else {
-        // No closing ** — treat as literal
         elements.push(<span key={keyCounter++}>**</span>);
         remaining = remaining.slice(2);
       }
-    } else if (tokenType === 'action') {
-      // Find closing * (but not **)
-      let closeIdx = -1;
-      for (let i = matchIdx + 1; i < remaining.length; i++) {
-        if (remaining[i] === '*' && (i + 1 >= remaining.length || remaining[i + 1] !== '*')) {
-          closeIdx = i;
-          break;
-        }
+    } else if (doubleQuoteIdx !== -1) {
+      if (doubleQuoteIdx > 0) {
+        elements.push(<span key={keyCounter++}>{remaining.slice(0, doubleQuoteIdx)}</span>);
       }
-      if (closeIdx !== -1 && closeIdx > matchIdx + 1) {
-        const inner = remaining.slice(matchIdx + 1, closeIdx);
-        if (inner.length > 0) {
-          elements.push(<span key={keyCounter++} className="italic text-muted-foreground">*{inner}*</span>);
-          remaining = remaining.slice(closeIdx + 1);
-        } else {
-          elements.push(<span key={keyCounter++}>*</span>);
-          remaining = remaining.slice(1);
-        }
-      } else {
-        // No closing * — treat as literal
-        elements.push(<span key={keyCounter++}>*</span>);
-        remaining = remaining.slice(1);
-      }
-    } else if (tokenType === 'dialogue') {
-      const closeIdx = remaining.indexOf('"', matchIdx + 1);
+      const closeIdx = remaining.indexOf('"', doubleQuoteIdx + 1);
       if (closeIdx !== -1) {
-        const inner = remaining.slice(matchIdx + 1, closeIdx);
-        if (inner.length > 0) {
-          elements.push(<span key={keyCounter++} className="text-foreground font-medium">&ldquo;{inner}&rdquo;</span>);
-          remaining = remaining.slice(closeIdx + 1);
-        } else {
-          elements.push(<span key={keyCounter++}>""</span>);
-          remaining = remaining.slice(2);
-        }
+        const inner = remaining.slice(doubleQuoteIdx + 1, closeIdx);
+        elements.push(<span key={keyCounter++} className="text-foreground font-medium">&ldquo;{inner}&rdquo;</span>);
+        remaining = remaining.slice(closeIdx + 1);
       } else {
         elements.push(<span key={keyCounter++}>"</span>);
-        remaining = remaining.slice(1);
-      }
-    } else if (tokenType === 'singleDialogue') {
-      const closeIdx = remaining.indexOf("'", matchIdx + 1);
-      if (closeIdx !== -1) {
-        const inner = remaining.slice(matchIdx + 1, closeIdx);
-        if (inner.length > 0) {
-          elements.push(<span key={keyCounter++} className="text-foreground font-medium">&lsquo;{inner}&rsquo;</span>);
-          remaining = remaining.slice(closeIdx + 1);
-        } else {
-          elements.push(<span key={keyCounter++}>''</span>);
-          remaining = remaining.slice(2);
-        }
-      } else {
-        elements.push(<span key={keyCounter++}>'</span>);
         remaining = remaining.slice(1);
       }
     }
@@ -1530,18 +1448,18 @@ function ChatInput() {
                           };
                           const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
                           
-                          let basePrompt = `cinematic portrait of ${charName}, ${charDesc.slice(0, 150)}, ${charPersonality.slice(0, 80)}, natural lighting, atmospheric, depth of field, 16:9`;
+                          let promptForModel = `cinematic portrait of ${charName}, ${charDesc.slice(0, 150)}, ${charPersonality.slice(0, 80)}, natural lighting, atmospheric, depth of field, 16:9`;
                           if (sceneContext) {
-                            basePrompt += `, scene: ${sceneContext}`;
+                            promptForModel += `, scene: ${sceneContext}`;
                           }
 
-                          // Enforce per-model prompt limits to avoid truncation by the API
-                          const maxLen = imageModel.includes('flux') ? 790
-                            : imageModel.includes('stable-diffusion-3') ? 400
-                            : imageModel.includes('stable-diffusion-xl') ? 300
-                            : 400;
+                          const maxLen = imageModel.includes('flux.2-klein') ? 800
+                            : imageModel.includes('flux') ? 2000
+                            : imageModel.includes('stable-diffusion-3') ? 2000
+                            : imageModel.includes('stable-diffusion-xl') ? 1000
+                            : 2000;
 
-                          let finalPrompt = basePrompt.slice(0, maxLen);
+                          let finalPrompt = promptForModel.slice(0, maxLen);
                           if (settings.enhanceImagePrompts) {
                             try {
                               finalPrompt = await enhanceImagePrompt(
@@ -1554,7 +1472,7 @@ function ChatInput() {
                               if (finalPrompt.length > maxLen) finalPrompt = finalPrompt.slice(0, maxLen);
                             } catch (e) {
                               console.error('Prompt enhancement failed, using base prompt:', e);
-                              finalPrompt = basePrompt.slice(0, maxLen);
+                              finalPrompt = promptForModel.slice(0, maxLen);
                             }
                           }
                           
@@ -2897,14 +2815,6 @@ function CharacterEditorInner() {
                   <div className="mt-2 flex justify-center">
                     <div className="relative w-24 h-24 rounded-full overflow-hidden bg-muted border-2 border-border cursor-zoom-in group" onClick={() => setLightboxOpen(true)}>
                       <img src={form.avatar} alt="Avatar preview" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        className="absolute top-0 right-0 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                        onClick={(e) => { e.stopPropagation(); updateForm('avatar', ''); }}
-                        aria-label="Remove avatar"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
                     </div>
                   </div>
                 )}
@@ -2934,12 +2844,6 @@ function CharacterEditorInner() {
                         if (!nvidiaConfig?.apiKey) return;
                         setGenerating(true);
                         try {
-                        const charName = form.name || 'character';
-                        const charDesc = form.description || '';
-                        const charPersonality = form.personality || '';
-                        const customPrompt = form.customAvatarPrompt;
-                        const useCustom = form.useCustomAvatarPrompt;
-                        
                         const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
                         
                         const modelDefaults: Record<string, { steps: number; cfg_scale: number }> = {
@@ -2950,21 +2854,30 @@ function CharacterEditorInner() {
                           'black-forest-labs/flux.2-klein-4b': { steps: 4, cfg_scale: 1 },
                         };
                         const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
-                        
-                        let basePrompt = '';
-                        if (useCustom && customPrompt && customPrompt.trim()) {
-                          basePrompt = customPrompt.trim();
+
+                        const charName = form.name || 'character';
+                        const charDesc = form.description || '';
+                        const charPersonality = form.personality || '';
+                        const charScenario = form.scenario || '';
+                        const charKnowledge = form.knowledge || '';
+                        const charRelationship = form.relationship || '';
+                        const customPrompt = form.customAvatarPrompt;
+                        const useCustom = form.useCustomAvatarPrompt;
+
+                        let promptForModel: string;
+                        if (useCustom && customPrompt?.trim()) {
+                          promptForModel = customPrompt.trim();
                         } else {
-                          basePrompt = `portrait of ${charName}, ${charDesc.slice(0, 180)}, ${charPersonality.slice(0, 100)}, natural lighting, soft shadows, high detail, 8k, professional photo, headshot`;
+                          promptForModel = `portrait of ${charName}, ${charDesc.slice(0, 150)}, ${charPersonality.slice(0, 80)}, ${charScenario.slice(0, 50)}, ${charKnowledge.slice(0, 50)}, ${charRelationship.slice(0, 50)}, natural lighting, soft shadows, high detail, 8k, professional photo, headshot`;
                         }
                         
-                        // Enforce per-model prompt limits
-                        const maxLen = imageModel.includes('flux') ? 790
-                          : imageModel.includes('stable-diffusion-3') ? 400
-                          : imageModel.includes('stable-diffusion-xl') ? 300
-                          : 400;
+                        const maxLen = imageModel.includes('flux.2-klein') ? 800
+                          : imageModel.includes('flux') ? 2000
+                          : imageModel.includes('stable-diffusion-3') ? 2000
+                          : imageModel.includes('stable-diffusion-xl') ? 1000
+                          : 2000;
 
-                        let finalPrompt = basePrompt.slice(0, maxLen);
+                        let finalPrompt = promptForModel.slice(0, maxLen);
                         if (settingsStore.settings.enhanceImagePrompts && !useCustom) {
                           try {
                             finalPrompt = await enhanceImagePrompt(
@@ -2973,11 +2886,10 @@ function CharacterEditorInner() {
                               `This is for a portrait/avatar image.`,
                               { model: imageModel.split('/').pop() || imageModel, maxChars: maxLen },
                             );
-                            // Safety truncation — AI should already respect the limit
                             if (finalPrompt.length > maxLen) finalPrompt = finalPrompt.slice(0, maxLen);
                           } catch (e) {
                             console.error('Prompt enhancement failed, using base prompt:', e);
-                            finalPrompt = basePrompt.slice(0, maxLen);
+                            finalPrompt = promptForModel.slice(0, maxLen);
                           }
                         }
                         
@@ -3007,9 +2919,6 @@ function CharacterEditorInner() {
                             throw new Error('CONTENT_FILTERED');
                           }
                           let base64Data = null;
-                          if (finishReason === 'CONTENT_FILTERED') {
-                            throw new Error('CONTENT_FILTERED');
-                          }
                           if (response_body.image) {
                             base64Data = response_body.image.startsWith('data:')
                               ? response_body.image
@@ -3032,11 +2941,9 @@ function CharacterEditorInner() {
                         } catch (e) {
                           const errorMsg = e instanceof Error ? e.message : 'Unknown error';
                           let userMsg = 'Failed to generate avatar. Try a different prompt.';
-                          
                           if (errorMsg.includes('CONTENT_FILTERED')) {
                             userMsg = 'Content filtered by NVIDIA. Try a different description or model.';
                           }
-                          
                           toast({
                             variant: 'destructive',
                             title: 'Image generation failed',
@@ -3047,8 +2954,11 @@ function CharacterEditorInner() {
                         }
                       }}
                       disabled={generating || !form.name}
+                      className="flex items-center gap-2"
                     >
                       {generating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                      <span className="text-xs">{settingsStore.settings.nvidiaImageModel?.split('/').pop()}</span>
+                      {settingsStore.settings.enhanceImagePrompts && <span className="text-[10px] text-purple-400">+AI</span>}
                     </Button>
                   )}
                 </div>
@@ -3087,10 +2997,11 @@ function CharacterEditorInner() {
                               setEnhancingPrompt(true);
                               try {
                                 const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
-                                const maxLen = imageModel.includes('flux') ? 790
-                                  : imageModel.includes('stable-diffusion-3') ? 400
-                                  : imageModel.includes('stable-diffusion-xl') ? 300
-                                  : 400;
+                                const maxLen = imageModel.includes('flux.2-klein') ? 800
+                                  : imageModel.includes('flux') ? 2000
+                                  : imageModel.includes('stable-diffusion-3') ? 2000
+                                  : imageModel.includes('stable-diffusion-xl') ? 1000
+                                  : 2000;
                                 const enhanced = await enhanceCustomAvatarPrompt(settingsStore.settings, currentPrompt, {
                                   model: imageModel.split('/').pop() || imageModel,
                                   maxChars: maxLen,
@@ -3111,7 +3022,10 @@ function CharacterEditorInner() {
                             {enhancingPrompt ? (
                               <RefreshCw className="w-4 h-4 animate-spin" />
                             ) : (
-                              <Sparkles className="w-4 h-4" />
+                              <div className="flex items-center gap-1">
+                                <Sparkles className="w-4 h-4" />
+                                {settingsStore.settings.enhanceImagePrompts && <span className="text-[10px] text-purple-400">AI</span>}
+                              </div>
                             )}
                           </Button>
                         </TooltipTrigger>

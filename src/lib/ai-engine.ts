@@ -1,16 +1,6 @@
-// ============================================================
-// AI Engine - Multi-provider BYOK streaming
-// Converts responses from various providers to unified format
-// ============================================================
-
 import type { AIProvider, AIModel, AppSettings, Character } from './types';
 
-// ---- Model Registry ----
-// Ordered by roleplay quality: BEST at top, WORST at bottom
 export const AI_MODELS: AIModel[] = [
-  // ==========================================
-  // OpenAI - Best for roleplay: GPT-4.1 series, then GPT-4o
-  // ==========================================
   { id: 'gpt-4.1', name: 'GPT-4.1', provider: 'openai', maxContextTokens: 1047576, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.002, costPer1kOutput: 0.008 },
   { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', provider: 'openai', maxContextTokens: 1047576, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0004, costPer1kOutput: 0.0016 },
   { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', provider: 'openai', maxContextTokens: 1047576, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
@@ -18,27 +8,15 @@ export const AI_MODELS: AIModel[] = [
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', maxContextTokens: 128000, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
   { id: 'o4-mini', name: 'o4-mini', provider: 'openai', maxContextTokens: 200000, maxOutputTokens: 100000, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0011, costPer1kOutput: 0.0044 },
   { id: 'o3-mini', name: 'o3-mini', provider: 'openai', maxContextTokens: 200000, maxOutputTokens: 100000, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0011, costPer1kOutput: 0.0044 },
-
-  // ==========================================
-  // Anthropic - Best for roleplay: Claude Sonnet 4, then Opus
-  // ==========================================
   { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 16000, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.003, costPer1kOutput: 0.015 },
   { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.003, costPer1kOutput: 0.015 },
   { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.015, costPer1kOutput: 0.075 },
   { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.001, costPer1kOutput: 0.005 },
   { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', provider: 'anthropic', maxContextTokens: 200000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00025, costPer1kOutput: 0.00125 },
-
-  // ==========================================
-  // Google - Best for roleplay: Gemini 2.5 Pro, then Flash
-  // ==========================================
   { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'google', maxContextTokens: 1000000, maxOutputTokens: 65536, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00125, costPer1kOutput: 0.01 },
   { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'google', maxContextTokens: 1000000, maxOutputTokens: 65536, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
   { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'google', maxContextTokens: 1048576, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0001, costPer1kOutput: 0.0004 },
   { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', provider: 'google', maxContextTokens: 128000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.000075, costPer1kOutput: 0.0003 },
-
-  // ==========================================
-  // Groq - Best for roleplay: Llama 4/3 series, then others
-  // ==========================================
   { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout 17B', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0003 },
   { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00059, costPer1kOutput: 0.00079 },
   { id: 'moonshotai/kimi-k2-instruct', name: 'Kimi K2 Instruct', provider: 'groq', maxContextTokens: 131072, maxOutputTokens: 16384, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0005, costPer1kOutput: 0.0015 },
@@ -52,27 +30,15 @@ export const AI_MODELS: AIModel[] = [
   { id: 'allam-2-7b', name: 'ALLaM 2 7B', provider: 'groq', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00008 },
   { id: 'canopylabs/orpheus-v1-english', name: 'Orpheus V1 English', provider: 'groq', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00008 },
   { id: 'canopylabs/orpheus-arabic-saudi', name: 'Orpheus Arabic Saudi', provider: 'groq', maxContextTokens: 8192, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00008 },
-
-  // ==========================================
-  // Mistral - Best for roleplay: Large, then Pixtral
-  // ==========================================
   { id: 'mistral-large-latest', name: 'Mistral Large', provider: 'mistral', maxContextTokens: 128000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.004, costPer1kOutput: 0.012 },
   { id: 'pixtral-large-latest', name: 'Pixtral Large', provider: 'mistral', maxContextTokens: 131072, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.004, costPer1kOutput: 0.012 },
   { id: 'mistral-small-latest', name: 'Mistral Small', provider: 'mistral', maxContextTokens: 32000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.006 },
   { id: 'open-mistral-nemo', name: 'Mistral Nemo', provider: 'mistral', maxContextTokens: 128000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
   { id: 'codestral-latest', name: 'Codestral', provider: 'mistral', maxContextTokens: 256000, maxOutputTokens: 8192, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0003, costPer1kOutput: 0.0009 },
-
-  // ==========================================
-  // OpenRouter (aggregator) - Best for roleplay: Claude, then Gemini, Llama
-  // ==========================================
   { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4 (OR)', provider: 'openrouter', maxContextTokens: 200000, maxOutputTokens: 16000, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.003, costPer1kOutput: 0.015 },
   { id: 'google/gemini-2.5-pro-preview', name: 'Gemini 2.5 Pro (OR)', provider: 'openrouter', maxContextTokens: 1000000, maxOutputTokens: 65536, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00125, costPer1kOutput: 0.01 },
   { id: 'meta-llama/llama-4-maverick', name: 'Llama 4 Maverick (OR)', provider: 'openrouter', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
   { id: 'openrouter-auto', name: 'OpenRouter (Auto)', provider: 'openrouter', maxContextTokens: 200000, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.001, costPer1kOutput: 0.003 },
-
-  // ==========================================
-  // NVIDIA NIM - Tier 1: God Tier (70B+)
-  // ==========================================
   { id: 'mistralai/mistral-large-3-675b-instruct-2512', name: 'Mistral Large 3 675B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
   { id: 'qwen/qwen3.5-397b-a17b', name: 'Qwen3.5 397B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
   { id: 'nvidia/llama-3.1-nemotron-ultra-253b-v1', name: 'Nemotron Ultra 253B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
@@ -87,10 +53,6 @@ export const AI_MODELS: AIModel[] = [
   { id: 'institute-of-science-tokyo/llama-3.1-swallow-70b-instruct-v0.1', name: 'Llama Swallow 70B (JP)', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
   { id: 'tokyotech-llm/llama-3-swallow-70b-instruct-v0.1', name: 'Llama Swallow 70B (TT)', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
   { id: 'yentinglin/llama-3-taiwan-70b-instruct', name: 'Llama Taiwan 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
-
-  // ==========================================
-  // NVIDIA NIM - Tier 2: High-End MoE (40B-90B)
-  // ==========================================
   { id: 'qwen/qwen3-coder-480b-a35b-instruct', name: 'Qwen3 Coder 480B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.002, costPer1kOutput: 0.002 },
   { id: 'meta/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 32768, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.0006 },
   { id: 'nvidia/llama-3.3-nemotron-super-49b-v1.5', name: 'Nemotron Super 49B v1.5', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.001, costPer1kOutput: 0.001 },
@@ -106,10 +68,6 @@ export const AI_MODELS: AIModel[] = [
   { id: 'moonshotai/kimi-k2-instruct', name: 'Kimi K2 Instruct', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
   { id: 'mistralai/mistral-small-3.1-24b-instruct-2503', name: 'Mistral Small 3.1 24B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
   { id: 'mistralai/mistral-small-24b-instruct', name: 'Mistral Small 24B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-
-  // ==========================================
-  // NVIDIA NIM - Tier 3: Workhorses (8B-15B)
-  // ==========================================
   { id: 'mistralai/mixtral-8x7b-instruct-v0.1', name: 'Mixtral 8x7B', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00024, costPer1kOutput: 0.00024 },
   { id: 'mistralai/magistral-small-2506', name: 'Magistral Small', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
   { id: 'microsoft/phi-4-multimodal-instruct', name: 'Phi-4 Multimodal', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
@@ -142,10 +100,6 @@ export const AI_MODELS: AIModel[] = [
   { id: 'nvidia/nemotron-3-super-120b-a12b', name: 'Nemotron 3 Super 120B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
   { id: 'nvidia/nemotron-3-nano-30b-a3b', name: 'Nemotron 3 Nano 30B', provider: 'nvidia', maxContextTokens: 65536, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0002, costPer1kOutput: 0.0002 },
   { id: 'nvidia/nemotron-nano-12b-v2-vl', name: 'Nemotron Nano 12B VL', provider: 'nvidia', maxContextTokens: 32768, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
-
-  // ==========================================
-  // NVIDIA NIM - Tier 4: Niche/Vision/Older
-  // ==========================================
   { id: 'abacusai/dracarys-llama-3.1-70b-instruct', name: 'Dracarys Llama 70B', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0007, costPer1kOutput: 0.0007 },
   { id: 'meta/llama-3.2-90b-vision-instruct', name: 'Llama 3.2 90B Vision', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.0008, costPer1kOutput: 0.0008 },
   { id: 'meta/llama-3.2-11b-vision-instruct', name: 'Llama 3.2 11B Vision', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: true, costPer1kInput: 0.00015, costPer1kOutput: 0.00015 },
@@ -178,10 +132,6 @@ export const AI_MODELS: AIModel[] = [
   { id: 'microsoft/phi-3-mini-128k-instruct', name: 'Phi-3 Mini 128K', provider: 'nvidia', maxContextTokens: 131072, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
   { id: 'microsoft/phi-3-mini-4k-instruct', name: 'Phi-3 Mini 4K', provider: 'nvidia', maxContextTokens: 4096, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.00005, costPer1kOutput: 0.00005 },
   { id: 'nvidia/llama3-chatqa-1.5-8b', name: 'Llama3 ChatQA 8B', provider: 'nvidia', maxContextTokens: 16384, maxOutputTokens: 4096, supportsStreaming: true, supportsVision: false, costPer1kInput: 0.0001, costPer1kOutput: 0.0001 },
-
-  // ==========================================
-  // Local LLMs (Ollama, LM Studio, llama.cpp, etc.)
-  // ==========================================
   { id: 'local-custom', name: 'Local Model (Custom)', provider: 'local', maxContextTokens: 8192, maxOutputTokens: 2048, supportsStreaming: true, supportsVision: false, costPer1kInput: 0, costPer1kOutput: 0 },
 ];
 
@@ -193,18 +143,96 @@ export function getModelInfo(modelId: string): AIModel | undefined {
   return AI_MODELS.find(m => m.id === modelId);
 }
 
-// ---- Message type ----
 export type ChatMessage = { role: string; content: string };
 
-// ============================================================
-// Build System Prompt
-// ============================================================
-// Design goals:
-//   1. Token-efficient — only emit sections that have content
-//   2. Immersive roleplay framing that works across all models
-//   3. Concrete formatting rules stated once, not repeated
-//   4. Memory + summary injected at the end (closest to the new turn = highest attention)
-// ============================================================
+// ── Token estimation ──────────────────────────────────────────────────────────
+
+const CJK_REGEX = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
+const UNICODE_SYMBOL_REGEX = /[^\s\w\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
+
+export function estimateTokens(text: string): number {
+  if (!text) return 0;
+  const cjkCount = (text.match(CJK_REGEX) ?? []).length;
+  const wordCount = text.replace(CJK_REGEX, ' ').trim().split(/\s+/).filter(Boolean).length;
+  return Math.ceil(wordCount * 0.75 + cjkCount * 1.5);
+}
+
+export function estimateTokensEnhanced(text: string): number {
+  if (!text) return 0;
+  const cjkCount = (text.match(CJK_REGEX) ?? []).length;
+  const unicodeCount = (text.replace(CJK_REGEX, '').match(UNICODE_SYMBOL_REGEX) ?? []).length;
+  const wordCount = text.replace(CJK_REGEX, '').replace(UNICODE_SYMBOL_REGEX, '').trim().split(/\s+/).filter(Boolean).length;
+  return Math.ceil(wordCount * 0.75 + cjkCount * 1.5 + unicodeCount * 1.2);
+}
+
+export function estimateMessageTokens(messages: ChatMessage[]): number {
+  if (!messages?.length) return 0;
+  return messages.reduce((sum, m) => sum + estimateTokens(m.content ?? '') + 4, 0);
+}
+
+function truncateTextToTokens(text: string, maxTokens: number): string {
+  if (estimateTokens(text) <= maxTokens) return text;
+  const words = text.split(/\s+/);
+  const kept: string[] = [];
+  let budget = maxTokens;
+  for (const word of words) {
+    const cost = estimateTokens(word) + 1;
+    if (cost > budget) break;
+    kept.push(word);
+    budget -= cost;
+  }
+  return kept.join(' ') + (kept.length < words.length ? ' \u2026' : '');
+}
+
+// ── Smart context truncation ──────────────────────────────────────────────────
+
+export function truncateMessagesToContext(
+  messages: ChatMessage[],
+  maxContextTokens: number,
+  maxOutputTokens: number,
+  safetyMarginTokens = 256,
+): ChatMessage[] {
+  const budget = maxContextTokens - maxOutputTokens - safetyMarginTokens;
+  if (budget <= 0) return messages;
+
+  const systemMessages = messages.filter(m => m.role === 'system');
+  const chatMessages = messages.filter(m => m.role !== 'system');
+
+  const systemTokens = systemMessages.reduce((s, m) => s + estimateTokens(m.content) + 4, 0);
+  let remaining = budget - systemTokens;
+
+  if (remaining <= 0) return systemMessages;
+
+  const kept: ChatMessage[] = [];
+  for (let i = chatMessages.length - 1; i >= 0; i--) {
+    const msg = chatMessages[i];
+    const cost = estimateTokens(msg.content) + 4;
+    if (cost > remaining) {
+      if (i === chatMessages.length - 1 && msg.role === 'user') {
+        const hardLimit = Math.max(remaining - 4, 50);
+        const truncatedContent = truncateTextToTokens(msg.content, hardLimit);
+        kept.unshift({ ...msg, content: truncatedContent });
+      }
+      break;
+    }
+    kept.unshift(msg);
+    remaining -= cost;
+  }
+
+  while (kept.length > 0 && kept[0].role === 'assistant') {
+    kept.shift();
+  }
+
+  if (kept.length === 0 && chatMessages.length > 0) {
+    const last = chatMessages[chatMessages.length - 1];
+    kept.push(last.role === 'user' ? last : { role: 'user', content: '(Continue)' });
+  }
+
+  return [...systemMessages, ...kept];
+}
+
+// ── System prompt builder ─────────────────────────────────────────────────────
+
 export function buildSystemPrompt(
   character: Character,
   settings: AppSettings,
@@ -213,26 +241,18 @@ export function buildSystemPrompt(
 ): string {
   const sections: string[] = [];
 
-  // ── Optional operator-level overrides ───────────────────────
-  if (settings.jailbreakPrompt?.trim()) {
-    sections.push(settings.jailbreakPrompt.trim());
-  }
-  if (settings.customSystemPrompt?.trim()) {
-    sections.push(settings.customSystemPrompt.trim());
-  }
+  if (settings.jailbreakPrompt?.trim()) sections.push(settings.jailbreakPrompt.trim());
+  if (settings.customSystemPrompt?.trim()) sections.push(settings.customSystemPrompt.trim());
 
-  // ── User persona (only emit lines that exist) ────────────────
   const persona = settings.userPersona;
   const hasPersonaName = persona?.name?.trim() && persona.name.trim() !== 'You';
   const userLines: string[] = ['[User]'];
-  if (hasPersonaName) userLines.push(`Name: ${persona.name.trim()}`);
+  if (hasPersonaName) userLines.push(`Name: ${persona!.name.trim()}`);
   if (persona?.description?.trim()) userLines.push(`Description: ${persona.description.trim()}`);
   if (persona?.personality?.trim()) userLines.push(`Personality: ${persona.personality.trim()}`);
   if (persona?.speechPatterns?.trim()) userLines.push(`Speech style: ${persona.speechPatterns.trim()}`);
-  // Only include the user block if there's at least one field beyond the header
   if (userLines.length > 1) sections.push(userLines.join('\n'));
 
-  // ── Character card ───────────────────────────────────────────
   const charLines: string[] = [`[Character: ${character.name}]`];
   if (character.description?.trim()) charLines.push(`Appearance/background: ${character.description.trim()}`);
   if (character.personality?.trim()) charLines.push(`Personality: ${character.personality.trim()}`);
@@ -245,43 +265,47 @@ export function buildSystemPrompt(
   if (character.scenario?.trim()) charLines.push(`\nScenario: ${character.scenario.trim()}`);
   sections.push(charLines.join('\n'));
 
-  // ── Example dialogue ─────────────────────────────────────────
   if (character.exampleMessages?.trim()) {
     sections.push(`[Example dialogue]\n${character.exampleMessages.trim()}`);
   }
 
-  // ── Core roleplay instructions ────────────────────────────────
-  // Kept tight: no redundancy, no restating the same rule two ways.
-  // Positive framing ("do X") preferred over negative ("don't do Y") where possible.
   sections.push(`[Roleplay rules]
-You ARE ${character.name}. Embody them completely — their voice, mannerisms, desires, flaws.
-• Stay in character at all times. Never reference being an AI or break the fourth wall.
-• Remember the user's persona details above and address them naturally in character.
-• Advance the story: introduce new beats, reveal emotion through action, avoid restating what was just said.
-• Write 1–3 paragraphs per response. Be vivid and purposeful, never padded.
-• No meta-commentary, reasoning traces, or out-of-character notes.
+You ARE ${character.name}. Embody them completely \u2014 voice, mannerisms, desires, flaws, contradictions.
+\u2022 Never break character, reference being an AI, or add out-of-character notes.
+\u2022 Address the user's persona naturally; let the relationship shape every line.
+
+[Response length \u2014 STRICT]
+\u2022 Mirror the user's message length and energy. Short user message = short reply (2\u20134 sentences). Long user message = up to 2 paragraphs max.
+\u2022 NEVER write more than 3 paragraphs regardless of context. Cut ruthlessly.
+\u2022 If you find yourself summarising what just happened, DELETE that paragraph \u2014 move forward instead.
+
+[Anti-repetition \u2014 MANDATORY]
+\u2022 Do not repeat, echo, or paraphrase any phrase from your own previous reply or the user's last message.
+\u2022 Write your final sentence, then check: does it restate anything already said? If yes, rewrite it.
+\u2022 Your response MUST end with a single clean sentence. No trailing ellipsis, no looping back to the opening.
+\u2022 Never end by repeating the closing words of a sentence character-by-character.
+
+[Tone adaptation]
+\u2022 Read the user's message style: casual/playful \u2192 relax the character's guard; tense/serious \u2192 heighten stakes; short/clipped \u2192 match the pace.
+\u2022 Let the user drive the scene tempo. React; don't lecture or over-explain.
 
 [Formatting]
-• *italics* for physical actions and internal feelings
-• "double quotes" for spoken dialogue
-• **bold** for emphasis or dramatic beats
-• Never use single quotes for speech`);
+\u2022 *italics* for physical actions and internal feelings \u2014 keep them short and purposeful
+\u2022 "double quotes" for all spoken dialogue
+\u2022 **bold** only for a single moment of genuine dramatic weight per reply \u2014 use sparingly
+\u2022 Never use single quotes for speech
+\u2022 Every reply must contain both action and dialogue unless the scene explicitly calls for silence`);
 
-  // ── Conversation summary (context anchor) ────────────────────
-  if (summary?.trim()) {
-    sections.push(`[Story so far]\n${summary.trim()}`);
-  }
+  if (summary?.trim()) sections.push(`[Story so far]\n${summary.trim()}`);
 
-  // ── Memories (injected last for highest model attention) ──────
   const validMemories = (memories ?? []).map(m => m?.trim()).filter(Boolean);
-  if (validMemories.length > 0) {
-    sections.push(`[Key memories]\n${validMemories.join('\n')}`);
-  }
+  if (validMemories.length > 0) sections.push(`[Key memories]\n${validMemories.join('\n')}`);
 
   return sections.join('\n\n');
 }
 
-// ---- Streaming ----
+// ── Streaming types ───────────────────────────────────────────────────────────
+
 export interface StreamCallbacks {
   onToken: (token: string) => void;
   onDone: (fullText: string) => void;
@@ -289,10 +313,8 @@ export interface StreamCallbacks {
   onThinking?: (text: string) => void;
 }
 
-/**
- * Stream a chat response from the AI provider.
- * ALL calls are made DIRECTLY from the browser (client-side).
- */
+// ── Main streaming entry point ────────────────────────────────────────────────
+
 export async function streamChatResponse(
   settings: AppSettings,
   messages: ChatMessage[],
@@ -300,6 +322,10 @@ export async function streamChatResponse(
   callbacks?: StreamCallbacks,
 ): Promise<string> {
   if (signal?.aborted) return '';
+
+  console.log('[streamChatResponse] DEBUG: streamingEnabled:', settings.streamingEnabled);
+  console.log('[streamChatResponse] DEBUG: provider:', settings.activeProvider);
+  console.log('[streamChatResponse] DEBUG: model:', settings.activeModel);
 
   if (!messages?.length) {
     callbacks?.onError('No messages provided to streamChatResponse.');
@@ -317,13 +343,17 @@ export async function streamChatResponse(
     return '';
   }
 
-  const requiresKey = settings.activeProvider !== 'local';
-  if (requiresKey && !providerConfig.apiKey?.trim()) {
+  if (settings.activeProvider !== 'local' && !providerConfig.apiKey?.trim()) {
     callbacks?.onError(
       `API key for ${settings.activeProvider} is empty. Add your API key in Settings.`,
     );
     return '';
   }
+
+  const modelInfo = getModelInfo(settings.activeModel);
+  const processedMessages = modelInfo
+    ? truncateMessagesToContext(messages, modelInfo.maxContextTokens, modelInfo.maxOutputTokens)
+    : messages;
 
   const provider = settings.activeProvider;
   const apiKey = providerConfig.apiKey ?? '';
@@ -334,27 +364,27 @@ export async function streamChatResponse(
 
     switch (provider) {
       case 'groq':
-        request = buildGroqRequest(settings, apiKey, messages);
+        request = buildGroqRequest(settings, apiKey, processedMessages);
         break;
       case 'openai':
       case 'openrouter':
       case 'custom':
-        request = buildOpenAIRequest(provider, baseUrl, settings, apiKey, messages);
+        request = buildOpenAIRequest(provider, baseUrl, settings, apiKey, processedMessages);
         break;
       case 'anthropic':
-        request = buildAnthropicRequest(baseUrl, settings, apiKey, messages);
+        request = buildAnthropicRequest(baseUrl, settings, apiKey, processedMessages);
         break;
       case 'google':
-        request = buildGoogleRequest(baseUrl, settings, apiKey, messages);
+        request = buildGoogleRequest(baseUrl, settings, apiKey, processedMessages);
         break;
       case 'mistral':
-        request = buildMistralRequest(baseUrl, settings, apiKey, messages);
+        request = buildMistralRequest(baseUrl, settings, apiKey, processedMessages);
         break;
       case 'nvidia':
-        request = buildNvidiaRequest(baseUrl, settings, apiKey, messages);
+        request = buildNvidiaRequest(baseUrl, settings, apiKey, processedMessages);
         break;
       case 'local':
-        request = buildLocalRequest(baseUrl, settings, messages);
+        request = buildLocalRequest(baseUrl, settings, processedMessages);
         break;
       default:
         callbacks?.onError(`Provider "${provider}" is not supported.`);
@@ -362,7 +392,6 @@ export async function streamChatResponse(
     }
 
     const response = await fetch(request, { signal });
-
     if (signal?.aborted) return '';
 
     if (!response.ok) {
@@ -377,8 +406,10 @@ export async function streamChatResponse(
       return '';
     }
 
-    const data = await response.json();
+    const data = await response.json() as Record<string, unknown>;
+    console.log('[streamChatResponse] DEBUG: non-streaming response keys:', Object.keys(data));
     const text = extractTextFromResponse(data, provider);
+    console.log('[streamChatResponse] DEBUG: extracted text:', text ? `"${text.slice(0, 100)}..."` : '(empty)');
     callbacks?.onToken(text);
     callbacks?.onDone(text);
     return text;
@@ -389,15 +420,16 @@ export async function streamChatResponse(
   }
 }
 
-// ---- Error helpers ----
+// ── Error helpers ─────────────────────────────────────────────────────────────
 
 async function parseErrorResponse(response: Response): Promise<string> {
   try {
-    const errData = await response.json();
+    const errData = await response.json() as Record<string, unknown>;
+    const nested = errData?.error as Record<string, unknown> | undefined;
     return (
-      errData?.error?.message ||
-      errData?.error?.code ||
-      errData?.message ||
+      (typeof nested?.message === 'string' ? nested.message : undefined) ??
+      (typeof nested?.code === 'string' ? nested.code : undefined) ??
+      (typeof errData?.message === 'string' ? errData.message : undefined) ??
       JSON.stringify(errData)
     );
   } catch {
@@ -409,25 +441,25 @@ async function parseErrorResponse(response: Response): Promise<string> {
 function buildErrorHint(provider: string, status: number): string {
   if (status === 401 || status === 403) return getAuthErrorHint(provider);
   if (status === 404) return '\n\nCheck the model ID in Settings.';
-  if (status === 429) return '\n\nRate limited — wait a moment and retry.';
+  if (status === 429) return '\n\nRate limited \u2014 wait a moment and retry.';
   if (status >= 500) return '\n\nServer error on the provider side. Try again shortly.';
   return '';
 }
 
 function getAuthErrorHint(provider: string): string {
   const hints: Record<string, string> = {
-    groq: '\n\n💡 Key should start with "gsk_" — get one at https://console.groq.com/keys',
-    anthropic: '\n\n💡 Get your key at https://console.anthropic.com/',
-    google: '\n\n💡 Get your key at https://aistudio.google.com/apikey',
-    openai: '\n\n💡 Get your key at https://platform.openai.com/api-keys',
-    nvidia: '\n\n💡 Get your key at https://build.nvidia.com/',
-    mistral: '\n\n💡 Get your key at https://console.mistral.ai/',
-    local: '\n\n💡 Make sure your local server is running (Ollama, LM Studio, etc.)',
+    groq: '\n\n\uD83D\uDCA1 Key should start with "gsk_" \u2014 get one at https://console.groq.com/keys',
+    anthropic: '\n\n\uD83D\uDCA1 Get your key at https://console.anthropic.com/',
+    google: '\n\n\uD83D\uDCA1 Get your key at https://aistudio.google.com/apikey',
+    openai: '\n\n\uD83D\uDCA1 Get your key at https://platform.openai.com/api-keys',
+    nvidia: '\n\n\uD83D\uDCA1 Get your key at https://build.nvidia.com/',
+    mistral: '\n\n\uD83D\uDCA1 Get your key at https://console.mistral.ai/',
+    local: '\n\n\uD83D\uDCA1 Make sure your local server is running (Ollama, LM Studio, etc.)',
   };
-  return hints[provider] ?? '\n\n💡 Check that your API key is valid.';
+  return hints[provider] ?? '\n\n\uD83D\uDCA1 Check that your API key is valid.';
 }
 
-// ---- Request builders ----
+// ── Request builders ──────────────────────────────────────────────────────────
 
 function buildGroqRequest(settings: AppSettings, apiKey: string, messages: ChatMessage[]): Request {
   const body: Record<string, unknown> = {
@@ -437,7 +469,6 @@ function buildGroqRequest(settings: AppSettings, apiKey: string, messages: ChatM
     max_tokens: settings.maxTokens ?? 1024,
     top_p: settings.topP ?? 0.9,
     stream: settings.streamingEnabled,
-    // Groq does NOT support frequency_penalty / presence_penalty
   };
   return new Request('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
@@ -487,18 +518,15 @@ function buildAnthropicRequest(
   const systemMsg = messages.find(m => m.role === 'system');
   const nonSystem = messages.filter(m => m.role !== 'system');
 
-  // Map to user/assistant; default unknown roles to 'user'
   const chatMessages = nonSystem.map(m => ({
     role: m.role === 'assistant' ? 'assistant' as const : 'user' as const,
     content: m.content,
   }));
 
-  // Anthropic requires first message = user
   if (chatMessages.length > 0 && chatMessages[0].role === 'assistant') {
     chatMessages.unshift({ role: 'user', content: '(Continue)' });
   }
 
-  // Merge consecutive same-role messages
   const merged: { role: 'user' | 'assistant'; content: string }[] = [];
   for (const msg of chatMessages) {
     const last = merged[merged.length - 1];
@@ -508,6 +536,8 @@ function buildAnthropicRequest(
       merged.push({ ...msg });
     }
   }
+
+  if (merged.length === 0) merged.push({ role: 'user', content: '(Begin)' });
 
   const body: Record<string, unknown> = {
     model: settings.activeModel,
@@ -540,7 +570,6 @@ function buildGoogleRequest(
   const systemMsg = messages.find(m => m.role === 'system');
   const nonSystem = messages.filter(m => m.role !== 'system');
 
-  // Map and merge consecutive same-role turns (Google requires strict alternation)
   const rawContents = nonSystem.map(m => ({
     role: m.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: m.content }],
@@ -556,8 +585,7 @@ function buildGoogleRequest(
     }
   }
 
-  // Google requires first content to be 'user'
-  if (contents.length > 0 && contents[0].role !== 'user') {
+  if (contents.length === 0 || contents[0].role !== 'user') {
     contents.unshift({ role: 'user', parts: [{ text: '(Continue)' }] });
   }
 
@@ -575,10 +603,10 @@ function buildGoogleRequest(
 
   const encodedModel = encodeURIComponent(settings.activeModel);
   const endpoint = settings.streamingEnabled ? 'streamGenerateContent' : 'generateContent';
-  const altSse = settings.streamingEnabled ? '&alt=sse' : '';
+  const altParam = settings.streamingEnabled ? '&alt=sse' : '';
 
   return new Request(
-    `${base}/models/${encodedModel}:${endpoint}?key=${encodeURIComponent(apiKey)}${altSse}`,
+    `${base}/models/${encodedModel}:${endpoint}?key=${encodeURIComponent(apiKey)}${altParam}`,
     { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) },
   );
 }
@@ -606,13 +634,15 @@ function buildMistralRequest(
   });
 }
 
+// FIX: Use /\/*$/ to strip ALL trailing slashes before appending one,
+// preventing double-slash URLs when baseUrl already has a trailing slash.
 function buildNvidiaRequest(
   baseUrl: string | undefined,
   settings: AppSettings,
   apiKey: string,
   messages: ChatMessage[],
 ): Request {
-  const url = baseUrl || 'https://roleplay.jameskaren.workers.dev/';
+  const url = (baseUrl || 'https://roleplay.jameskaren.workers.dev').replace(/\/*$/, '') + '/';
   const body: Record<string, unknown> = {
     model: settings.activeModel,
     messages,
@@ -650,7 +680,22 @@ function buildLocalRequest(
   });
 }
 
-// ---- Universal SSE Stream Parser ----
+// ── SSE stream parser ─────────────────────────────────────────────────────────
+//
+// NVIDIA delta rewriting is now handled entirely by the Cloudflare worker.
+// The client receives true deltas from nvidia just like every other OpenAI-
+// compatible provider. The StreamCursors interface is kept only for Google
+// Gemini, which still sends cumulative content on the client side.
+
+interface StreamCursors {
+  // Google Gemini sends full accumulated text in every chunk; track position.
+  googleCumulative: number;
+}
+
+function makeCursors(): StreamCursors {
+  return { googleCumulative: 0 };
+}
+
 async function parseSSEStream(
   response: Response,
   provider: string,
@@ -666,39 +711,45 @@ async function parseSSEStream(
   const decoder = new TextDecoder();
   let fullText = '';
   let buffer = '';
-  let done = false;
+  const cursors = makeCursors();
 
-  const abortHandler = () => { reader.cancel().catch(() => { }); };
+  const abortHandler = () => { reader.cancel().catch(() => undefined); };
   signal?.addEventListener('abort', abortHandler);
 
   try {
-    while (!done) {
+    outer: while (true) {
       if (signal?.aborted) break;
 
-      const result = await reader.read();
-      done = result.done;
-      if (result.done) break;
+      const { done, value } = await reader.read();
+      if (done) break;
 
-      buffer += decoder.decode(result.value, { stream: true });
-
+      buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() ?? '';
 
       for (const line of lines) {
-        if (signal?.aborted) break;
+        if (signal?.aborted) break outer;
 
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith(':') || trimmed.startsWith('event:')) continue;
         if (!trimmed.startsWith('data:')) continue;
 
-        const dataStr = trimmed.startsWith('data: ') ? trimmed.slice(6) : trimmed.slice(5);
-        if (dataStr === '[DONE]') { callbacks?.onDone(fullText); return; }
+        const dataStr = trimmed.slice(trimmed.startsWith('data: ') ? 6 : 5);
+        if (dataStr === '[DONE]') {
+          callbacks?.onDone(fullText);
+          return;
+        }
 
         let parsed: Record<string, unknown>;
-        try { parsed = JSON.parse(dataStr); }
-        catch { continue; }
+        try { parsed = JSON.parse(dataStr) as Record<string, unknown>; }
+        catch { 
+          console.log('[parseSSEStream] DEBUG: failed to parse JSON, dataStr:', dataStr.slice(0, 200));
+          continue; 
+        }
 
-        const token = extractTokenFromChunk(parsed, provider);
+        console.log('[parseSSEStream] DEBUG: parsed chunk keys:', Object.keys(parsed));
+        const token = extractTokenFromChunk(parsed, provider, cursors);
+        console.log('[parseSSEStream] DEBUG: token extracted:', token ? `"${token.slice(0, 50)}..."` : '(empty)');
         if (token) { fullText += token; callbacks?.onToken(token); }
 
         const reasoning = extractReasoningFromChunk(parsed);
@@ -706,22 +757,21 @@ async function parseSSEStream(
       }
     }
 
-    // Flush remaining buffer
+    // Flush remaining buffer.
     const remaining = buffer.trim();
     if (remaining && !signal?.aborted) {
-      const dataStr = remaining.startsWith('data: ')
-        ? remaining.slice(6)
-        : remaining.startsWith('data:')
-          ? remaining.slice(5)
-          : null;
+      let dataStr: string | null = null;
+      if (remaining.startsWith('data: ')) dataStr = remaining.slice(6);
+      else if (remaining.startsWith('data:')) dataStr = remaining.slice(5);
+
       if (dataStr && dataStr !== '[DONE]') {
         try {
-          const parsed = JSON.parse(dataStr);
-          const token = extractTokenFromChunk(parsed, provider);
+          const parsed = JSON.parse(dataStr) as Record<string, unknown>;
+          const token = extractTokenFromChunk(parsed, provider, cursors);
           if (token) { fullText += token; callbacks?.onToken(token); }
           const reasoning = extractReasoningFromChunk(parsed);
           if (reasoning) callbacks?.onThinking?.(reasoning);
-        } catch { /* malformed — skip */ }
+        } catch { /* malformed — discard */ }
       }
     }
 
@@ -738,12 +788,10 @@ async function parseSSEStream(
   }
 }
 
-/**
- * Extract reasoning/thinking content from a streaming chunk.
- * Supports OpenAI-style reasoning_content and Anthropic thinking_delta.
- */
+// ── Chunk token extractors ────────────────────────────────────────────────────
+
 function extractReasoningFromChunk(chunk: Record<string, unknown>): string {
-  // OpenAI-compatible reasoning delta (NVIDIA NIM, DeepSeek, some OpenRouter models)
+  // OpenAI-compatible reasoning_content (DeepSeek, some OpenRouter models).
   if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
     const delta = (chunk.choices[0] as Record<string, unknown>)?.delta as Record<string, unknown> | undefined;
     if (typeof delta?.reasoning_content === 'string' && delta.reasoning_content) {
@@ -751,7 +799,7 @@ function extractReasoningFromChunk(chunk: Record<string, unknown>): string {
     }
   }
 
-  // Anthropic thinking_delta
+  // Anthropic extended thinking delta.
   if (chunk.type === 'content_block_delta' && chunk.delta !== null && typeof chunk.delta === 'object') {
     const delta = chunk.delta as Record<string, unknown>;
     if (delta.type === 'thinking_delta' && typeof delta.thinking === 'string') {
@@ -762,26 +810,38 @@ function extractReasoningFromChunk(chunk: Record<string, unknown>): string {
   return '';
 }
 
-/** Extract a text token from a single SSE chunk across all supported provider formats. */
-function extractTokenFromChunk(chunk: Record<string, unknown>, _provider: string): string {
-  // OpenAI-compatible (Groq, OpenAI, Mistral, OpenRouter, NVIDIA, custom, local)
+function extractTokenFromChunk(
+  chunk: Record<string, unknown>,
+  provider: string,
+  cursors: StreamCursors,
+): string {
+  // OpenAI-compatible delta — Groq, OpenAI, Mistral, OpenRouter, and NVIDIA.
+  // NVIDIA's Cloudflare worker rewrites its cumulative chunks to true deltas,
+  // so no special handling is needed here. All these providers send true deltas.
   if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
-    const delta = (chunk.choices[0] as Record<string, unknown>)?.delta as Record<string, unknown> | undefined;
-    return typeof delta?.content === 'string' ? delta.content : '';
+    const choice = chunk.choices[0] as Record<string, unknown>;
+    const delta = choice?.delta as Record<string, unknown> | undefined;
+    if (typeof delta?.content === 'string') {
+      return delta.content;
+    }
+    return '';
   }
 
-  // Anthropic Messages API — text_delta
+  // Anthropic Messages streaming — true delta.
   if (chunk.type === 'content_block_delta') {
     const delta = chunk.delta as Record<string, unknown> | undefined;
-    return delta?.type === 'text_delta' && typeof delta.text === 'string' ? delta.text : '';
+    if (delta?.type === 'text_delta' && typeof delta.text === 'string') return delta.text;
+    return '';
   }
 
-  // Google Gemini SSE
+  // Google Gemini SSE — cumulative snapshots; slice to emit only the new suffix.
   if (Array.isArray(chunk.candidates) && chunk.candidates.length > 0) {
     const content = (chunk.candidates[0] as Record<string, unknown>)?.content as Record<string, unknown> | undefined;
-    if (content && Array.isArray(content.parts) && content.parts.length > 0) {
-      const text = (content.parts[0] as { text?: string }).text;
-      return typeof text === 'string' ? text : '';
+    if (Array.isArray(content?.parts) && (content.parts as unknown[]).length > 0) {
+      const full = (content.parts as Array<{ text?: string }>).map(p => p.text ?? '').join('');
+      const newText = full.slice(cursors.googleCumulative);
+      cursors.googleCumulative = full.length;
+      return newText;
     }
     return '';
   }
@@ -789,15 +849,14 @@ function extractTokenFromChunk(chunk: Record<string, unknown>, _provider: string
   return '';
 }
 
-/** Extract full text from a non-streaming JSON response across all supported provider formats. */
 function extractTextFromResponse(data: Record<string, unknown>, _provider: string): string {
-  // OpenAI-compatible
+  // OpenAI-compatible (Groq, OpenAI, Mistral, NVIDIA, local, custom).
   if (Array.isArray(data.choices) && data.choices.length > 0) {
     const message = (data.choices[0] as Record<string, unknown>)?.message as Record<string, unknown> | undefined;
     return typeof message?.content === 'string' ? message.content : '';
   }
 
-  // Anthropic
+  // Anthropic Messages API (non-streaming).
   if (Array.isArray(data.content)) {
     return (data.content as Array<{ type: string; text?: string }>)
       .filter(c => c.type === 'text')
@@ -805,10 +864,10 @@ function extractTextFromResponse(data: Record<string, unknown>, _provider: strin
       .join('');
   }
 
-  // Google
+  // Google Gemini (non-streaming).
   if (Array.isArray(data.candidates) && data.candidates.length > 0) {
     const content = (data.candidates[0] as Record<string, unknown>)?.content as Record<string, unknown> | undefined;
-    if (content && Array.isArray(content.parts)) {
+    if (Array.isArray(content?.parts)) {
       return (content.parts as Array<{ text?: string }>).map(p => p.text ?? '').join('');
     }
   }
@@ -816,74 +875,33 @@ function extractTextFromResponse(data: Record<string, unknown>, _provider: strin
   return '';
 }
 
-// ============================================================
-// Token estimation
-// ============================================================
+// ── Character generation ──────────────────────────────────────────────────────
 
-/** Fast token estimator — handles CJK, emoji/Unicode, and Latin text. */
-export function estimateTokens(text: string): number {
-  if (!text) return 0;
+// FIX: Restored the correct prompt. The previous version had a corrupted string
+// that embedded raw source code into the constant value.
+const CHARACTER_GENERATION_PROMPT = `You are a creative writer specializing in immersive roleplay characters. Output ONLY valid JSON \u2014 no markdown fences, no preamble, no explanation.
 
-  const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
-  const cjkCount = (text.match(cjkRegex) ?? []).length;
-
-  const withoutCJK = text.replace(cjkRegex, ' ');
-  const wordCount = withoutCJK.trim() ? withoutCJK.trim().split(/\s+/).length : 0;
-
-  // ~0.75 tokens/English word, ~1.5 tokens/CJK character
-  return Math.ceil(wordCount * 0.75 + cjkCount * 1.5);
-}
-
-/** Extended estimator that also weights emoji/non-ASCII symbols separately. */
-export function estimateTokensEnhanced(text: string): number {
-  if (!text) return 0;
-
-  const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
-  const cjkCount = (text.match(cjkRegex) ?? []).length;
-
-  const unicodeRegex = /[^\s\w\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g;
-  const unicodeCount = (text.match(unicodeRegex) ?? []).length;
-
-  const stripped = text.replace(cjkRegex, '').replace(unicodeRegex, '');
-  const wordCount = stripped.trim() ? stripped.trim().split(/\s+/).length : 0;
-
-  return Math.ceil(wordCount * 0.75 + cjkCount * 1.5 + unicodeCount * 1.2);
-}
-
-export function estimateMessageTokens(messages: ChatMessage[]): number {
-  if (!messages?.length) return 0;
-  // +4 per message accounts for role/turn overhead in most tokenizers
-  return messages.reduce((sum, m) => sum + estimateTokens(m.content ?? '') + 4, 0);
-}
-
-// ============================================================
-// Character Generation
-// ============================================================
-
-// Improved: more concise prompt (fewer output tokens consumed on the instruction side),
-// richer first-message guidance, and clearer JSON schema description.
-const CHARACTER_GENERATION_PROMPT = `You are a creative writer specializing in immersive roleplay characters. Output ONLY valid JSON — no markdown fences, no explanation.
-
-Schema:
+Schema (all fields are strings unless noted):
 {
-  "name": "Distinctive, memorable name",
-  "description": "2 sentences: vivid physical appearance + brief background",
-  "personality": "2 sentences: core traits, internal contradictions, what drives them",
-  "knowledge": "2–3 sentences: skills, expertise, formative experiences",
-  "scenario": "1–2 sentences: where they are, what's happening right now",
-  "firstMessage": "3–5 sentences in character voice. Start mid-scene with *action*. Reveal personality through behavior, not exposition. End with something that invites the user to respond.",
-  "speechPatterns": "1–2 sentences: cadence, vocabulary, verbal tics, accent cues",
-  "likes": "1–2 sentences: specific, unexpected passions",
-  "dislikes": "1–2 sentences: genuine aversions that cause friction",
-  "behavior": "1–2 sentences: how they behave under pressure, what boundaries they have",
+  "name": "Distinctive, memorable name that fits their world",
+  "description": "2 sentences: vivid physical appearance + concrete background detail (job, origin, circumstance)",
+  "personality": "2\u20133 sentences: dominant trait, a meaningful flaw or contradiction, what secretly drives them",
+  "knowledge": "2 sentences: specific skills or expertise they actually use; formative experience that shaped them",
+  "scenario": "2 sentences: the precise physical location they are in right now, and what is actively happening around them when we meet them",
+  "firstMessage": "Opening message written entirely in the character's own voice. 3\u20135 sentences. MUST: start with a *physical action* rooted in the scenario location, contain at least one line of spoken dialogue in \\"double quotes\\", reveal a personality trait through behavior not narration, end with a hook that invites the user to respond. MUST NOT: introduce a new setting unrelated to scenario, repeat the same action twice, end on a trailing or echoing sentence.",
+  "speechPatterns": "2 sentences: specific cadence (clipped? verbose? formal?), signature vocabulary or verbal tic, any accent markers",
+  "likes": "2 sentences: specific, surprising passions that could drive plot",
+  "dislikes": "2 sentences: genuine aversions that create friction or conflict",
+  "behavior": "2 sentences: default social behavior + how they change under stress or threat",
   "tags": ["tag1","tag2","tag3","tag4","tag5"]
 }
 
-Rules:
-- Characters must have a flaw or contradiction — perfection is boring
-- First message must feel like the story has already started
-- Tags: lowercase, genre/archetype/mood, 4–6 total
-- JSON only`;
+Hard rules:
+- scenario and firstMessage MUST be consistent \u2014 the character is physically present in the scenario location
+- firstMessage must NOT be a generic greeting; it must feel like we arrived mid-scene
+- characters must have at least one flaw or inner conflict \u2014 perfection is unplayable
+- tags: 4\u20136 items, lowercase, genre/archetype/mood only
+- Output JSON only \u2014 no text before or after the object`;
 
 export interface GeneratedCharacter {
   name: string;
@@ -908,9 +926,15 @@ export async function generateCharacter(
   settings: AppSettings,
   options: GenerateCharacterOptions = {},
 ): Promise<GeneratedCharacter | null> {
+  console.log('[generateCharacter] DEBUG: Starting character generation');
+  console.log('[generateCharacter] DEBUG: activeProvider:', settings.activeProvider);
+  console.log('[generateCharacter] DEBUG: activeModel:', settings.activeModel);
+  
   const providerConfig = settings.providers?.find(
     p => p.provider === settings.activeProvider && p.enabled,
   );
+  console.log('[generateCharacter] DEBUG: providerConfig found:', !!providerConfig);
+  
   if (!providerConfig) {
     throw new Error(`No API key configured for ${settings.activeProvider}. Add one in Settings.`);
   }
@@ -925,37 +949,58 @@ export async function generateCharacter(
     { role: 'system', content: systemPrompt },
     { role: 'user', content: userPrompt?.trim() || 'Generate a unique, compelling character.' },
   ];
+  
+  console.log('[generateCharacter] DEBUG: messages prepared, count:', messages.length);
+  console.log('[generateCharacter] DEBUG: systemPrompt length:', systemPrompt.length);
 
   let fullText = '';
   let streamError: string | null = null;
 
-  await streamChatResponse(settings, messages, undefined, {
+  const nonStreamingSettings = { 
+    ...settings, 
+    streamingEnabled: false,
+    maxTokens: 4096,
+  };
+  
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000);
+
+  await streamChatResponse(nonStreamingSettings, messages, controller.signal, {
     onToken: token => { fullText += token; },
-    onDone: () => { },
+    onDone: () => undefined,
     onError: error => { streamError = error; },
   });
+  
+  clearTimeout(timeout);
+  
+  console.log('[generateCharacter] DEBUG: stream completed, fullText length:', fullText.length);
+  console.log('[generateCharacter] DEBUG: streamError:', streamError);
+  console.log('[generateCharacter] DEBUG: fullText raw:', fullText);
 
   if (streamError) throw new Error(`Character generation failed: ${streamError}`);
   if (!fullText.trim()) throw new Error('Character generation returned an empty response. Please try again.');
 
-  // Strip markdown fences if the model added them
-  let jsonStr = fullText.trim()
-    .replace(/^```json\s*/i, '')
-    .replace(/^```\s*/i, '')
-    .replace(/\s*```\s*$/i, '')
-    .trim();
-
-  const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error('Could not parse character data: no valid JSON object in response.');
+  const jsonStr = extractJsonObject(fullText);
+  console.log('[generateCharacter] DEBUG: jsonStr extracted:', jsonStr ? 'found' : 'null');
+  console.log('[generateCharacter] DEBUG: fullText after cleaning:', fullText.slice(0, 500));
+  if (jsonStr) {
+    console.log('[generateCharacter] DEBUG: jsonStr preview:', jsonStr.slice(0, 200));
+  }
+  
+  if (!jsonStr) {
+    const preview = fullText.length > 300 ? fullText.slice(0, 300) + '\u2026' : fullText;
+    throw new Error(
+      `Could not find a JSON object in the model's response. Raw output:\n\n${preview}\n\nTry again \u2014 some models occasionally ignore formatting instructions.`,
+    );
   }
 
   let parsed: Record<string, unknown>;
   try {
-    parsed = JSON.parse(jsonMatch[0]);
+    parsed = JSON.parse(jsonStr) as Record<string, unknown>;
   } catch (e) {
+    const preview = jsonStr.length > 300 ? jsonStr.slice(0, 300) + '\u2026' : jsonStr;
     throw new Error(
-      `Failed to parse character JSON: ${e instanceof Error ? e.message : 'Unknown error'}. Try again.`,
+      `Extracted JSON failed to parse (${e instanceof Error ? e.message : 'unknown error'}):\n\n${preview}\n\nTry again.`,
     );
   }
 
@@ -979,15 +1024,119 @@ export async function generateCharacter(
   };
 }
 
-// ============================================================
-// Image Prompt Enhancement
-// ============================================================
+// ── JSON extraction helper ────────────────────────────────────────────────────
+
+function extractJsonObject(raw: string): string | null {
+  let text = raw
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
+    .replace(/<\/?think>/gi, '')
+    .replace(/<\/?thinking>/gi, '')
+    .trim();
+
+  text = text.replace(/```(?:json)?\s*([\s\S]*?)```/gi, '$1').trim();
+  text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+  const trimmed = text.trim();
+  if (tryParse(trimmed)) return trimmed;
+
+  const candidate = extractByBraceWalk(text);
+  if (candidate) return candidate;
+
+  const repaired = attemptRepair(text);
+  if (repaired) return repaired;
+
+  return null;
+}
+
+function tryParse(s: string): boolean {
+  try { JSON.parse(s); return true; } catch { return false; }
+}
+
+function extractByBraceWalk(text: string): string | null {
+  const firstBrace = text.indexOf('{');
+  if (firstBrace === -1) return null;
+
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = firstBrace; i < text.length; i++) {
+    const ch = text[i];
+    if (escape) { escape = false; continue; }
+    if (ch === '\\' && inString) { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        const candidate = text.slice(firstBrace, i + 1);
+        if (tryParse(candidate)) return candidate;
+        const cleaned = removeTrailingCommas(candidate);
+        if (tryParse(cleaned)) return cleaned;
+      }
+    }
+  }
+
+  return null;
+}
+
+function removeTrailingCommas(s: string): string {
+  return s.replace(/,\s*([}\]])/g, '$1');
+}
+
+function attemptRepair(text: string): string | null {
+  const start = text.indexOf('{');
+  if (start === -1) return null;
+
+  const fragment = text.slice(start);
+  let inString = false;
+  let escape = false;
+  const stack: string[] = [];
+
+  for (let i = 0; i < fragment.length; i++) {
+    const ch = fragment[i];
+    if (escape) { escape = false; continue; }
+    if (ch === '\\' && inString) { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === '{') stack.push('}');
+    else if (ch === '[') stack.push(']');
+    else if (ch === '}' || ch === ']') stack.pop();
+  }
+
+  if (stack.length === 0) return null;
+
+  const suffix = (inString ? '"' : '') + stack.reverse().join('');
+  const repaired = removeTrailingCommas(fragment + suffix);
+  return tryParse(repaired) ? repaired : null;
+}
+
+// ── Image / text prompt enhancement ──────────────────────────────────────────
 
 interface EnhanceOptions {
-  /** Maximum characters for the final prompt (AI will be instructed to respect this) */
   maxChars?: number;
-  /** Model name shown to the AI so it can tailor its output style */
   model?: string;
+}
+
+async function runEnhancePrompt(settings: AppSettings, prompt: string): Promise<string> {
+  return new Promise<string>(resolve => {
+    let result = '';
+    const nonStreamingSettings = { ...settings, streamingEnabled: false };
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
+    streamChatResponse(
+      nonStreamingSettings,
+      [{ role: 'user', content: prompt }],
+      controller.signal,
+      {
+        onToken: token => { result += token; },
+        onDone: () => { clearTimeout(timeout); resolve(result.trim()); },
+        onError: () => { clearTimeout(timeout); resolve(''); },
+      },
+    );
+  });
 }
 
 export async function enhanceImagePrompt(
@@ -996,29 +1145,11 @@ export async function enhanceImagePrompt(
   context?: string,
   options?: EnhanceOptions,
 ): Promise<string> {
-  const contextClause = context ? ` Scene context: ${context}.` : '';
-  const limitClause = options?.maxChars
-    ? ` The final prompt MUST be ${options.maxChars} characters or fewer. Be concise — every word counts.`
-    : '';
-  const modelClause = options?.model
-    ? ` Target model: ${options.model}. Tailor terminology and style accordingly.`
-    : '';
-  const prompt =
-    `Rewrite the following image prompt to be more detailed and visually specific for an AI image generator.${contextClause}${modelClause} Add lighting, mood, composition, and quality keywords.${limitClause} Output the enhanced prompt only, no explanation.\n\nOriginal: "${userPrompt}"`;
-
-  return new Promise(resolve => {
-    let result = '';
-    streamChatResponse(
-      settings,
-      [{ role: 'user', content: prompt }],
-      undefined,
-      {
-        onToken: token => { result += token; },
-        onDone: () => { resolve(result.trim() || userPrompt); },
-        onError: () => { resolve(userPrompt); },
-      },
-    );
-  });
+  const contextClause = context?.trim() ? ` Scene context: ${context.trim()}.` : '';
+  const limitClause = options?.maxChars ? ` The final prompt MUST be ${options.maxChars} characters or fewer. Be concise \u2014 every word counts.` : '';
+  const modelClause = options?.model ? ` Target model: ${options.model}. Tailor terminology and style accordingly.` : '';
+  const prompt = `Rewrite the following image prompt to be more detailed and visually specific for an AI image generator.${contextClause}${modelClause} Add lighting, mood, composition, and quality keywords.${limitClause} Output the enhanced prompt only, no explanation.\n\nOriginal: "${userPrompt}"`;
+  return (await runEnhancePrompt(settings, prompt)) || userPrompt;
 }
 
 export async function enhanceTextPrompt(
@@ -1026,27 +1157,10 @@ export async function enhanceTextPrompt(
   text: string,
   options?: EnhanceOptions,
 ): Promise<string> {
-  const limitClause = options?.maxChars
-    ? ` The result MUST be ${options.maxChars} characters or fewer. Be concise.`
-    : '';
-  const modelClause = options?.model
-    ? ` Target model: ${options.model}. Tailor terminology and style accordingly.`
-    : '';
+  const limitClause = options?.maxChars ? ` The result MUST be ${options.maxChars} characters or fewer. Be concise.` : '';
+  const modelClause = options?.model ? ` Target model: ${options.model}. Tailor terminology and style accordingly.` : '';
   const prompt = `Enhance this text prompt for AI image generation. Make it more detailed and descriptive while keeping the original meaning.${modelClause}${limitClause} Output only the enhanced prompt, nothing else.\n\nOriginal: "${text}"`;
-
-  return new Promise(resolve => {
-    let result = '';
-    streamChatResponse(
-      settings,
-      [{ role: 'user', content: prompt }],
-      undefined,
-      {
-        onToken: token => { result += token; },
-        onDone: () => { resolve(result.trim() || text); },
-        onError: () => { resolve(text); },
-      },
-    );
-  });
+  return (await runEnhancePrompt(settings, prompt)) || text;
 }
 
 export async function enhanceCustomAvatarPrompt(
@@ -1054,25 +1168,8 @@ export async function enhanceCustomAvatarPrompt(
   text: string,
   options?: EnhanceOptions,
 ): Promise<string> {
-  const limitClause = options?.maxChars
-    ? ` The result MUST be ${options.maxChars} characters or fewer. Be concise — every word counts.`
-    : '';
-  const modelClause = options?.model
-    ? ` Target model: ${options.model}. Tailor terminology and style accordingly.`
-    : '';
+  const limitClause = options?.maxChars ? ` The result MUST be ${options.maxChars} characters or fewer. Be concise \u2014 every word counts.` : '';
+  const modelClause = options?.model ? ` Target model: ${options.model}. Tailor terminology and style accordingly.` : '';
   const prompt = `Make this avatar generation prompt more detailed and visually specific. Add lighting, style, composition, and quality keywords.${modelClause}${limitClause} Keep the original meaning. Output only the enhanced prompt, nothing else.\n\nOriginal: "${text}"`;
-
-  return new Promise(resolve => {
-    let result = '';
-    streamChatResponse(
-      settings,
-      [{ role: 'user', content: prompt }],
-      undefined,
-      {
-        onToken: token => { result += token; },
-        onDone: () => { resolve(result.trim() || text); },
-        onError: () => { resolve(text); },
-      },
-    );
-  });
+  return (await runEnhancePrompt(settings, prompt)) || text;
 }
