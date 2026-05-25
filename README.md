@@ -1,19 +1,25 @@
-# RolePlay Chat
+<div align="center">
+  <img src="public/logo.png" alt="RolePlay Chat" width="140" />
+</div>
+
+<h1 align="center">RolePlay Chat</h1>
 
 <div align="center">
-  <img src="public/preview-landing.png" alt="RolePlay Chat" width="740" />
+  <img src="public/preview-landing.png" alt="RolePlay Chat Preview" width="740" />
   <br/>
   <sub><i>Light mode — Private, intelligent roleplay, fully client-side</i></sub>
 </div>
 
 <br/>
 
-A private, client-side AI roleplay chat application. All data stays in your browser — **no servers, no tracking, no accounts required.**
+<p align="center">
+  A private, client-side AI roleplay chat application. All data stays in your browser — <strong>no servers, no tracking, no accounts required.</strong>
+</p>
 
 <div align="center">
   <a href="https://roleplay-6hg.pages.dev/"><strong>→ Live Demo</strong></a>
   &nbsp;&nbsp;|&nbsp;&nbsp;
-  <img src="public/preview-landing-dark.png" alt="Dark Mode" width="32" valign="middle" /> Dark mode available
+  <img src="public/preview-landing-dark.png" alt="Dark Mode" width="24" valign="middle" /> Dark mode available
 </div>
 
 <br/>
