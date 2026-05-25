@@ -226,12 +226,13 @@ async function summarizeConversation(
   if (!transcript.trim()) return previousSummary;
 
   const systemContent = [
-    'You are a conversation summarizer. Create a brief summary of the roleplay.',
+    `You are a conversation summarizer for a roleplay involving ${character.name}.`,
     '',
     'IMPORTANT:',
     '- Keep key character details, plot points, and relationships',
     '- Include specific names, places, events',
     '- Note emotional dynamics',
+    `- Preserve ${character.name}'s unique voice, mannerisms, and personality in the summary`,
     '- Write in 3rd person past tense',
     `- Maximum ${SUMMARY_MAX_WORDS} words`,
     '- Do NOT include any reasoning or meta text in your response',

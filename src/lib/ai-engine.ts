@@ -274,10 +274,12 @@ You ARE ${character.name}. Embody them completely \u2014 voice, mannerisms, desi
 \u2022 If you find yourself summarising what just happened, DELETE that paragraph \u2014 move forward instead.
 
 [Anti-repetition \u2014 MANDATORY]
-\u2022 Do not repeat, echo, or paraphrase any phrase from your own previous reply or the user's last message.
+\u2022 Do not repeat, echo, or paraphrase any phrase from your own previous reply or the user\u2019s last message.
 \u2022 Write your final sentence, then check: does it restate anything already said? If yes, rewrite it.
 \u2022 Your response MUST end with a single clean sentence. No trailing ellipsis, no looping back to the opening.
 \u2022 Never end by repeating the closing words of a sentence character-by-character.
+\u2022 If the prompt includes a \u201cStory so far\u201d block: treat it as silent context. DO NOT acknowledge, react to, or repeat it. Continue the scene from the most recent exchange as if nothing was summarized.
+\u2022 If you catch yourself summarizing, recapping, or reacting to a summary mid-response, DELETE that paragraph and write fresh forward-moving content instead.
 
 [Tone adaptation]
 \u2022 Read the user's message style: casual/playful \u2192 relax the character's guard; tense/serious \u2192 heighten stakes; short/clipped \u2192 match the pace.
@@ -288,9 +290,25 @@ You ARE ${character.name}. Embody them completely \u2014 voice, mannerisms, desi
 \u2022 "double quotes" for all spoken dialogue
 \u2022 **bold** only for a single moment of genuine dramatic weight per reply \u2014 use sparingly
 \u2022 Never use single quotes for speech
-\u2022 Every reply must contain both action and dialogue unless the scene explicitly calls for silence`);
+\u2022 Every reply must contain both action and dialogue unless the scene explicitly calls for silence
 
-  if (summary?.trim()) sections.push(`[Story so far]\n${summary.trim()}`);
+[Behavioral boundaries \u2014 MANDATORY]
+${character.behavior?.trim() ? `\u2022 ${character.behavior.trim().replace(/\.$/, '')}` : ''}
+\u2022 Never narrate on behalf of the user or their character \u2014 write ONLY what ${character.name} sees, hears, feels, and does.
+\u2022 Never assume the user\u2019s character\u2019s actions, reactions, or internal thoughts.
+\u2022 Never repeat, paraphrase, or echo your own previous reply back to the user.
+\u2022 Never write summary, recap, or out-of-character notes \u2014 stay in the scene.`);
+
+  // Compact character identity card — placed near the end so it stays prominent
+  const identityParts: string[] = [`You are ${character.name}.`];
+  if (character.personality?.trim()) identityParts.push(character.personality.trim());
+  if (character.speechPatterns?.trim()) identityParts.push(`Speech: ${character.speechPatterns.trim()}`);
+  if (character.behavior?.trim()) identityParts.push(`Behavior: ${character.behavior.trim()}`);
+  sections.push(`[Your identity]\n${identityParts.join(' ')}`);
+
+  if (summary?.trim()) {
+    sections.push(`[Story so far — context only, continue from present]\n${summary.trim()}`);
+  }
 
   const validMemories = (memories ?? []).map(m => m?.trim()).filter(Boolean);
   if (validMemories.length > 0) sections.push(`[Key memories]\n${validMemories.join('\n')}`);
@@ -460,7 +478,7 @@ function buildGroqRequest(settings: AppSettings, apiKey: string, messages: ChatM
     model: settings.activeModel,
     messages,
     temperature: settings.temperature ?? 0.8,
-    max_tokens: settings.maxTokens ?? 1024,
+    max_tokens: settings.maxTokens ?? 2048,
     top_p: settings.topP ?? 0.9,
     stream: settings.streamingEnabled,
   };
@@ -494,7 +512,7 @@ function buildOpenAIRequest(
     model: settings.activeModel,
     messages,
     temperature: settings.temperature ?? 0.8,
-    max_tokens: settings.maxTokens ?? 1024,
+    max_tokens: settings.maxTokens ?? 2048,
     top_p: settings.topP ?? 0.9,
     stream: settings.streamingEnabled,
   };
@@ -616,7 +634,7 @@ function buildMistralRequest(
     model: settings.activeModel,
     messages,
     temperature: settings.temperature ?? 0.8,
-    max_tokens: settings.maxTokens ?? 1024,
+    max_tokens: settings.maxTokens ?? 2048,
     top_p: settings.topP ?? 0.9,
     random_seed: Math.floor(Math.random() * 1_000_000),
     stream: settings.streamingEnabled,
@@ -641,7 +659,7 @@ function buildNvidiaRequest(
     model: settings.activeModel,
     messages,
     temperature: settings.temperature ?? 0.8,
-    max_tokens: settings.maxTokens ?? 1024,
+    max_tokens: settings.maxTokens ?? 2048,
     top_p: settings.topP ?? 0.9,
     stream: settings.streamingEnabled,
     apiKey,

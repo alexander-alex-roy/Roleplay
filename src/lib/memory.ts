@@ -45,6 +45,17 @@ const RETRIEVAL_CONTEXT_WINDOW = 6;
 /** Max recent words kept for retrieval scoring. */
 const MAX_RECENT_WORDS = 50;
 
+/** Minimum seconds between extractions to avoid rapid-fire LLM calls. */
+const EXTRACTION_DEBOUNCE_MS = 15_000;
+
+/** Keyword Jaccard threshold for conflict detection. */
+const CONFLICT_KEYWORD_THRESHOLD = 0.4;
+
+/** Content Jaccard threshold — below this, same-topic memories are considered contradictory. */
+const CONFLICT_CONTENT_THRESHOLD = 0.25;
+
+let lastExtractionTime = 0;
+
 // ---- Memory Extraction ----
 
 const MEMORY_EXTRACTION_PROMPT = `You are a memory extraction system for a roleplay AI character. Analyze the conversation and extract important information.
@@ -70,6 +81,12 @@ export async function extractMemories(
   if (!settings.memoryEnabled || !settings.autoExtractMemories) return [];
   // FIX: Need at least 2 messages to have a meaningful exchange worth extracting
   if (recentMessages.length < 2) return [];
+
+  // Debounce: skip if we just extracted — prevents rapid-fire LLM calls
+  // when the user sends multiple short messages in quick succession.
+  const now = Date.now();
+  if (now - lastExtractionTime < EXTRACTION_DEBOUNCE_MS) return [];
+  lastExtractionTime = now;
 
   // FIX: Filter out non-conversational roles before building the transcript
   const conversableMessages = recentMessages
@@ -152,6 +169,28 @@ export async function extractMemories(
       // *content* itself is similar OR when the majority of keywords overlap.
       const isDuplicate = existingMemories.some(em => isSimilarMemory(em.content, m.content));
       if (isDuplicate) continue;
+
+      // New fact contradicts an old one → old is stale, discard it.
+      const normalizedNewKeywords: string[] = [
+        ...new Set(
+          (m.keywords as unknown[])
+            .filter((k): k is string => typeof k === 'string')
+            .map(k => k.toLowerCase().trim())
+            .filter(k => k.length >= MIN_KEYWORD_LENGTH && k.length <= MAX_KEYWORD_LENGTH),
+        ),
+      ];
+
+      const conflicts = existingMemories.filter(em => {
+        const keywordOverlap = normalizedNewKeywords.filter(kw => em.keywords.includes(kw)).length;
+        const unionSize = new Set([...normalizedNewKeywords, ...em.keywords]).size;
+        const keywordJaccard = unionSize > 0 ? keywordOverlap / unionSize : 0;
+        return keywordJaccard >= CONFLICT_KEYWORD_THRESHOLD && !isSimilarMemory(em.content, m.content);
+      });
+      for (const conflict of conflicts) {
+        memoryDB.delete(conflict.id).catch(err => console.warn('[memory] Failed to delete superseded memory:', err));
+        const idx = existingMemories.findIndex(em => em.id === conflict.id);
+        if (idx >= 0) existingMemories.splice(idx, 1);
+      }
 
       // Normalize and deduplicate keywords
       const normalizedKeywords = [

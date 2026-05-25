@@ -313,7 +313,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   activeModel: 'gpt-4o-mini',
 
   temperature: 0.7,
-  maxTokens: 512,
+  maxTokens: 2048,
   topP: 0.9,
   frequencyPenalty: 0.1,
   presencePenalty: 0.1,
