@@ -1,8 +1,26 @@
 # RolePlay Chat
 
-A private, client-side AI roleplay chat application. All data stays in your browser — no servers, no tracking, no accounts required.
+<div align="center">
+  <img src="public/preview-landing.png" alt="RolePlay Chat" width="740" />
+  <br/>
+  <sub><i>Light mode — Private, intelligent roleplay, fully client-side</i></sub>
+</div>
 
-**Live Demo:** https://roleplay-6hg.pages.dev/
+<br/>
+
+A private, client-side AI roleplay chat application. All data stays in your browser — **no servers, no tracking, no accounts required.**
+
+<div align="center">
+  <a href="https://roleplay-6hg.pages.dev/"><strong>→ Live Demo</strong></a>
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <img src="public/preview-landing-dark.png" alt="Dark Mode" width="32" valign="middle" /> Dark mode available
+</div>
+
+<br/>
+
+---
+
+<br/>
 
 ## Features
 
@@ -196,4 +214,30 @@ This software is licensed under a **proprietary license**. See the [LICENSE](LIC
 
 ---
 
-*If you are interested in commercial licensing or enterprise deployments, please contact the project maintainer.*
+## For Developers
+
+This is a [Next.js 16](https://nextjs.org/) App Router project with static export, built with TypeScript and Tailwind CSS v4.
+
+| Area | Details |
+|---|---|
+| **Data layer** | IndexedDB via vanilla CRUD helpers in [`src/lib/db.ts`](src/lib/db.ts) — no ORM |
+| **State** | Zustand stores in [`src/stores/`](src/stores/) |
+| **AI engine** | Multi-provider abstraction in [`src/lib/ai-engine.ts`](src/lib/ai-engine.ts) supporting 80+ models |
+| **Memory system** | Automatic extraction & retrieval in [`src/lib/memory.ts`](src/lib/memory.ts) |
+| **Build output** | Static site to `out/` — deploy anywhere |
+
+Key files:
+
+- [`src/lib/types.ts`](src/lib/types.ts) — all TypeScript interfaces & types
+- [`src/lib/db.ts`](src/lib/db.ts) — IndexedDB operations
+- [`src/lib/ai-engine.ts`](src/lib/ai-engine.ts) — AI provider abstraction
+- [`src/lib/memory.ts`](src/lib/memory.ts) — memory extraction & retrieval
+- [`src/stores/chat-store.ts`](src/stores/chat-store.ts) — main Zustand store
+- [`src/app/page.tsx`](src/app/page.tsx) — single-page entry point
+- [`src/app/globals.css`](src/app/globals.css) — Tailwind v4 + theme variables
+
+> **Architecture note:** The app is a pure client-side SPA. Next.js `output: "export"` generates a fully static site — no Node server, no API routes, no SSR. Everything runs in the browser.
+
+---
+
+*If you are interested in commercial licensing or enterprise deployments, please contact the project maintainer.**
