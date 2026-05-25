@@ -70,17 +70,33 @@ async function handleChat(body, apiKey) {
     });
   } catch (err) {
     clearTimeout(timeout);
-    return jsonError(err instanceof Error ? err.message : 'Upstream fetch failed', 502);
+    const message = err instanceof Error && err.name === 'AbortError'
+      ? 'Request timed out after 120 seconds'
+      : (err instanceof Error ? err.message : 'Upstream fetch failed');
+    return jsonError(message, 502);
   }
 
   clearTimeout(timeout);
 
   if (!nvidiaRes.ok) {
-    const errorText = await nvidiaRes.text().catch(() => `HTTP ${nvidiaRes.status}`);
-    return new Response(errorText, {
-      status: nvidiaRes.status,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-    });
+    let message = `NVIDIA API error (${nvidiaRes.status})`;
+    try {
+      const errJson = await nvidiaRes.json();
+      if (errJson?.detail) {
+        const details = Array.isArray(errJson.detail)
+          ? errJson.detail.map(d => d.msg || JSON.stringify(d)).join('; ')
+          : String(errJson.detail);
+        message += `: ${details}`;
+      } else if (errJson?.error?.message) {
+        message += `: ${errJson.error.message}`;
+      } else {
+        message += `: ${JSON.stringify(errJson).slice(0, 200)}`;
+      }
+    } catch {
+      const raw = await nvidiaRes.text().catch(() => '');
+      if (raw) message += `: ${raw.slice(0, 200)}`;
+    }
+    return jsonError(message, nvidiaRes.status);
   }
 
   if (isStream) {
@@ -105,108 +121,16 @@ async function handleChat(body, apiKey) {
   });
 }
 
-/**
- * Rewrite NVIDIA NIM SSE stream so every data chunk carries a true delta.
- *
- * FIX: emittedLength is now tracked per choice index to handle multi-choice
- * responses correctly, and null delta.content is handled for finish_reason chunks.
- */
-async function rewriteNvidiaSSE(readable, writable) {
-  const writer = writable.getWriter();
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-  let buffer = '';
-  // Per-choice cursor: tracks how many characters we have already forwarded
-  // for each choice index. NVIDIA sends cumulative content so we slice the
-  // new suffix each chunk.
-  const emittedLengthByChoice = {};
-
-  const reader = readable.getReader();
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() ?? '';
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-
-        if (!trimmed || trimmed.startsWith(':') || trimmed.startsWith('event:')) {
-          await writer.write(encoder.encode(line + '\n'));
-          continue;
-        }
-
-        if (!trimmed.startsWith('data:')) {
-          await writer.write(encoder.encode(line + '\n'));
-          continue;
-        }
-
-        const dataStr = trimmed.startsWith('data: ') ? trimmed.slice(6) : trimmed.slice(5);
-
-        if (dataStr === '[DONE]') {
-          await writer.write(encoder.encode('data: [DONE]\n\n'));
-          continue;
-        }
-
-        let chunk;
-        try { chunk = JSON.parse(dataStr); }
-        catch {
-          await writer.write(encoder.encode(line + '\n'));
-          continue;
-        }
-
-        if (Array.isArray(chunk.choices) && chunk.choices.length > 0) {
-          const choice = chunk.choices[0];
-          const delta = choice?.delta;
-          const finishReason = choice?.finish_reason;
-          const choiceIndex = choice?.index ?? 0;
-
-          if (delta && typeof delta.content === 'string') {
-            // NVIDIA sends cumulative content — slice to get only the new suffix.
-            if (emittedLengthByChoice[choiceIndex] === undefined) {
-              emittedLengthByChoice[choiceIndex] = 0;
-            }
-            const cumulativeContent = delta.content;
-            const deltaOnly = cumulativeContent.slice(emittedLengthByChoice[choiceIndex]);
-            emittedLengthByChoice[choiceIndex] = cumulativeContent.length;
-
-            // Skip chunks with no new content and no finish_reason.
-            if (!deltaOnly && !finishReason) continue;
-
-            chunk.choices[0].delta.content = deltaOnly;
-          }
-          // If delta.content is null/undefined but there's a finish_reason,
-          // fall through and forward the chunk as-is (don't drop it).
-        }
-
-        await writer.write(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
-      }
-    }
-
-    if (buffer.trim()) {
-      await writer.write(encoder.encode(buffer));
-    }
-  } catch {
-    // Stream closed or aborted — nothing to do.
-  } finally {
-    writer.close().catch(() => undefined);
-    reader.releaseLock();
-  }
-}
-
 async function handleImageGen(body, apiKey) {
   const {
     prompt, model: requestedModel,
     cfg_scale, aspect_ratio, seed, steps,
-    negative_prompt, height, width,
+    negative_prompt, height, width, image,
   } = body;
 
   const modelName = requestedModel || 'stabilityai/stable-diffusion-3-medium';
   const endpoint = `${NVIDIA_IMAGE_BASE}/${modelName}`;
-  const requestBody = buildImageBody(modelName, { prompt, cfg_scale, aspect_ratio, seed, steps, negative_prompt, height, width });
+  const requestBody = buildImageBody(modelName, { prompt, cfg_scale, aspect_ratio, seed, steps, negative_prompt, height, width, image });
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 120_000);
@@ -224,17 +148,33 @@ async function handleImageGen(body, apiKey) {
     });
   } catch (err) {
     clearTimeout(timeout);
-    return jsonError(err instanceof Error ? err.message : 'Upstream fetch failed', 502);
+    const message = err instanceof Error && err.name === 'AbortError'
+      ? 'Request timed out after 120 seconds'
+      : (err instanceof Error ? err.message : 'Upstream fetch failed');
+    return jsonError(message, 502);
   }
 
   clearTimeout(timeout);
 
   if (!nvidiaRes.ok) {
-    const errorText = await nvidiaRes.text().catch(() => `HTTP ${nvidiaRes.status}`);
-    return new Response(errorText, {
-      status: nvidiaRes.status,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-    });
+    let message = `NVIDIA API error (${nvidiaRes.status})`;
+    try {
+      const errJson = await nvidiaRes.json();
+      if (errJson?.detail) {
+        const details = Array.isArray(errJson.detail)
+          ? errJson.detail.map(d => d.msg || JSON.stringify(d)).join('; ')
+          : String(errJson.detail);
+        message += `: ${details}`;
+      } else if (errJson?.error?.message) {
+        message += `: ${errJson.error.message}`;
+      } else {
+        message += `: ${JSON.stringify(errJson).slice(0, 200)}`;
+      }
+    } catch {
+      const raw = await nvidiaRes.text().catch(() => '');
+      if (raw) message += `: ${raw.slice(0, 200)}`;
+    }
+    return jsonError(message, nvidiaRes.status);
   }
 
   const data = await nvidiaRes.json().catch(() => null);
@@ -245,7 +185,7 @@ async function handleImageGen(body, apiKey) {
 }
 
 function buildImageBody(modelName, opts) {
-  const { prompt, cfg_scale, aspect_ratio, seed, steps, negative_prompt, height, width } = opts;
+  const { prompt, cfg_scale, aspect_ratio, seed, steps, negative_prompt, height, width, image } = opts;
 
   if (modelName === 'stabilityai/stable-diffusion-xl') {
     return {
@@ -298,6 +238,29 @@ function buildImageBody(modelName, opts) {
       seed: seed ?? 0,
       steps: steps ?? 4,
     };
+  }
+
+  if (modelName === 'stabilityai/stable-diffusion-3-medium') {
+    return {
+      prompt,
+      cfg_scale: cfg_scale ?? 5,
+      aspect_ratio: aspect_ratio ?? '1:1',
+      seed: seed ?? 0,
+      steps: steps ?? 50,
+      negative_prompt: negative_prompt ?? '',
+    };
+  }
+
+
+
+  if (modelName === 'black-forest-labs/flux.1-kontext-dev') {
+    const body = {
+      prompt,
+      guidance_scale: cfg_scale ?? 7,
+      num_inference_steps: steps ?? 28,
+    };
+    if (image) body.image = image;
+    return body;
   }
 
   return {

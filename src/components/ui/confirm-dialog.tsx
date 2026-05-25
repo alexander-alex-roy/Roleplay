@@ -116,12 +116,12 @@ export function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) 
       {children}
       
       <Dialog open={mode !== null} onOpenChange={handleOpenChange}>
-        <DialogContent>
+        <DialogContent aria-describedby="confirm-dialog-description">
           <DialogHeader>
             <DialogTitle className={variant === "error" ? "text-destructive" : variant === "success" ? "text-green-600" : ""}>
               {isConfirm ? confirmOptions.title : alertOptions.title}
             </DialogTitle>
-            <DialogDescription>{isConfirm ? confirmOptions.description : alertOptions.description}</DialogDescription>
+            <DialogDescription id="confirm-dialog-description">{isConfirm ? confirmOptions.description : alertOptions.description}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             {isConfirm ? (

@@ -124,7 +124,13 @@ export async function extractMemories(
     const match = jsonStr.match(/\[[\s\S]*\]/);
     if (!match) return [];
 
-    const parsed = JSON.parse(match[0]);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(match[0]);
+    } catch {
+      console.warn('[memory] Failed to parse AI response as JSON — malformed output');
+      return [];
+    }
 
     // FIX: Validate that parsed is actually an array before iterating
     if (!Array.isArray(parsed) || parsed.length === 0) return [];

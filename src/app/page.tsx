@@ -45,6 +45,133 @@ import {
 } from '@/components/ui/tooltip';
 import { ThemeToggle } from '@/components/theme-toggle';
 
+/**
+ * Smart-truncate a prompt at a natural boundary instead of blindly
+ * cutting at char N. For comma-separated prompts (common in image gen),
+ * this preserves the last complete phrase segment that fits within the
+ * limit. Falls back to word-boundary truncation.
+ *
+ * When the prompt significantly exceeds the limit, preserves both head
+ * (subject description) and tail (quality/style keywords) and removes
+ * only the middle — the most important parts for image generation.
+ */
+function smartTrimPrompt(prompt: string, maxChars: number): string {
+  if (prompt.length <= maxChars) return prompt;
+
+  const truncated = prompt.slice(0, maxChars);
+  const boundary = Math.max(
+    truncated.lastIndexOf(','),
+    truncated.lastIndexOf('. '),
+    truncated.lastIndexOf(';'),
+  );
+  if (boundary > maxChars * 0.35) {
+    return truncated.slice(0, boundary).trimEnd();
+  }
+
+  if (prompt.length > maxChars * 1.6) {
+    const headBudget = Math.floor(maxChars * 0.55);
+    let tailBudget = maxChars - headBudget - 5;
+    if (tailBudget < 40) tailBudget = 40;
+
+    const headPart = prompt.slice(0, headBudget);
+    const tailPart = prompt.slice(prompt.length - tailBudget);
+
+    const headCut = Math.max(headPart.lastIndexOf(','), headPart.lastIndexOf('. '), headPart.lastIndexOf(' '));
+    const cleanHead = headCut > 10 ? headPart.slice(0, headCut).trimEnd() : headPart.trimEnd();
+
+    const tailStart = Math.min(
+      tailPart.indexOf(' ') >= 0 ? tailPart.indexOf(' ') : Infinity,
+      tailPart.indexOf(',') >= 0 ? tailPart.indexOf(',') : Infinity,
+    );
+    const cleanTail = tailStart > 0 && tailStart < tailBudget / 2
+      ? tailPart.slice(tailStart).trimStart()
+      : tailPart.trimStart();
+
+    return `${cleanHead} ... ${cleanTail}`;
+  }
+
+  const lastSpace = truncated.lastIndexOf(' ');
+  if (lastSpace > 10) return truncated.slice(0, lastSpace).trimEnd();
+  return truncated;
+}
+
+/**
+ * Analyse conversation text and return scene-appropriate lighting/vibe
+ * based on keyword matching. Returns null if no mood is detected (code
+ * falls back to neutral defaults downstream).
+ */
+function detectSceneMood(text: string): { lighting: string; vibe: string } | null {
+  const lower = text.toLowerCase();
+  const moods = [
+    { test: ['battle', 'fight', 'attack', 'war', 'combat', 'sword', 'weapon', 'clash', 'strike', 'duel'],
+      lighting: 'dramatic chiaroscuro lighting, moody atmosphere', vibe: 'intense action scene' },
+    { test: ['romance', 'kiss', 'love', 'embrace', 'tender', 'intimate', 'romantic', 'caress', 'passionate'],
+      lighting: 'warm golden lighting, soft romantic glow', vibe: 'intimate romantic scene' },
+    { test: ['sad', 'cry', 'tears', 'grief', 'mourning', 'melancholy', 'lonely', 'heartbreak', 'weep'],
+      lighting: 'dim diffused lighting, soft blue shadows', vibe: 'melancholic emotional scene' },
+    { test: ['rain', 'storm', 'thunder', 'lightning', 'wind', 'cold', 'snow', 'winter', 'blizzard', 'hurricane'],
+      lighting: 'overcast storm lighting, moody turbulent sky', vibe: 'stormy atmospheric scene' },
+    { test: ['night', 'dark', 'moonlight', 'stars', 'shadow', 'midnight', 'dusk', 'twilight'],
+      lighting: 'moonlit scene, low-key lighting, deep shadows', vibe: 'nocturnal scene' },
+    { test: ['sun', 'sunny', 'bright', 'daylight', 'warm', 'summer', 'beach', 'garden', 'meadow', 'radiant'],
+      lighting: 'bright natural sunlight, warm cheerful atmosphere', vibe: 'bright daytime scene' },
+    { test: ['forest', 'woods', 'nature', 'river', 'lake', 'mountain', 'wilderness', 'jungle', 'valley'],
+      lighting: 'dappled forest lighting, natural diffused light', vibe: 'natural wilderness scene' },
+    { test: ['magic', 'spell', 'enchant', 'mystical', 'supernatural', 'fantasy', 'arcane', 'sorcery', 'witch'],
+      lighting: 'ethereal glowing light, magical luminescence', vibe: 'mystical fantasy scene' },
+    { test: ['sunset', 'dawn', 'sunrise', 'golden hour', 'evening light', 'dusk'],
+      lighting: 'golden hour light, warm amber glow, long shadows', vibe: 'golden hour scene' },
+    { test: ['dark', 'gloomy', 'ominous', 'creepy', 'horror', 'scary', 'dread', 'sinister', 'shadowy'],
+      lighting: 'grim dark lighting, heavy shadows, volumetric fog', vibe: 'dark ominous scene' },
+    { test: ['party', 'celebrate', 'festival', 'feast', 'festive', 'joyful', 'laughter', 'merry'],
+      lighting: 'warm festive lighting, candlelit glow', vibe: 'joyful celebration scene' },
+    { test: ['ocean', 'sea', 'water', 'underwater', 'beach', 'coast', 'lake', 'river', 'ship', 'boat'],
+      lighting: 'water-reflected light, aquamarine atmosphere', vibe: 'aquatic waterside scene' },
+  ];
+  for (const m of moods) {
+    if (m.test.some(k => lower.includes(k))) return { lighting: m.lighting, vibe: m.vibe };
+  }
+  return null;
+}
+
+/**
+ * Build an image generation prompt by analysing the recent conversation
+ * and extracting mood, scene context, and character details. Sections
+ * are ordered by semantic importance so the smartTrimPrompt function
+ * naturally drops the least important parts (quality keywords) first.
+ */
+function buildScenePrompt(
+  character: Character,
+  messages: { role: string; content: string }[],
+): string {
+  const { name, description = '', personality = '', scenario = '' } = character;
+
+  const recent = messages.slice(-4);
+  const convText = recent.map(m => m.content).join('\n');
+
+  const mood = detectSceneMood(convText);
+
+  const lastMsg = recent[recent.length - 1];
+  const contextText = lastMsg?.content?.slice(0, 250)?.trim() || '';
+
+  const sections: string[] = [];
+  sections.push(`scene with ${name}`);
+  if (contextText) sections.push(contextText);
+  if (mood?.vibe) sections.push(mood.vibe);
+
+  const appearance = description.slice(0, 200);
+  if (appearance) sections.push(appearance);
+  if (personality) sections.push(personality.slice(0, 100));
+  if (scenario) sections.push(scenario.slice(0, 80));
+
+  if (mood?.lighting) sections.push(mood.lighting);
+  else sections.push('cinematic lighting, atmospheric');
+
+  sections.push('cinematic, high detail, depth of field, 16:9');
+
+  return sections.join(', ');
+}
+
 // ============================================================
 // MAIN APP COMPONENT
 // ============================================================
@@ -170,6 +297,8 @@ function SetupWizard() {
   const [userName, setUserName] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<CharacterTemplate | null>(null);
   const [charName, setCharName] = useState('');
+  const [wizardProvider, setWizardProvider] = useState<'groq' | 'google' | null>(null);
+  const [wizardApiKey, setWizardApiKey] = useState('');
 
   const showSetupWizard = settingsStore.settings.showSetupWizard;
   const showWizard = settingsStore.isLoaded && showSetupWizard;
@@ -177,6 +306,20 @@ function SetupWizard() {
   if (!showWizard) return null;
 
   const handleComplete = async () => {
+    // Save API key if the user entered one during the wizard
+    if (wizardProvider && wizardApiKey.trim()) {
+      const providerId = wizardProvider === 'groq' ? 'groq' : 'google';
+      await settingsStore.setProvider({
+        provider: providerId as any,
+        apiKey: wizardApiKey.trim(),
+        enabled: true,
+      });
+      await settingsStore.setActiveProvider(providerId as any);
+      await settingsStore.setActiveModel(
+        wizardProvider === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.0-flash'
+      );
+    }
+
     if (userName.trim()) {
       await settingsStore.updateUserPersona({ name: userName.trim() });
     }
@@ -206,6 +349,10 @@ function SetupWizard() {
     {
       title: 'Welcome!',
       description: "Let's set up your roleplay experience in just a few steps.",
+    },
+    {
+      title: 'Choose Your AI',
+      description: 'Connect an AI provider to bring your characters to life.',
     },
     {
       title: 'Your Name',
@@ -273,6 +420,80 @@ function SetupWizard() {
 
           {step === 1 && (
             <div className="space-y-4">
+              <p className="text-xs text-muted-foreground">
+                Pick a provider below. Groq is free and fastest to get started.
+              </p>
+
+              <div
+                onClick={() => { setWizardProvider('groq'); setWizardApiKey(''); }}
+                className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                  wizardProvider === 'groq'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">⚡</span>
+                  <span className="font-medium text-sm">Groq</span>
+                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">FREE</Badge>
+                  <Badge variant="outline" className="text-[10px] h-4 px-1.5 bg-green-500/10 text-green-600 border-green-500/30">Recommended</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Fast, free AI. No credit card. 30 requests/second on free tier.
+                </p>
+              </div>
+
+              <div
+                onClick={() => { setWizardProvider('google'); setWizardApiKey(''); }}
+                className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                  wizardProvider === 'google'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">💎</span>
+                  <span className="font-medium text-sm">Google AI Studio</span>
+                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">Free Tier</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Gemini models with generous free quota.
+                </p>
+              </div>
+
+              {wizardProvider && (
+                <div className="space-y-2 p-3 rounded-lg bg-muted/30 border border-border">
+                  <Label htmlFor="wizardApiKey" className="text-xs font-medium">
+                    API Key for {wizardProvider === 'groq' ? 'Groq' : 'Google AI Studio'}
+                  </Label>
+                  <Input
+                    id="wizardApiKey"
+                    type="password"
+                    value={wizardApiKey}
+                    onChange={(e) => setWizardApiKey(e.target.value)}
+                    placeholder="Paste your API key here..."
+                    className="h-9 text-sm"
+                    autoComplete="off"
+                  />
+                  <a
+                    href={wizardProvider === 'groq'
+                      ? 'https://console.groq.com/keys'
+                      : 'https://aistudio.google.com/apikey'
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Get free {wizardProvider === 'groq' ? 'Groq' : 'Google AI Studio'} API key
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4">
               <div>
                 <Label htmlFor="userName" className="text-sm">Your Name</Label>
                 <Input
@@ -290,7 +511,7 @@ function SetupWizard() {
             </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <div className="space-y-4">
               <div>
                 <Label className="text-sm">Character Template</Label>
@@ -367,7 +588,11 @@ function SetupWizard() {
 // ============================================================
 function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenMobileNav: () => void }) {
   const store = useChatStore();
+  const settingsStore = useSettingsStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showQuickSetup, setShowQuickSetup] = useState(false);
+  const [quickProvider, setQuickProvider] = useState<'groq' | 'google' | null>(null);
+  const [quickApiKey, setQuickApiKey] = useState('');
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -436,6 +661,106 @@ function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenM
               <p className="text-[10px] sm:text-xs font-medium">Smart Memory</p>
             </div>
           </div>
+
+          {/* Quick provider setup — shown when no providers configured */}
+          {settingsStore.settings.providers.length === 0 && !showQuickSetup && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-left space-y-3">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-yellow-500" />
+                <p className="text-sm font-medium">Quick Start — Free AI</p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Connect a free AI provider to start chatting immediately. No credit card needed.
+              </p>
+              <Button variant="outline" size="sm" className="w-full" onClick={() => setShowQuickSetup(true)}>
+                Connect Provider
+              </Button>
+            </div>
+          )}
+
+          {showQuickSetup && (
+            <div className="rounded-xl border p-4 text-left space-y-3 bg-card">
+              <p className="text-sm font-medium">Choose a provider</p>
+
+              <div
+                onClick={() => setQuickProvider('groq')}
+                className={`p-2.5 rounded-lg border cursor-pointer transition-all ${
+                  quickProvider === 'groq' ? 'border-primary bg-primary/5' : 'border-border'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span>⚡</span>
+                  <span className="text-sm font-medium">Groq</span>
+                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">Free</Badge>
+                </div>
+              </div>
+
+              <div
+                onClick={() => setQuickProvider('google')}
+                className={`p-2.5 rounded-lg border cursor-pointer transition-all ${
+                  quickProvider === 'google' ? 'border-primary bg-primary/5' : 'border-border'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span>💎</span>
+                  <span className="text-sm font-medium">Google AI</span>
+                  <Badge variant="outline" className="text-[10px] h-4 px-1.5">Free Tier</Badge>
+                </div>
+              </div>
+
+              {quickProvider && (
+                <div className="space-y-2">
+                  <Input
+                    type="password"
+                    placeholder="Paste your API key..."
+                    value={quickApiKey}
+                    onChange={(e) => setQuickApiKey(e.target.value)}
+                    className="h-9 text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      disabled={!quickApiKey.trim()}
+                      onClick={async () => {
+                        const pId = quickProvider === 'groq' ? 'groq' : 'google';
+                        await settingsStore.setProvider({
+                          provider: pId as any,
+                          apiKey: quickApiKey.trim(),
+                          enabled: true,
+                        });
+                        await settingsStore.setActiveProvider(pId as any);
+                        await settingsStore.setActiveModel(
+                          quickProvider === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.0-flash'
+                        );
+                        setShowQuickSetup(false);
+                        setQuickProvider(null);
+                        setQuickApiKey('');
+                      }}
+                    >
+                      Connect
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => { setShowQuickSetup(false); setQuickProvider(null); setQuickApiKey(''); }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                  <a
+                    href={quickProvider === 'groq' ? 'https://console.groq.com/keys' : 'https://aistudio.google.com/apikey'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Get free key
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="space-y-3">
             <Button
@@ -1009,9 +1334,15 @@ function ChatView({ isMobile, onOpenMobileNav, lightboxImage, setLightboxImage }
       >
         <div className={`mx-auto p-4 space-y-4 ${isMobile ? 'max-w-full' : 'max-w-3xl'}`}>
           {messages.length === 0 && (
-            <div className="text-center py-8">
+            <div className="text-center py-12 space-y-3">
+              <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto">
+                <MessageSquare className="w-6 h-6 text-muted-foreground" />
+              </div>
               <p className="text-sm text-muted-foreground">
-                Start a conversation with {activeCharacter.name}
+                The story begins with you. Say something to {activeCharacter.name}.
+              </p>
+              <p className="text-xs text-muted-foreground/60">
+                Type a message below to start the conversation.
               </p>
             </div>
           )}
@@ -1120,7 +1451,7 @@ function MessageBubble({ message }: { message: MessageData }) {
   }, [handleContextMenu]);
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-in fade-in duration-200`}>
       <div
         className="group relative max-w-[85%] sm:max-w-[75%]"
         onContextMenu={handleContextMenu}
@@ -1152,7 +1483,7 @@ function MessageBubble({ message }: { message: MessageData }) {
           </div>
         )}
         <div
-          className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
+          className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words shadow-sm ${
             isUser
               ? 'bg-blue-600 text-white rounded-tr-sm'
               : 'bg-muted rounded-tl-sm'
@@ -1161,7 +1492,11 @@ function MessageBubble({ message }: { message: MessageData }) {
           {message.content && message.content.trim() !== '[Generated Image]' ? (
             formatMessageContent(message.content)
           ) : message.isStreaming ? (
-            <span className="animate-pulse">▊</span>
+            <span className="inline-flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-foreground animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-foreground animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-foreground animate-bounce" style={{ animationDelay: '300ms' }} />
+            </span>
           ) : null}
           {message.isStreaming && message.content && <span className="animate-pulse ml-0.5">▊</span>}
         </div>
@@ -1173,7 +1508,7 @@ function MessageBubble({ message }: { message: MessageData }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-6 w-6 opacity-40 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:opacity-100"
               onClick={() => {
                 navigator.clipboard.writeText(message.content).catch(() => {
                   const textarea = document.createElement('textarea');
@@ -1310,6 +1645,18 @@ function ChatInput() {
     }
   }, [activeChatId]);
 
+  // On mobile, scroll the input into view when focused (keyboard awareness)
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const onFocus = () => {
+      // Small delay lets the keyboard animation start
+      setTimeout(() => ta.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300);
+    };
+    ta.addEventListener('focus', onFocus);
+    return () => ta.removeEventListener('focus', onFocus);
+  }, []);
+
   const characterName = store.activeCharacter?.name || '...';
 
   return (
@@ -1323,8 +1670,8 @@ function ChatInput() {
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
               onInput={handleInput}
-              placeholder={`Message ${characterName}...`}
-              className="min-h-[44px] max-h-[200px] resize-none pr-12 rounded-xl text-sm"
+              placeholder={`Reply to ${characterName}...`}
+              className="min-h-[48px] max-h-[200px] resize-none pr-4 rounded-xl text-sm leading-relaxed"
               rows={1}
               disabled={store.isStreaming}
               maxLength={10000}
@@ -1342,13 +1689,14 @@ function ChatInput() {
             </Button>
           ) : (
             <Button
-              size="icon"
-              className="h-10 w-10 rounded-xl flex-shrink-0"
+              size="default"
+              className="h-10 gap-1.5 rounded-xl flex-shrink-0 px-3 sm:px-4"
               onClick={handleSend}
               disabled={!text.trim()}
               aria-label="Send message"
             >
               <Send className="w-4 h-4" />
+              <span className="hidden sm:inline text-xs">Send</span>
             </Button>
           )}
         </div>
@@ -1429,38 +1777,27 @@ function ChatInput() {
                         
                         setGeneratingImage(true);
                         try {
-                          const recentMessages = store.messages.slice(-6);
-                          const lastAction = recentMessages.find(m => m.role === 'user' || m.role === 'assistant');
-                          const sceneContext = lastAction ? lastAction.content.slice(0, 150) : '';
-                          
-                          const charName = store.activeCharacter.name;
-                          const charDesc = store.activeCharacter.description || '';
-                          const charPersonality = store.activeCharacter.personality || '';
-                          
-                          const imageModel = settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
-                          
-                          const modelDefaults: Record<string, { steps: number; cfg_scale: number }> = {
-                            'stabilityai/stable-diffusion-3-medium': { steps: 50, cfg_scale: 5 },
-                            'stabilityai/stable-diffusion-xl': { steps: 25, cfg_scale: 5 },
-                            'black-forest-labs/flux.1-dev': { steps: 50, cfg_scale: 5 },
-                            'black-forest-labs/flux.1-schnell': { steps: 4, cfg_scale: 0 },
-                            'black-forest-labs/flux.2-klein-4b': { steps: 4, cfg_scale: 1 },
-                          };
-                          const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
-                          
-                          let promptForModel = `cinematic portrait of ${charName}, ${charDesc.slice(0, 150)}, ${charPersonality.slice(0, 80)}, natural lighting, atmospheric, depth of field, 16:9`;
-                          if (sceneContext) {
-                            promptForModel += `, scene: ${sceneContext}`;
-                          }
+                         const modelDefaults: Record<string, { steps: number; cfg_scale: number }> = {
+                             'stabilityai/stable-diffusion-3-medium': { steps: 50, cfg_scale: 5 },
+                             'stabilityai/stable-diffusion-xl': { steps: 25, cfg_scale: 5 },
+                             'black-forest-labs/flux.1-dev': { steps: 50, cfg_scale: 5 },
+                             'black-forest-labs/flux.1-schnell': { steps: 4, cfg_scale: 0 },
+                             'black-forest-labs/flux.2-klein-4b': { steps: 4, cfg_scale: 1 },
+                             'black-forest-labs/flux.1-kontext-dev': { steps: 28, cfg_scale: 7 },
+                           };
+                          const imageModel = modelDefaults[settings.nvidiaImageModel] ? settings.nvidiaImageModel : 'stabilityai/stable-diffusion-3-medium';
+                          const defaults = modelDefaults[imageModel]!;
 
-                          const maxLen = imageModel.includes('flux.2-klein') ? 800
-                            : imageModel.includes('flux') ? 2000
-                            : imageModel.includes('stable-diffusion-3') ? 2000
-                            : imageModel.includes('stable-diffusion-xl') ? 1000
-                            : 2000;
+                          const promptForModel = buildScenePrompt(store.activeCharacter, store.messages.slice(-4));
 
-                          let finalPrompt = promptForModel.slice(0, maxLen);
-                          if (settings.enhanceImagePrompts) {
+                            const maxLen = imageModel.includes('flux.2-klein') ? 800
+                              : imageModel.includes('flux') ? 2000
+                              : imageModel.includes('stable-diffusion-3') ? 2000
+                              : imageModel.includes('stable-diffusion-xl') ? 1000
+                              : 2000;
+ 
+                           let finalPrompt = smartTrimPrompt(promptForModel, maxLen);
+                           if (settings.enhanceImagePrompts) {
                             try {
                               finalPrompt = await enhanceImagePrompt(
                                 settingsStore.settings,
@@ -1469,10 +1806,10 @@ function ChatInput() {
                                 { model: imageModel.split('/').pop() || imageModel, maxChars: maxLen },
                               );
                               // Safety truncation — AI should already respect the limit
-                              if (finalPrompt.length > maxLen) finalPrompt = finalPrompt.slice(0, maxLen);
+                              if (finalPrompt.length > maxLen) finalPrompt = smartTrimPrompt(finalPrompt, maxLen);
                             } catch (e) {
                               console.error('Prompt enhancement failed, using base prompt:', e);
-                              finalPrompt = promptForModel.slice(0, maxLen);
+                              finalPrompt = smartTrimPrompt(promptForModel, maxLen);
                             }
                           }
                           
@@ -1529,13 +1866,20 @@ function ChatInput() {
                             
                             if (base64Data) {
                               await store.addImageMessage(base64Data, imageModel);
+                            } else {
+                              toast({ variant: 'destructive', title: 'Image generation failed', description: 'No image data in response. Try a different model.' });
                             }
                           } else {
                             const errBody = await response.text();
                             console.error('Scene image generation failed:', response.status, errBody);
+                            let description = `HTTP ${response.status}`;
+                            try { const errJson = JSON.parse(errBody); description = errJson?.error?.message || errJson?.detail?.[0]?.msg || description; } catch { description = errBody.slice(0, 200) || description; }
+                            toast({ variant: 'destructive', title: 'Image generation failed', description });
                           }
                         } catch (e) {
+                          const msg = e instanceof Error ? e.message : 'Unknown error';
                           console.error('Image generation failed:', e);
+                          toast({ variant: 'destructive', title: 'Image generation failed', description: msg });
                         } finally {
                           setGeneratingImage(false);
                         }
@@ -1730,7 +2074,7 @@ function SettingsDialog() {
 
   return (
     <Dialog open={store.settingsOpen} onOpenChange={store.setSettingsOpen}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden" aria-describedby="settings-description">
+      <DialogContent className="max-w-full h-dvh max-h-dvh m-0 rounded-none md:max-w-2xl md:max-h-[85vh] md:m-auto md:rounded-lg flex flex-col p-0 overflow-hidden" aria-describedby="settings-description">
         <DialogDescription id="settings-description" className="sr-only">
           Application settings and configuration
         </DialogDescription>
@@ -2157,6 +2501,10 @@ function SettingsDialog() {
                             </SelectItem>
                             <SelectItem value="black-forest-labs/flux.2-klein-4b">
                               <span className="truncate">FLUX.2 Klein 4B <span className="text-muted-foreground ml-1 text-xs">(compact)</span></span>
+                            </SelectItem>
+
+                            <SelectItem value="black-forest-labs/flux.1-kontext-dev">
+                              <span className="truncate">FLUX.1 Kontext <span className="text-muted-foreground ml-1 text-xs">(context-aware)</span></span>
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -2844,18 +3192,18 @@ function CharacterEditorInner() {
                         if (!nvidiaConfig?.apiKey) return;
                         setGenerating(true);
                         try {
-                        const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
-                        
-                        const modelDefaults: Record<string, { steps: number; cfg_scale: number }> = {
-                          'stabilityai/stable-diffusion-3-medium': { steps: 50, cfg_scale: 5 },
-                          'stabilityai/stable-diffusion-xl': { steps: 25, cfg_scale: 5 },
-                          'black-forest-labs/flux.1-dev': { steps: 50, cfg_scale: 5 },
-                          'black-forest-labs/flux.1-schnell': { steps: 4, cfg_scale: 0 },
-                          'black-forest-labs/flux.2-klein-4b': { steps: 4, cfg_scale: 1 },
-                        };
-                        const defaults = modelDefaults[imageModel] || { steps: 50, cfg_scale: 5 };
+                          const modelDefaults: Record<string, { steps: number; cfg_scale: number }> = {
+                           'stabilityai/stable-diffusion-3-medium': { steps: 50, cfg_scale: 5 },
+                           'stabilityai/stable-diffusion-xl': { steps: 25, cfg_scale: 5 },
+                           'black-forest-labs/flux.1-dev': { steps: 50, cfg_scale: 5 },
+                           'black-forest-labs/flux.1-schnell': { steps: 4, cfg_scale: 0 },
+                           'black-forest-labs/flux.2-klein-4b': { steps: 4, cfg_scale: 1 },
+                           'black-forest-labs/flux.1-kontext-dev': { steps: 28, cfg_scale: 7 },
+                         };
+                         const imageModel = modelDefaults[settingsStore.settings.nvidiaImageModel] ? settingsStore.settings.nvidiaImageModel : 'stabilityai/stable-diffusion-3-medium';
+                         const defaults = modelDefaults[imageModel]!;
 
-                        const charName = form.name || 'character';
+                         const charName = form.name || 'character';
                         const charDesc = form.description || '';
                         const charPersonality = form.personality || '';
                         const charScenario = form.scenario || '';
@@ -2877,7 +3225,7 @@ function CharacterEditorInner() {
                           : imageModel.includes('stable-diffusion-xl') ? 1000
                           : 2000;
 
-                        let finalPrompt = promptForModel.slice(0, maxLen);
+                        let finalPrompt = smartTrimPrompt(promptForModel, maxLen);
                         if (settingsStore.settings.enhanceImagePrompts && !useCustom) {
                           try {
                             finalPrompt = await enhanceImagePrompt(
@@ -2886,10 +3234,10 @@ function CharacterEditorInner() {
                               `This is for a portrait/avatar image.`,
                               { model: imageModel.split('/').pop() || imageModel, maxChars: maxLen },
                             );
-                            if (finalPrompt.length > maxLen) finalPrompt = finalPrompt.slice(0, maxLen);
+                            if (finalPrompt.length > maxLen) finalPrompt = smartTrimPrompt(finalPrompt, maxLen);
                           } catch (e) {
                             console.error('Prompt enhancement failed, using base prompt:', e);
-                            finalPrompt = promptForModel.slice(0, maxLen);
+                            finalPrompt = smartTrimPrompt(promptForModel, maxLen);
                           }
                         }
                         
@@ -2997,7 +3345,7 @@ function CharacterEditorInner() {
                               setEnhancingPrompt(true);
                               try {
                                 const imageModel = settingsStore.settings.nvidiaImageModel || 'stabilityai/stable-diffusion-3-medium';
-                                const maxLen = imageModel.includes('flux.2-klein') ? 800
+                                                                const maxLen = imageModel.includes('flux.2-klein') ? 800
                                   : imageModel.includes('flux') ? 2000
                                   : imageModel.includes('stable-diffusion-3') ? 2000
                                   : imageModel.includes('stable-diffusion-xl') ? 1000
@@ -3007,7 +3355,7 @@ function CharacterEditorInner() {
                                   maxChars: maxLen,
                                 });
                                 // Safety truncation — AI should already respect the limit
-                                const truncated = enhanced.length > maxLen ? enhanced.slice(0, maxLen) : enhanced;
+                                const truncated = enhanced.length > maxLen ? smartTrimPrompt(enhanced, maxLen) : enhanced;
                                 updateForm('customAvatarPrompt', truncated);
                                 if (truncated.length < enhanced.length) {
                                   setGenerationError(`Prompt truncated from ${enhanced.length} to ${maxLen} chars to fit ${imageModel.split('/').pop()} limits`);
@@ -3302,7 +3650,28 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
           </SheetTitle>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100dvh-10rem)] overflow-y-auto -webkit-overflow-scrolling-touch">
+        {/* Quick actions */}
+        <div className="flex gap-2 p-3 border-b border-border">
+          {activeCharacter && (
+            <Button
+              size="sm"
+              className="flex-1 h-9 text-xs gap-1"
+              onClick={() => { store.newChat(activeCharacter); onOpenChange(false); }}
+            >
+              <MessageSquare className="w-3.5 h-3.5" /> New Chat
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className={`${activeCharacter ? 'flex-none' : 'flex-1'} h-9 text-xs gap-1`}
+            onClick={() => { store.setCharacterEditorOpen(true); onOpenChange(false); }}
+          >
+            <Plus className="w-3.5 h-3.5" /> Create
+          </Button>
+        </div>
+
+        <ScrollArea className="h-[calc(100dvh-16rem)] overflow-y-auto -webkit-overflow-scrolling-touch">
           {/* Characters Section */}
           <div className="border-b border-border">
             <div className="p-3 space-y-2">
@@ -3454,10 +3823,19 @@ function MobileNavSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
         </ScrollArea>
 
         {/* Bottom actions */}
-        <div className="p-3 border-t border-border space-y-1">
+        <div className="p-3 border-t border-border space-y-1.5">
+          {activeCharacter && (
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2 min-h-[40px] text-sm"
+              onClick={() => { store.newChat(activeCharacter); onOpenChange(false); }}
+            >
+              <MessageSquare className="w-4 h-4" /> New Chat
+            </Button>
+          )}
           <Button
             variant="ghost"
-            className="w-full justify-start gap-2 min-h-[44px]"
+            className="w-full justify-start gap-2 min-h-[40px] text-sm"
             onClick={() => { store.setSettingsOpen(true); onOpenChange(false); }}
           >
             <Settings className="w-4 h-4" /> Settings

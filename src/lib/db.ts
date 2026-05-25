@@ -326,7 +326,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   customSystemPrompt: '',
   jailbreakPrompt: '',
   userPersona: { ...DEFAULT_USER_PERSONA },
-  nvidiaImageModel: 'stable-diffusion-3-medium',
+  nvidiaImageModel: 'stabilityai/stable-diffusion-3-medium',
   enhanceImagePrompts: false,
   showSetupWizard: true,
 };
