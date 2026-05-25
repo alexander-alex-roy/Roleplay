@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   keywords: ["roleplay", "AI chat", "private", "BYOK", "character.ai alternative", "open source"],
   icons: {
     icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

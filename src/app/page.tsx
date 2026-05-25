@@ -297,7 +297,7 @@ function SetupWizard() {
   const [userName, setUserName] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<CharacterTemplate | null>(null);
   const [charName, setCharName] = useState('');
-  const [wizardProvider, setWizardProvider] = useState<'groq' | 'google' | null>(null);
+  const [wizardProvider, setWizardProvider] = useState<'nvidia' | 'groq' | 'google' | 'openai' | 'anthropic' | null>(null);
   const [wizardApiKey, setWizardApiKey] = useState('');
 
   const showSetupWizard = settingsStore.settings.showSetupWizard;
@@ -308,16 +308,20 @@ function SetupWizard() {
   const handleComplete = async () => {
     // Save API key if the user entered one during the wizard
     if (wizardProvider && wizardApiKey.trim()) {
-      const providerId = wizardProvider === 'groq' ? 'groq' : 'google';
       await settingsStore.setProvider({
-        provider: providerId as any,
+        provider: wizardProvider as any,
         apiKey: wizardApiKey.trim(),
         enabled: true,
       });
-      await settingsStore.setActiveProvider(providerId as any);
-      await settingsStore.setActiveModel(
-        wizardProvider === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.0-flash'
-      );
+      await settingsStore.setActiveProvider(wizardProvider as any);
+      const defaultModels: Record<string, string> = {
+        nvidia: 'mistralai/mistral-7b-instruct-v0.3',
+        groq: 'llama-3.1-8b-instant',
+        google: 'gemini-2.0-flash-lite',
+        openai: 'gpt-4.1-nano',
+        anthropic: 'claude-3-haiku-20240307',
+      };
+      await settingsStore.setActiveModel(defaultModels[wizardProvider] || 'gpt-4.1-nano');
     }
 
     if (userName.trim()) {
@@ -403,7 +407,7 @@ function SetupWizard() {
                   AI-Powered
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Bring characters to life with AI. Supports Groq (free!), OpenAI, Anthropic, and more.
+                  Bring characters to life with AI. Supports NVIDIA NIM, Groq, OpenAI, Anthropic, and more.
                 </p>
               </div>
               <div className="p-4 rounded-lg bg-muted/50 space-y-2">
@@ -419,52 +423,43 @@ function SetupWizard() {
           )}
 
           {step === 1 && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <p className="text-xs text-muted-foreground">
-                Pick a provider below. Groq is free and fastest to get started.
+                Pick a provider. NVIDIA NIM offers powerful free models to get started.
               </p>
 
-              <div
-                onClick={() => { setWizardProvider('groq'); setWizardApiKey(''); }}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                  wizardProvider === 'groq'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">⚡</span>
-                  <span className="font-medium text-sm">Groq</span>
-                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">FREE</Badge>
-                  <Badge variant="outline" className="text-[10px] h-4 px-1.5 bg-green-500/10 text-green-600 border-green-500/30">Recommended</Badge>
+              {[
+                { id: 'nvidia' as const, label: 'NVIDIA NIM', icon: '🟢', badge: 'Free Tier', recommended: true, desc: 'Free access to DeepSeek V4, Llama 3.1 & more. Sign up at build.nvidia.com.' },
+                { id: 'groq' as const, label: 'Groq', icon: '⚡', badge: 'FREE', recommended: false, desc: 'Fast, free AI inference. No credit card. 30 req/s on free tier.' },
+                { id: 'google' as const, label: 'Google AI Studio', icon: '💎', badge: 'Free Tier', recommended: false, desc: 'Gemini models with generous free quota.' },
+                { id: 'openai' as const, label: 'OpenAI', icon: '🤖', badge: 'Paid', recommended: false, desc: 'GPT-4o, GPT-4.1 & o-series models. Pay-as-you-go.' },
+                { id: 'anthropic' as const, label: 'Anthropic', icon: '🧠', badge: 'Paid', recommended: false, desc: 'Claude Sonnet 4, Opus & Haiku. Best for creative writing.' },
+              ].map(p => (
+                <div
+                  key={p.id}
+                  onClick={() => { setWizardProvider(p.id); setWizardApiKey(''); }}
+                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                    wizardProvider === p.id
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{p.icon}</span>
+                    <span className="font-medium text-sm">{p.label}</span>
+                    <Badge variant="secondary" className="text-[10px] h-4 px-1.5">{p.badge}</Badge>
+                    {p.recommended && (
+                      <Badge variant="outline" className="text-[10px] h-4 px-1.5 bg-green-500/10 text-green-600 border-green-500/30">Recommended</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{p.desc}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Fast, free AI. No credit card. 30 requests/second on free tier.
-                </p>
-              </div>
-
-              <div
-                onClick={() => { setWizardProvider('google'); setWizardApiKey(''); }}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                  wizardProvider === 'google'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">💎</span>
-                  <span className="font-medium text-sm">Google AI Studio</span>
-                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">Free Tier</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Gemini models with generous free quota.
-                </p>
-              </div>
+              ))}
 
               {wizardProvider && (
                 <div className="space-y-2 p-3 rounded-lg bg-muted/30 border border-border">
                   <Label htmlFor="wizardApiKey" className="text-xs font-medium">
-                    API Key for {wizardProvider === 'groq' ? 'Groq' : 'Google AI Studio'}
+                    API Key for {wizardProvider === 'nvidia' ? 'NVIDIA NIM' : wizardProvider === 'openai' ? 'OpenAI' : wizardProvider === 'anthropic' ? 'Anthropic' : wizardProvider === 'groq' ? 'Groq' : 'Google AI Studio'}
                   </Label>
                   <Input
                     id="wizardApiKey"
@@ -478,14 +473,20 @@ function SetupWizard() {
                   <a
                     href={wizardProvider === 'groq'
                       ? 'https://console.groq.com/keys'
-                      : 'https://aistudio.google.com/apikey'
+                      : wizardProvider === 'google'
+                      ? 'https://aistudio.google.com/apikey'
+                      : wizardProvider === 'nvidia'
+                      ? 'https://build.nvidia.com'
+                      : wizardProvider === 'openai'
+                      ? 'https://platform.openai.com/api-keys'
+                      : 'https://console.anthropic.com/settings/keys'
                     }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs text-primary hover:underline inline-flex items-center gap-1"
                   >
                     <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                    Get free {wizardProvider === 'groq' ? 'Groq' : 'Google AI Studio'} API key
+                    Get {wizardProvider === 'nvidia' ? 'NVIDIA NIM' : wizardProvider === 'openai' ? 'OpenAI' : wizardProvider === 'anthropic' ? 'Anthropic' : wizardProvider === 'groq' ? 'Groq' : 'Google AI Studio'} API key
                   </a>
                 </div>
               )}
@@ -591,7 +592,7 @@ function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenM
   const settingsStore = useSettingsStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showQuickSetup, setShowQuickSetup] = useState(false);
-  const [quickProvider, setQuickProvider] = useState<'groq' | 'google' | null>(null);
+  const [quickProvider, setQuickProvider] = useState<'nvidia' | 'groq' | 'google' | 'openai' | 'anthropic' | null>(null);
   const [quickApiKey, setQuickApiKey] = useState('');
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -637,10 +638,9 @@ function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenM
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div className="max-w-lg w-full text-center space-y-6">
           <div className="space-y-2">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
-              <MessageSquare className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+            <div className="w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-2xl bg-card shadow-sm border border-border flex items-center justify-center p-2">
+              <Image src="/logo.png" alt="RolePlay Chat" width={96} height={96} className="w-full h-full object-contain" priority />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">RolePlay Chat</h1>
             <p className="text-muted-foreground text-sm sm:text-lg">
               Private, intelligent roleplay with any AI model.
               Your data stays on your device.
@@ -669,9 +669,9 @@ function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenM
                 <Zap className="w-4 h-4 text-yellow-500" />
                 <p className="text-sm font-medium">Quick Start — Free AI</p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Connect a free AI provider to start chatting immediately. No credit card needed.
-              </p>
+            <p className="text-xs text-muted-foreground">
+              Connect an AI provider to start chatting immediately. Free options available.
+            </p>
               <Button variant="outline" size="sm" className="w-full" onClick={() => setShowQuickSetup(true)}>
                 Connect Provider
               </Button>
@@ -682,31 +682,30 @@ function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenM
             <div className="rounded-xl border p-4 text-left space-y-3 bg-card">
               <p className="text-sm font-medium">Choose a provider</p>
 
-              <div
-                onClick={() => setQuickProvider('groq')}
-                className={`p-2.5 rounded-lg border cursor-pointer transition-all ${
-                  quickProvider === 'groq' ? 'border-primary bg-primary/5' : 'border-border'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span>⚡</span>
-                  <span className="text-sm font-medium">Groq</span>
-                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">Free</Badge>
+              {[
+                { id: 'nvidia' as const, label: 'NVIDIA NIM', icon: '🟢', badge: 'Free Tier', recommended: true },
+                { id: 'groq' as const, label: 'Groq', icon: '⚡', badge: 'Free', recommended: false },
+                { id: 'google' as const, label: 'Google AI', icon: '💎', badge: 'Free Tier', recommended: false },
+                { id: 'openai' as const, label: 'OpenAI', icon: '🤖', badge: 'Paid', recommended: false },
+                { id: 'anthropic' as const, label: 'Anthropic', icon: '🧠', badge: 'Paid', recommended: false },
+              ].map(p => (
+                <div
+                  key={p.id}
+                  onClick={() => setQuickProvider(p.id)}
+                  className={`p-2.5 rounded-lg border cursor-pointer transition-all ${
+                    quickProvider === p.id ? 'border-primary bg-primary/5' : 'border-border'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>{p.icon}</span>
+                    <span className="text-sm font-medium">{p.label}</span>
+                    <Badge variant="secondary" className="text-[10px] h-4 px-1.5">{p.badge}</Badge>
+                    {p.recommended && (
+                      <Badge variant="outline" className="text-[10px] h-4 px-1.5 bg-green-500/10 text-green-600 border-green-500/30">Recommended</Badge>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              <div
-                onClick={() => setQuickProvider('google')}
-                className={`p-2.5 rounded-lg border cursor-pointer transition-all ${
-                  quickProvider === 'google' ? 'border-primary bg-primary/5' : 'border-border'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span>💎</span>
-                  <span className="text-sm font-medium">Google AI</span>
-                  <Badge variant="outline" className="text-[10px] h-4 px-1.5">Free Tier</Badge>
-                </div>
-              </div>
+              ))}
 
               {quickProvider && (
                 <div className="space-y-2">
@@ -723,16 +722,20 @@ function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenM
                       className="flex-1"
                       disabled={!quickApiKey.trim()}
                       onClick={async () => {
-                        const pId = quickProvider === 'groq' ? 'groq' : 'google';
                         await settingsStore.setProvider({
-                          provider: pId as any,
+                          provider: quickProvider as any,
                           apiKey: quickApiKey.trim(),
                           enabled: true,
                         });
-                        await settingsStore.setActiveProvider(pId as any);
-                        await settingsStore.setActiveModel(
-                          quickProvider === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.0-flash'
-                        );
+                        await settingsStore.setActiveProvider(quickProvider as any);
+                        const defaultModels: Record<string, string> = {
+                          nvidia: 'mistralai/mistral-7b-instruct-v0.3',
+                          groq: 'llama-3.1-8b-instant',
+                          google: 'gemini-2.0-flash-lite',
+                          openai: 'gpt-4.1-nano',
+                          anthropic: 'claude-3-haiku-20240307',
+                        };
+                        await settingsStore.setActiveModel(defaultModels[quickProvider] || 'gpt-4.1-nano');
                         setShowQuickSetup(false);
                         setQuickProvider(null);
                         setQuickApiKey('');
@@ -749,13 +752,22 @@ function WelcomeView({ isMobile, onOpenMobileNav }: { isMobile: boolean; onOpenM
                     </Button>
                   </div>
                   <a
-                    href={quickProvider === 'groq' ? 'https://console.groq.com/keys' : 'https://aistudio.google.com/apikey'}
+                    href={quickProvider === 'groq'
+                      ? 'https://console.groq.com/keys'
+                      : quickProvider === 'google'
+                      ? 'https://aistudio.google.com/apikey'
+                      : quickProvider === 'nvidia'
+                      ? 'https://build.nvidia.com'
+                      : quickProvider === 'openai'
+                      ? 'https://platform.openai.com/api-keys'
+                      : 'https://console.anthropic.com/settings/keys'
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs text-primary hover:underline inline-flex items-center gap-1"
                   >
                     <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                    Get free key
+                    Get {quickProvider === 'nvidia' ? 'NVIDIA NIM' : quickProvider === 'openai' ? 'OpenAI' : quickProvider === 'anthropic' ? 'Anthropic' : quickProvider === 'groq' ? 'Groq' : 'Google AI'} API key
                   </a>
                 </div>
               )}
