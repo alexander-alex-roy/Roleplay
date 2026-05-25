@@ -111,7 +111,7 @@ function detectSceneMood(text: string): { lighting: string; vibe: string } | nul
       lighting: 'dim diffused lighting, soft blue shadows', vibe: 'melancholic emotional scene' },
     { test: ['rain', 'storm', 'thunder', 'lightning', 'wind', 'cold', 'snow', 'winter', 'blizzard', 'hurricane'],
       lighting: 'overcast storm lighting, moody turbulent sky', vibe: 'stormy atmospheric scene' },
-    { test: ['night', 'dark', 'moonlight', 'stars', 'shadow', 'midnight', 'dusk', 'twilight'],
+    { test: ['moonlight', 'stars', 'midnight', 'twilight'],
       lighting: 'moonlit scene, low-key lighting, deep shadows', vibe: 'nocturnal scene' },
     { test: ['sun', 'sunny', 'bright', 'daylight', 'warm', 'summer', 'beach', 'garden', 'meadow', 'radiant'],
       lighting: 'bright natural sunlight, warm cheerful atmosphere', vibe: 'bright daytime scene' },
@@ -121,17 +121,27 @@ function detectSceneMood(text: string): { lighting: string; vibe: string } | nul
       lighting: 'ethereal glowing light, magical luminescence', vibe: 'mystical fantasy scene' },
     { test: ['sunset', 'dawn', 'sunrise', 'golden hour', 'evening light', 'dusk'],
       lighting: 'golden hour light, warm amber glow, long shadows', vibe: 'golden hour scene' },
-    { test: ['dark', 'gloomy', 'ominous', 'creepy', 'horror', 'scary', 'dread', 'sinister', 'shadowy'],
+    { test: ['gloomy', 'ominous', 'creepy', 'horror', 'scary', 'dread', 'sinister', 'shadowy'],
       lighting: 'grim dark lighting, heavy shadows, volumetric fog', vibe: 'dark ominous scene' },
     { test: ['party', 'celebrate', 'festival', 'feast', 'festive', 'joyful', 'laughter', 'merry'],
       lighting: 'warm festive lighting, candlelit glow', vibe: 'joyful celebration scene' },
     { test: ['ocean', 'sea', 'water', 'underwater', 'beach', 'coast', 'lake', 'river', 'ship', 'boat'],
       lighting: 'water-reflected light, aquamarine atmosphere', vibe: 'aquatic waterside scene' },
   ];
+
+  // Score each mood by number of matching keywords, pick the best.
+  // This avoids first-match-wins issues where a generic word like "dark"
+  // hijacks a more specific mood.
+  let best: { lighting: string; vibe: string } | null = null;
+  let bestScore = 0;
   for (const m of moods) {
-    if (m.test.some(k => lower.includes(k))) return { lighting: m.lighting, vibe: m.vibe };
+    const score = m.test.reduce((sum, k) => sum + (lower.includes(k) ? 1 : 0), 0);
+    if (score > bestScore) {
+      bestScore = score;
+      best = { lighting: m.lighting, vibe: m.vibe };
+    }
   }
-  return null;
+  return best;
 }
 
 /**
@@ -146,23 +156,22 @@ function buildScenePrompt(
 ): string {
   const { name, description = '', personality = '', scenario = '' } = character;
 
-  const recent = messages.slice(-4);
+  const recent = messages.slice(-6);
   const convText = recent.map(m => m.content).join('\n');
 
   const mood = detectSceneMood(convText);
 
   const lastMsg = recent[recent.length - 1];
-  const contextText = lastMsg?.content?.slice(0, 250)?.trim() || '';
+  const contextText = lastMsg?.content?.slice(0, 200)?.trim() || '';
 
   const sections: string[] = [];
-  sections.push(`scene with ${name}`);
+  sections.push(`scene with ${name}, ${scenario.slice(0, 80)}`);
   if (contextText) sections.push(contextText);
   if (mood?.vibe) sections.push(mood.vibe);
 
-  const appearance = description.slice(0, 200);
+  const appearance = description.slice(0, 150);
   if (appearance) sections.push(appearance);
-  if (personality) sections.push(personality.slice(0, 100));
-  if (scenario) sections.push(scenario.slice(0, 80));
+  if (personality) sections.push(personality.slice(0, 60));
 
   if (mood?.lighting) sections.push(mood.lighting);
   else sections.push('cinematic lighting, atmospheric');
@@ -1835,7 +1844,7 @@ function ChatInput() {
                               aspect_ratio: "16:9",
                               seed: Math.floor(Math.random() * 1000000),
                               steps: defaults.steps,
-                              negative_prompt: imageModel.includes('flux') ? undefined : "cartoon, anime, illustration, drawing, painting, 3d render, deformed, distorted, low quality, blurry, text, watermark, signature",
+                              negative_prompt: imageModel.includes('flux') ? undefined : "cartoon, anime, 3d render, deformed, distorted, low quality, blurry, text, watermark, signature",
                               apiKey: nvidiaConfig.apiKey,
                             }),
                           });
